@@ -1,10 +1,12 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { products, categories, brands, ccOptions } from "@/data/products";
+import { categories, brands, ccOptions } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const priceRanges = [
   { label: "Hasta $20.000", min: 0, max: 20000 },
@@ -14,7 +16,7 @@ const priceRanges = [
 ];
 
 const ProductList = () => {
-  const [params] = useSearchParams();
+  const [params, setSearchParams] = useSearchParams();
   const catParam = params.get("categoria");
   const qParam = params.get("q")?.toLowerCase() || "";
 
@@ -23,55 +25,70 @@ const ProductList = () => {
   const [priceFilter, setPriceFilter] = useState<number>(-1);
   const [showFilters, setShowFilters] = useState(false);
 
+  // CONSULTA A SUPABASE
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['public-products-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const filtered = useMemo(() => {
     return products.filter(p => {
+      // 1. Filtro por Categoría (URL)
       if (catParam && p.category !== catParam) return false;
-      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.includes(qParam)) return false;
-      if (brandFilter && !p.motoFit.includes(brandFilter) && p.brand !== brandFilter) return false;
-      if (ccFilter && !p.cc.includes(ccFilter)) return false;
+      
+      // 2. Filtro por Búsqueda (URL)
+      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam)) return false;
+      
+      // 3. Filtro por Marca (Sidebar)
+      if (brandFilter && p.brand !== brandFilter) return false;
+      
+      // 4. Filtro por Precio (Sidebar) - Usamos el precio final (con descuento si tiene)
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
-        if (p.price < range.min || p.price > range.max) return false;
+        const currentPrice = p.discount_price && p.is_on_sale ? p.discount_price : p.price;
+        if (currentPrice < range.min || currentPrice > range.max) return false;
       }
+      
       return true;
     });
-  }, [catParam, qParam, brandFilter, ccFilter, priceFilter]);
+  }, [products, catParam, qParam, brandFilter, priceFilter]);
 
   const activeCategory = categories.find(c => c.id === catParam);
   const hasFilters = brandFilter || ccFilter || priceFilter >= 0;
 
-  const clearFilters = () => { setBrandFilter(""); setCcFilter(""); setPriceFilter(-1); };
+  const clearFilters = () => { 
+    setBrandFilter(""); 
+    setCcFilter(""); 
+    setPriceFilter(-1); 
+    setSearchParams({}); // También limpia la búsqueda de la URL
+  };
 
   const FilterSection = () => (
     <div className="space-y-6">
       <div>
-        <h4 className="text-sm font-semibold mb-2">Marca de moto</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Marca</h4>
         <div className="space-y-1">
           {brands.map(b => (
             <button key={b} onClick={() => setBrandFilter(brandFilter === b ? "" : b)}
-              className={`block w-full text-left text-sm px-2 py-1.5 rounded transition-colors ${brandFilter === b ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
+              className={`block w-full text-left text-xs font-bold uppercase px-3 py-2 rounded-lg transition-colors ${brandFilter === b ? "bg-black text-white" : "hover:bg-muted text-gray-500"}`}>
               {b}
             </button>
           ))}
         </div>
       </div>
       <div>
-        <h4 className="text-sm font-semibold mb-2">Cilindrada</h4>
-        <div className="space-y-1">
-          {ccOptions.map(cc => (
-            <button key={cc} onClick={() => setCcFilter(ccFilter === cc ? "" : cc)}
-              className={`block w-full text-left text-sm px-2 py-1.5 rounded transition-colors ${ccFilter === cc ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
-              {cc}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <h4 className="text-sm font-semibold mb-2">Precio</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Precio</h4>
         <div className="space-y-1">
           {priceRanges.map((r, i) => (
             <button key={i} onClick={() => setPriceFilter(priceFilter === i ? -1 : i)}
-              className={`block w-full text-left text-sm px-2 py-1.5 rounded transition-colors ${priceFilter === i ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
+              className={`block w-full text-left text-xs font-bold uppercase px-3 py-2 rounded-lg transition-colors ${priceFilter === i ? "bg-black text-white" : "hover:bg-muted text-gray-500"}`}>
               {r.label}
             </button>
           ))}
@@ -81,71 +98,62 @@ const ProductList = () => {
   );
 
   return (
-    <div className="container py-6">
+    <div className="container py-6 min-h-screen">
       {/* Breadcrumb */}
-      <nav className="text-sm text-muted-foreground mb-4 flex items-center gap-1">
-        <Link to="/" className="hover:text-primary">Inicio</Link>
+      <nav className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+        <Link to="/" className="hover:text-orange-500">Inicio</Link>
         <span>/</span>
-        <span className="text-foreground">{activeCategory?.name || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
+        <span className="text-black">{activeCategory?.name || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
       </nav>
 
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-display font-bold">
-          {activeCategory?.name || (qParam ? `Resultados para "${qParam}"` : "Todos los productos")}
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-black uppercase tracking-tighter italic">
+          {activeCategory?.name || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
         </h2>
-        <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}>
-          <SlidersHorizontal className="h-4 w-4 mr-1" /> Filtros
+        <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
+          <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
         </Button>
       </div>
 
-      {hasFilters && (
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-sm text-muted-foreground">Filtros:</span>
-          {brandFilter && <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">{brandFilter} <button onClick={() => setBrandFilter("")}><X className="h-3 w-3" /></button></span>}
-          {ccFilter && <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">{ccFilter} <button onClick={() => setCcFilter("")}><X className="h-3 w-3" /></button></span>}
-          {priceFilter >= 0 && <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">{priceRanges[priceFilter].label} <button onClick={() => setPriceFilter(-1)}><X className="h-3 w-3" /></button></span>}
-          <button onClick={clearFilters} className="text-xs text-primary hover:underline">Limpiar todos</button>
-        </div>
-      )}
-
-      <div className="flex gap-6">
+      <div className="flex gap-8">
         {/* Desktop filters */}
-        <aside className="hidden lg:block w-56 flex-shrink-0">
-          <div className="sticky top-32 bg-card rounded-lg border p-4">
-            <h3 className="font-semibold mb-4 flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" /> Filtros</h3>
+        <aside className="hidden lg:block w-64 flex-shrink-0">
+          <div className="sticky top-24 bg-white rounded-[32px] border border-gray-100 p-6 shadow-sm">
+            <h3 className="font-black uppercase tracking-tighter text-lg mb-6 flex items-center gap-2">
+              <SlidersHorizontal className="h-5 w-5 text-orange-500" /> Filtros
+            </h3>
             <FilterSection />
           </div>
         </aside>
 
-        {/* Mobile filters */}
-        {showFilters && (
-          <div className="fixed inset-0 z-40 bg-foreground/50 lg:hidden" onClick={() => setShowFilters(false)}>
-            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} className="absolute left-0 top-0 h-full w-72 bg-card p-4 overflow-y-auto" onClick={e => e.stopPropagation()}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Filtros</h3>
-                <button onClick={() => setShowFilters(false)}><X className="h-5 w-5" /></button>
-              </div>
-              <FilterSection />
-            </motion.div>
-          </div>
-        )}
-
         {/* Products grid */}
         <div className="flex-1">
-          <p className="text-sm text-muted-foreground mb-4">{filtered.length} resultado{filtered.length !== 1 ? "s" : ""}</p>
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              <p className="text-lg mb-2">No se encontraron productos</p>
-              <Button variant="outline" onClick={clearFilters}>Limpiar filtros</Button>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="animate-spin text-orange-500 mb-4" size={40} />
+              <p className="font-bold uppercase tracking-widest text-xs text-gray-400">Cargando repuestos...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {filtered.map((p, i) => (
-                <motion.div key={p.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <ProductCard product={p} />
-                </motion.div>
-              ))}
-            </div>
+            <>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                {filtered.length} productos encontrados
+              </p>
+              
+              {filtered.length === 0 ? (
+                <div className="text-center py-20 bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200">
+                  <p className="text-lg font-bold text-gray-400 mb-4 tracking-tighter uppercase">No hay resultados para esta búsqueda</p>
+                  <Button variant="outline" className="rounded-full border-black uppercase font-black text-xs" onClick={clearFilters}>Limpiar filtros</Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                  {filtered.map((p, i) => (
+                    <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                      <ProductCard product={p} />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

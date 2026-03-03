@@ -11,7 +11,7 @@ const Footer = () => (
             <span className="text-primary">Rafaghelli</span> Motos
           </h3>
           <p className="text-sm opacity-70 leading-relaxed">
-            Repuestos seleccionados y taller especializado en Lanús. Pasión por las dos ruedas y atención personalizada de @gos_motos.
+            Repuestos seleccionados y taller especializado en Lanús. Pasión por las dos ruedas y atención personalizada de @rafaghellimotos.
           </p>
           <div className="flex gap-4 pt-2">
             <a href="https://instagram.com/rafaghellimotos" target="_blank" className="hover:text-primary transition-colors">
@@ -83,7 +83,7 @@ const Footer = () => (
 
       <div className="border-t border-muted/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest opacity-40">
         <span>© 2026 Rafaghelli Motos.</span>
-        <span>Desarrollado por @gos_motos</span>
+        <span>Desarrollado por @gonzaaortiz16</span>
       </div>
     </div>
   </footer>

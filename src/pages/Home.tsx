@@ -82,34 +82,39 @@ const Home = () => {
       </section>
 
       {/* Categories */}
-      <section className="container py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-display font-bold">Categorías</h3>
-          <Link to="/productos" className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
-            Ver todo <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.4 }}
-            >
-              <Link to={`/productos?categoria=${cat.id}`} className="category-card block">
-                <div className="aspect-[4/3] relative rounded-xl overflow-hidden">
-                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4">
-                    <h4 className="text-background font-display font-bold text-lg">{cat.name}</h4>
+    {/* Sección de Categorías */}
+          <section className="container py-12 px-6">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-black uppercase tracking-tighter">Categorías</h3>
+              <Link to="/productos" className="text-orange-500 text-xs font-bold uppercase hover:underline">Ver todas ›</Link>
+            </div>
+            
+            {/* Cambiamos a grid-cols-3 en móvil y grid-cols-6 en PC para que entren todas en una línea */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              {categories.map((cat) => (
+                <Link 
+                  key={cat.id} 
+                  to={`/productos?categoria=${cat.id}`} 
+                  className="group flex flex-col items-center text-center gap-3"
+                >
+                  {/* Contenedor de imagen más chico y circular o redondeado */}
+                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 group-hover:border-orange-500 transition-all shadow-sm">
+                    <img 
+                      src={cat.image} 
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      alt={cat.name} 
+                    />
+                    {/* Capa de color naranja suave al pasar el mouse */}
+                    <div className="absolute inset-0 bg-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                  
+                  <span className="text-[10px] md:text-xs font-black uppercase tracking-tight text-gray-700 group-hover:text-orange-600 transition-colors">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
 
       {/* Ofertas (Cargando desde Supabase) */}
       <section className="bg-muted/50">

@@ -2,19 +2,33 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, ChevronRight, Truck, Shield, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categories, products } from "@/data/products";
+import { categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
-
-const featured = products.filter(p => p.originalPrice);
-const offers = products.filter(p => p.freeShipping);
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+
+  // CONEXIÓN A SUPABASE: Traemos los productos reales
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['public-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Filtramos usando los datos de la base de datos
+  const featured = products.filter(p => p.is_on_sale || p.discount_price);
+  const freeShipping = products.filter(p => p.has_free_shipping);
 
   return (
     <div className="min-h-screen">
@@ -51,9 +65,9 @@ const Home = () => {
         <div className="container py-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { icon: Truck, text: "Envíos a todo el país", sub: "Gratis en compras +$50.000" },
+              { icon: Truck, text: "Envíos a todo el país", sub: "Garantizado por @gos_motos" },
               { icon: Shield, text: "Garantía oficial", sub: "En todos los productos" },
-              { icon: CreditCard, text: "Hasta 12 cuotas en nuestro local", sub: "Con todas las tarjetas" },
+              { icon: CreditCard, text: "Pagos Seguros", sub: "Efectivo o Transferencia" },
             ].map(({ icon: Icon, text, sub }) => (
               <div key={text} className="flex items-center gap-3 py-2">
                 <Icon className="h-8 w-8 text-primary flex-shrink-0" />
@@ -84,7 +98,7 @@ const Home = () => {
               transition={{ delay: i * 0.1, duration: 0.4 }}
             >
               <Link to={`/productos?categoria=${cat.id}`} className="category-card block">
-                <div className="aspect-[4/3] relative">
+                <div className="aspect-[4/3] relative rounded-xl overflow-hidden">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" loading="lazy" />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4">
@@ -97,7 +111,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Ofertas */}
+      {/* Ofertas (Cargando desde Supabase) */}
       <section className="bg-muted/50">
         <div className="container py-10">
           <div className="flex items-center justify-between mb-6">
@@ -106,23 +120,33 @@ const Home = () => {
               Ver más <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {featured.map((p, i) => (
-              <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <ProductCard product={p} />
-              </motion.div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(n => <div key={n} className="h-64 bg-gray-200 animate-pulse rounded-xl" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {featured.length > 0 ? (
+                featured.map((p, i) => (
+                  <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+                    <ProductCard product={p} />
+                  </motion.div>
+                ))
+              ) : (
+                <p className="col-span-full text-center text-gray-400 py-10">No hay ofertas publicadas.</p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Envío gratis */}
+      {/* Envío gratis (Cargando desde Supabase) */}
       <section className="container py-10">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-display font-bold">🚚 Envío gratis</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {offers.slice(0, 4).map((p, i) => (
+          {!isLoading && freeShipping.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <ProductCard product={p} />
             </motion.div>

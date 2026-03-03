@@ -22,7 +22,7 @@ const Header = () => {
       <div className="border-b border-muted/10">
         <div className="container flex items-center justify-between py-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> (011) 1570741745</span>
+            <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> (011) 15 7074-1745</span>
             <span className="hidden sm:inline">Lun a Sáb 9:00 - 19:00</span>
           </div>
           <Link to="/taller" className="flex items-center gap-1 text-primary hover:underline font-medium">

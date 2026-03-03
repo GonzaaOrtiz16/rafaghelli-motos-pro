@@ -12,6 +12,7 @@ import ProductList from "@/pages/ProductList";
 import ProductDetail from "@/pages/ProductDetail";
 import Checkout from "@/pages/Checkout";
 import Workshop from "@/pages/Workshop";
+import Admin from "@/pages/Admin"; // <--- 1. Agregamos el Import
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/producto/:slug" element={<ProductDetail />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/taller" element={<Workshop />} />
+                <Route path="/admin" element={<Admin />} /> {/* <--- 2. Agregamos la Ruta */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

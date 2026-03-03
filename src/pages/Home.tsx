@@ -53,7 +53,7 @@ const Home = () => {
             {[
               { icon: Truck, text: "Envíos a todo el país", sub: "Gratis en compras +$50.000" },
               { icon: Shield, text: "Garantía oficial", sub: "En todos los productos" },
-              { icon: CreditCard, text: "Hasta 12 cuotas", sub: "Con todas las tarjetas" },
+              { icon: CreditCard, text: "Hasta 12 cuotas en nuestro local", sub: "Con todas las tarjetas" },
             ].map(({ icon: Icon, text, sub }) => (
               <div key={text} className="flex items-center gap-3 py-2">
                 <Icon className="h-8 w-8 text-primary flex-shrink-0" />

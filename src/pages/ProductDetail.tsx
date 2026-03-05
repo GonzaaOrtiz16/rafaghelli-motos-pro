@@ -1,84 +1,108 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingCart, Zap, Truck, Shield, ChevronRight, Send } from "lucide-react";
+import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getProductBySlug, products } from "@/data/products";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/ProductCard";
-import { useCart } from "@/context/CartContext";
-import { useState } from "react";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
 const ProductDetail = () => {
   const { slug } = useParams();
-  const product = getProductBySlug(slug || "");
-  const { addItem } = useCart();
-  const [selectedVariant, setSelectedVariant] = useState<string>("");
+  const [product, setProduct] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-  const [question, setQuestion] = useState("");
-  const [questions, setQuestions] = useState<{ q: string; a?: string }[]>([
-    { q: "¿Hacen envíos al interior?", a: "¡Sí! Enviamos a todo el país por Correo Argentino o Andreani. Consulta costos de envío." },
-    { q: "¿Tienen garantía?", a: "Todos nuestros productos cuentan con garantía oficial del fabricante." },
-  ]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (data) {
+        setProduct(data);
+        const { data: relData } = await supabase
+          .from('products')
+          .select('*')
+          .eq('category', data.category)
+          .not('id', 'eq', data.id)
+          .limit(4);
+        setRelated(relData || []);
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [slug]);
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <p className="font-black uppercase tracking-tighter text-zinc-400">Sincronizando con Rafaghelli...</p>
+      </div>
+    </div>
+  );
 
   if (!product) {
     return (
       <div className="container py-20 text-center">
-        <p className="text-xl text-muted-foreground mb-4">Producto no encontrado</p>
-        <Button variant="cta" asChild><Link to="/productos">Ver productos</Link></Button>
+        <p className="text-xl font-bold mb-4">Producto no encontrado</p>
+        <Button asChild className="bg-orange-500 rounded-2xl"><Link to="/productos">Ir al catálogo</Link></Button>
       </div>
     );
   }
 
-  const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0;
-  const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setZoomPos({ x: ((e.clientX - rect.left) / rect.width) * 100, y: ((e.clientY - rect.top) / rect.height) * 100 });
+  const handleWhatsAppClick = () => {
+    const message = encodeURIComponent(`¡Hola Rafaghelli Motos! 👋 Me interesa este producto: ${product.title}. ¿Tienen stock disponible?`);
+    // Número de VENTAS actualizado: 1157074145
+    window.open(`https://wa.me/5491157074145?text=${message}`, '_blank');
   };
 
-  const handleAddQuestion = () => {
-    if (question.trim()) {
-      setQuestions(prev => [...prev, { q: question.trim() }]);
-      setQuestion("");
-    }
-  };
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercent = hasDiscount ? Math.round((1 - product.price / product.original_price) * 100) : 0;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container py-6">
-      {/* Breadcrumb */}
-      <nav className="text-sm text-muted-foreground mb-4 flex items-center gap-1 flex-wrap">
-        <Link to="/" className="hover:text-primary">Inicio</Link><span>/</span>
-        <Link to={`/productos?categoria=${product.category}`} className="hover:text-primary capitalize">{product.category}</Link><span>/</span>
-        <span className="text-foreground truncate max-w-[200px]">{product.title}</span>
-      </nav>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container py-10 px-6 max-w-7xl mx-auto">
+      {/* Navegación Superior */}
+      <div className="flex justify-between items-center mb-8">
+        <Link to="/productos" className="inline-flex items-center gap-2 text-zinc-400 hover:text-orange-500 font-black uppercase text-[10px] tracking-widest transition-all">
+          <ArrowLeft size={14} /> Volver
+        </Link>
+        <div className="flex gap-4">
+          <a href="https://instagram.com/rafaghellimotos" target="_blank" className="text-zinc-300 hover:text-pink-500 transition-colors">
+            <Instagram size={18} />
+          </a>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Image gallery */}
-        <div>
-          <div
-            className="aspect-square bg-muted rounded-xl overflow-hidden cursor-zoom-in relative"
-            onMouseEnter={() => setZoomed(true)}
-            onMouseLeave={() => setZoomed(false)}
-            onMouseMove={handleMouseMove}
-          >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        {/* Galería de Imágenes */}
+        <div className="sticky top-24">
+          <div className="aspect-square bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative">
             <img
               src={product.images[activeImage]}
               alt={product.title}
-              className="w-full h-full object-cover transition-transform duration-200"
-              style={zoomed ? { transform: "scale(2)", transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
+              className="w-full h-full object-cover"
             />
+            {hasDiscount && (
+              <div className="absolute top-6 left-6 bg-orange-500 text-white font-black px-4 py-2 rounded-2xl italic text-lg shadow-lg">
+                {discountPercent}% OFF
+              </div>
+            )}
           </div>
           {product.images.length > 1 && (
-            <div className="flex gap-2 mt-3">
-              {product.images.map((img, i) => (
+            <div className="flex gap-4 mt-6 overflow-x-auto pb-2 px-2">
+              {product.images.map((img: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${i === activeImage ? "border-primary" : "border-transparent hover:border-muted-foreground/30"}`}
+                  className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage ? "border-orange-500 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -87,132 +111,98 @@ const ProductDetail = () => {
           )}
         </div>
 
-        {/* Product info */}
-        <div className="space-y-5">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Nuevo | +{product.stock} vendidos</p>
-            <h1 className="text-2xl md:text-3xl font-display font-bold leading-tight">{product.title}</h1>
+        {/* Info del Producto */}
+        <div className="flex flex-col lg:pl-6">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="bg-zinc-900 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg tracking-widest">{product.category}</span>
+              <span className="text-orange-500 font-black text-[10px] uppercase tracking-widest border border-orange-500/20 px-3 py-1.5 rounded-lg">{product.brand || 'Original'}</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] italic text-zinc-900">
+              {product.title}
+            </h1>
           </div>
 
-          <div>
-            {product.originalPrice && (
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
-                <span className="text-sm font-semibold text-success">{discount}% OFF</span>
+          <div className="mb-10 bg-zinc-50 p-8 rounded-[2.5rem] border border-zinc-100">
+            {hasDiscount && (
+              <p className="text-xl text-zinc-400 line-through font-bold mb-1">{formatPrice(product.original_price)}</p>
+            )}
+            <div className="text-6xl font-black text-zinc-900 tracking-tighter leading-none mb-4">
+              {formatPrice(product.price)}
+            </div>
+            <div className="flex items-center gap-2 text-zinc-500 font-bold text-sm">
+              <Box size={18} className="text-orange-500" /> 
+              Stock disponible: <span className="text-zinc-900">{product.stock} unidades</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            {product.free_shipping && (
+              <div className="flex items-center gap-4 p-5 bg-green-50 rounded-3xl border border-green-100">
+                <Truck className="h-8 w-8 text-green-600" />
+                <div>
+                  <p className="text-xs font-black uppercase text-green-700">Envío Gratis</p>
+                  <p className="text-[10px] text-green-600 font-bold uppercase">A todo el país</p>
+                </div>
               </div>
             )}
-            <p className="text-4xl font-bold">{formatPrice(product.price)}</p>
-            <p className="text-sm text-muted-foreground mt-1">en 1 pago · o hasta <span className="font-semibold text-foreground">12 cuotas de {formatPrice(Math.round(product.price / 12))}</span></p>
-          </div>
-
-          {product.freeShipping && (
-            <div className="flex items-center gap-2 text-success">
-              <Truck className="h-5 w-5" />
-              <span className="text-sm font-semibold">Envío gratis a todo el país</span>
-            </div>
-          )}
-
-          {/* Variants */}
-          {product.variants?.map(v => (
-            <div key={v.label}>
-              <p className="text-sm font-medium mb-2">{v.label}: <span className="text-muted-foreground">{selectedVariant || "Seleccionar"}</span></p>
-              <div className="flex gap-2">
-                {v.options.map(opt => (
-                  <button
-                    key={opt}
-                    onClick={() => setSelectedVariant(opt)}
-                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${selectedVariant === opt ? "border-primary bg-accent text-accent-foreground" : "border-border hover:border-muted-foreground"}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
+            <div className="flex items-center gap-4 p-5 bg-orange-50 rounded-3xl border border-orange-100">
+              <Shield className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-xs font-black uppercase text-orange-700">Garantía</p>
+                <p className="text-[10px] text-orange-600 font-bold uppercase">Oficial Rafaghelli</p>
               </div>
             </div>
-          ))}
-
-          <div className="flex flex-col gap-2 pt-2">
-            <Button variant="cta" size="lg" onClick={() => addItem(product, selectedVariant)}>
-              <Zap className="h-5 w-5 mr-1" /> Comprar ahora
-            </Button>
-            <Button variant="cta-outline" size="lg" onClick={() => addItem(product, selectedVariant)}>
-              <ShoppingCart className="h-5 w-5 mr-1" /> Agregar al carrito
-            </Button>
           </div>
 
-          <div className="flex items-center gap-4 pt-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Shield className="h-4 w-4 text-primary" /> Garantía oficial</span>
-            <span>Stock: {product.stock} unidades</span>
+          <div className="flex flex-col gap-4">
+            <Button 
+              onClick={handleWhatsAppClick}
+              className="w-full bg-zinc-900 hover:bg-orange-500 text-white h-24 rounded-[2.5rem] text-2xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+            >
+              <MessageCircle size={32} className="mr-4 group-hover:rotate-12 transition-transform" />
+              Consultar Ventas
+            </Button>
+            
+            <div className="flex justify-center gap-8 mt-4">
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-zinc-400" />
+                <span className="text-[10px] font-black uppercase text-zinc-400">Ventas: 11 5707-4145</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-zinc-400" />
+                <span className="text-[10px] font-black uppercase text-zinc-400">Taller: 11 7163-0707</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Description + Specs + Q&A */}
-      <div className="mt-12 space-y-10">
-        {/* Description */}
-        <section>
-          <h2 className="text-xl font-display font-bold mb-4">Descripción</h2>
-          <div className="bg-card rounded-xl border p-6">
-            <p className="text-foreground leading-relaxed">{product.description}</p>
+      {/* Descripción Técnica */}
+      <div className="mt-24">
+        <div className="max-w-3xl">
+          <h3 className="text-3xl font-black uppercase tracking-tighter italic mb-8 flex items-center gap-4 text-zinc-900">
+            Detalles <span className="text-orange-500">Técnicos</span>
+          </h3>
+          <div className="bg-white p-10 rounded-[3rem] border-2 border-zinc-100 shadow-sm">
+            <p className="text-zinc-600 text-xl leading-relaxed font-medium whitespace-pre-line">
+              {product.description || "Consultanos las especificaciones técnicas de este repuesto. Contamos con asesoramiento especializado en nuestro taller propio."}
+            </p>
           </div>
-        </section>
-
-        {/* Specs */}
-        <section>
-          <h2 className="text-xl font-display font-bold mb-4">Ficha Técnica</h2>
-          <div className="bg-card rounded-xl border overflow-hidden">
-            <table className="w-full text-sm">
-              <tbody>
-                {Object.entries(product.specs).map(([key, val], i) => (
-                  <tr key={key} className={i % 2 === 0 ? "bg-muted/30" : ""}>
-                    <td className="px-4 py-3 font-medium text-muted-foreground w-1/3">{key}</td>
-                    <td className="px-4 py-3">{val}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Q&A */}
-        <section>
-          <h2 className="text-xl font-display font-bold mb-4">Preguntas y respuestas</h2>
-          <div className="bg-card rounded-xl border p-6 space-y-4">
-            <div className="flex gap-2">
-              <input
-                value={question}
-                onChange={e => setQuestion(e.target.value)}
-                placeholder="Hacé una pregunta sobre este producto..."
-                className="flex-1 px-4 py-2.5 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                onKeyDown={e => e.key === "Enter" && handleAddQuestion()}
-              />
-              <Button variant="cta" onClick={handleAddQuestion}><Send className="h-4 w-4" /></Button>
-            </div>
-            <div className="space-y-3">
-              {questions.map((item, i) => (
-                <div key={i} className="border-b last:border-0 pb-3 last:pb-0">
-                  <p className="text-sm font-medium">{item.q}</p>
-                  {item.a ? (
-                    <p className="text-sm text-muted-foreground mt-1 pl-4 border-l-2 border-primary">{item.a}</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground mt-1 italic">Esperando respuesta del vendedor...</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        </div>
       </div>
 
-      {/* Related products */}
+      {/* Relacionados */}
       {related.length > 0 && (
-        <section className="mt-12">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-display font-bold">Productos relacionados</h3>
-            <Link to={`/productos?categoria=${product.category}`} className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
-              Ver más <ChevronRight className="h-4 w-4" />
-            </Link>
+        <section className="mt-24">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-orange-500 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Sugerencias</p>
+              <h3 className="text-3xl font-black uppercase tracking-tighter italic">Productos Relacionados</h3>
+            </div>
+            <Link to="/productos" className="text-zinc-400 hover:text-zinc-900 text-xs font-black uppercase tracking-widest transition-colors">Ver catálogo completo ›</Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {related.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
@@ -222,3 +212,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+

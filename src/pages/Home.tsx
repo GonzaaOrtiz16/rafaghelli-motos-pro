@@ -13,7 +13,7 @@ const Home = () => {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  // CONEXIÓN A SUPABASE: Traemos los datos frescos de la tabla nueva
+  // CONEXIÓN A SUPABASE: Traemos los datos frescos
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
@@ -26,10 +26,10 @@ const Home = () => {
     }
   });
 
-  // FILTROS ESTRICTOS: Basados en tu nueva estructura SQL
+  // FILTROS CORREGIDOS
+  // Ahora priorizamos el campo 'is_on_sale' que activamos en el Admin
   const featured = products.filter(p => 
-    p.original_price && 
-    Number(p.original_price) > Number(p.price)
+    p.is_on_sale === true || (p.original_price && Number(p.original_price) > Number(p.price))
   );
 
   const freeShipping = products.filter(p => 
@@ -72,7 +72,6 @@ const Home = () => {
             </form>
           </motion.div>
         </div>
-        {/* Decoración de fondo */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-orange-500/10 to-transparent hidden md:block" />
       </section>
 
@@ -188,7 +187,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* Call to Action Final */}
         <div className="flex flex-col items-center gap-6">
           <Link to="/productos">
             <Button 

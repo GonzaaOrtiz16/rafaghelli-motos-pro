@@ -47,7 +47,7 @@ const Admin = () => {
       stock: product.stock?.toString() || '10',
       original_price: product.original_price?.toString() || '',
       free_shipping: product.free_shipping || false,
-      is_on_sale: product.original_price > product.price
+      is_on_sale: product.is_on_sale || (product.original_price > product.price)
     });
     setTempImages(product.images || []); 
     setIsAdding(true);
@@ -64,7 +64,6 @@ const Admin = () => {
     }
   };
 
-  // MANEJO DE IMÁGENES CORREGIDO
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -75,7 +74,6 @@ const Admin = () => {
     for (const file of Array.from(files)) {
       try {
         const fileExt = file.name.split('.').pop();
-        // Usamos un ID único para evitar que la caché del navegador no muestre la imagen
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${fileName}`;
 
@@ -98,12 +96,10 @@ const Admin = () => {
       }
     }
 
-    // Actualización de estado segura usando el previo
     setTempImages(prev => [...prev, ...newUrls]);
     setUploadingImages(false);
     toast.success("Imagen cargada correctamente");
     
-    // Resetear el input para permitir subir la misma foto si se borra
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -130,15 +126,16 @@ const Admin = () => {
       description: formData.description,
       stock: parseInt(formData.stock),
       free_shipping: formData.free_shipping,
+      is_on_sale: formData.is_on_sale, // AHORA SE ENVÍA EL BOOLEANO CORRECTO
       slug: slug,
-      images: tempImages, // Se guarda como array text[]
+      images: tempImages,
     };
 
     const { error } = await supabase.from('products').insert([productData]);
     
     setLoading(false);
     if (!error) {
-      toast.success("¡Producto publicado!");
+      toast.success("¡Producto publicado en Rafaghelli!");
       setIsAdding(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
@@ -205,7 +202,7 @@ const Admin = () => {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex gap-2">
-                        {p.original_price > p.price && <span className="bg-orange-100 text-orange-600 text-[9px] px-2 py-1 rounded-lg font-black uppercase tracking-tighter italic">Oferta</span>}
+                        {p.is_on_sale && <span className="bg-orange-100 text-orange-600 text-[9px] px-2 py-1 rounded-lg font-black uppercase tracking-tighter italic">Oferta</span>}
                         {p.free_shipping && <span className="bg-green-100 text-green-600 text-[9px] px-2 py-1 rounded-lg font-black uppercase tracking-tighter">Envío Gratis</span>}
                         <span className="bg-gray-100 text-gray-500 text-[9px] px-2 py-1 rounded-lg font-black uppercase tracking-tighter">Stock: {p.stock}</span>
                       </div>
@@ -268,7 +265,7 @@ const Admin = () => {
               <div className="bg-zinc-900 rounded-[32px] p-8 space-y-6 text-white">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Precio ($)</label>
+                    <label className="text-[10px] uppercase font-black text-zinc-500 tracking-widest">Precio Venta ($)</label>
                     <input className="w-full bg-white/10 rounded-xl px-5 py-3 outline-none font-black text-xl text-orange-500" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
                   </div>
                   <div className="space-y-2">
@@ -278,16 +275,18 @@ const Admin = () => {
                 </div>
                 
                 <div className="flex gap-4">
-                  <button type="button" onClick={() => setFormData({...formData, is_on_sale: !formData.is_on_sale})} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase ${formData.is_on_sale ? 'bg-orange-500' : 'bg-white/5 text-zinc-500'}`}>Oferta</button>
-                  <button type="button" onClick={() => setFormData({...formData, free_shipping: !formData.free_shipping})} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase ${formData.free_shipping ? 'bg-green-500' : 'bg-white/5 text-zinc-500'}`}>Envío Gratis</button>
+                  <button type="button" onClick={() => setFormData({...formData, is_on_sale: !formData.is_on_sale})} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${formData.is_on_sale ? 'bg-orange-500' : 'bg-white/5 text-zinc-500'}`}>Oferta</button>
+                  <button type="button" onClick={() => setFormData({...formData, free_shipping: !formData.free_shipping})} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${formData.free_shipping ? 'bg-green-500' : 'bg-white/5 text-zinc-500'}`}>Envío Gratis</button>
                 </div>
 
                 {formData.is_on_sale && (
-                  <input className="w-full bg-white text-black rounded-xl px-5 py-3 outline-none font-black" type="number" placeholder="Precio Anterior" value={formData.original_price} onChange={e => setFormData({...formData, original_price: e.target.value})} />
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-black text-orange-500 tracking-widest">Precio Anterior (Original) ($)</label>
+                    <input className="w-full bg-white text-black rounded-xl px-5 py-3 outline-none font-black text-xl" type="number" value={formData.original_price} onChange={e => setFormData({...formData, original_price: e.target.value})} />
+                  </div>
                 )}
               </div>
 
-              {/* FOTOS CON PREVIEW CORREGIDO */}
               <div className="space-y-4">
                 <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Fotos</label>
                 <div className="grid grid-cols-4 gap-4">

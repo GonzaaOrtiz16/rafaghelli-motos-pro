@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { categories } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();

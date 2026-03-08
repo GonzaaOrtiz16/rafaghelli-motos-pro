@@ -61,15 +61,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section with Video Background */}
+      {/* Hero Section with Image Background */}
       <section className="relative overflow-hidden min-h-[70vh] flex items-center">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
+        <img
+          src="/hero-moto-street.jpg"
+          alt="Moto de calle haciendo wheelie en la ciudad"
           className="absolute inset-0 w-full h-full object-cover"
-          src="/hero-wheelie.mp4"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
         <div className="container py-16 md:py-28 px-6 relative z-10 text-white">

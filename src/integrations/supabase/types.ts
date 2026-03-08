@@ -32,6 +32,48 @@ export type Database = {
         }
         Relationships: []
       }
+      motorcycles: {
+        Row: {
+          brand: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          kilometers: number
+          model: string
+          price: number
+          title: string
+          year: number
+        }
+        Insert: {
+          brand: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          kilometers?: number
+          model: string
+          price: number
+          title: string
+          year: number
+        }
+        Update: {
+          brand?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          kilometers?: number
+          model?: string
+          price?: number
+          title?: string
+          year?: number
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand: string
@@ -101,6 +143,27 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          home_media_type: string | null
+          home_media_url: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          home_media_type?: string | null
+          home_media_url?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          home_media_type?: string | null
+          home_media_url?: string | null
+          id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

@@ -386,13 +386,13 @@ const Home = () => {
           ) : (
             <img src={siteSettings.home_media_url} alt="Banner Rafaghelli Motos" className="absolute inset-0 w-full h-full object-cover" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
-            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <h3 className="text-5xl md:text-8xl font-black uppercase tracking-tighter italic text-primary-foreground leading-[0.85] mb-4">
-                Potenciamos <br /> <span className="text-primary">tu viaje</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-10">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+              <h3 className="text-2xl md:text-4xl font-black uppercase tracking-tighter italic text-primary-foreground leading-[0.9] mb-2">
+                Potenciamos <span className="text-primary">tu viaje</span>
               </h3>
-              <p className="text-muted-foreground text-lg font-medium max-w-md mx-auto">
+              <p className="text-muted-foreground text-xs md:text-sm font-medium">
                 Taller propio · Repuestos originales · Motos en venta
               </p>
             </motion.div>

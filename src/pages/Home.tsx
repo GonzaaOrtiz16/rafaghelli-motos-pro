@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Search, Truck, Shield, CreditCard, ArrowRight, Bike, Zap, ChevronRight } from "lucide-react";
+import { Search, Truck, Shield, CreditCard, ArrowRight, Bike, Zap, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { useState, useRef } from "react";
@@ -27,6 +27,8 @@ const scaleIn = {
 
 const Home = () => {
   const [q, setQ] = useState("");
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -347,7 +349,18 @@ const Home = () => {
           className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden"
         >
           {siteSettings.home_media_type === 'video' ? (
-            <video src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+            <>
+              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted={isMuted} playsInline className="absolute inset-0 w-full h-full object-cover" />
+              <button
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  if (videoRef.current) videoRef.current.muted = !isMuted;
+                }}
+                className="absolute top-4 right-4 z-20 bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground p-3 rounded-full transition-colors"
+              >
+                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              </button>
+            </>
           ) : (
             <img src={siteSettings.home_media_url} alt="Banner Rafaghelli Motos" className="absolute inset-0 w-full h-full object-cover" />
           )}

@@ -50,19 +50,27 @@ const ProductList = () => {
     }
   });
 
+  // Marcas dinámicas extraídas de los productos
+  const dynamicBrands = useMemo(() => {
+    const brandSet = new Set(products.map(p => p.brand).filter(Boolean));
+    return Array.from(brandSet).sort();
+  }, [products]);
+
+  // Categoría activa: priorizar parámetro URL, luego filtro manual
+  const activeCat = catParam || catFilter;
+
   const filtered = useMemo(() => {
     return products.filter(p => {
-      if (catParam && p.category !== catParam) return false;
-      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam)) return false;
+      if (activeCat && p.category !== activeCat) return false;
+      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam) && !p.brand.toLowerCase().includes(qParam)) return false;
       if (brandFilter && p.brand !== brandFilter) return false;
-      if (catFilter && p.category !== catFilter) return false;
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
         if (p.price < range.min || p.price > range.max) return false;
       }
       return true;
     });
-  }, [products, catParam, qParam, brandFilter, catFilter, priceFilter]);
+  }, [products, activeCat, qParam, brandFilter, priceFilter]);
 
   const activeCategory = catParam || "";
 

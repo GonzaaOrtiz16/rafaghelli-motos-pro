@@ -98,7 +98,7 @@ const ProductList = () => {
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Marca</h4>
         <div className="space-y-1">
-          {brands.map(b => (
+          {dynamicBrands.map(b => (
             <button key={b} onClick={() => setBrandFilter(brandFilter === b ? "" : b)}
               className={`block w-full text-left text-xs font-bold uppercase px-3 py-2 rounded-lg transition-colors ${brandFilter === b ? "bg-black text-white" : "hover:bg-muted text-gray-500"}`}>
               {b}

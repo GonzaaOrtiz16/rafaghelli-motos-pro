@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone } from "lucide-react";
+import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -14,6 +16,8 @@ const ProductDetail = () => {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,6 +61,30 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const hasSizes = product.sizes && product.sizes.length > 0;
+
+  const handleAddToCart = () => {
+    if (hasSizes && !selectedSize) {
+      toast.error("Seleccioná un talle antes de agregar al carrito");
+      return;
+    }
+    addItem({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      original_price: product.original_price,
+      images: product.images || [],
+      category: product.category,
+      brand: product.brand,
+      free_shipping: product.free_shipping,
+      description: product.description || '',
+      stock: product.stock || 0,
+      is_on_sale: product.is_on_sale,
+    }, selectedSize || undefined);
+    toast.success("¡Agregado al carrito!");
+  };
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(`¡Hola Rafaghelli Motos! 👋 Me interesa este producto: ${product.title}. ¿Tienen stock disponible?`);
@@ -155,13 +183,39 @@ const ProductDetail = () => {
             </div>
           </div>
 
+          {/* Selector de Talles */}
+          {hasSizes && (
+            <div className="mb-6">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 block">Seleccioná tu talle</label>
+              <div className="flex flex-wrap gap-3">
+                {product.sizes.map((size: string) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${selectedSize === size ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'border-zinc-200 text-zinc-600 hover:border-orange-300'}`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-4">
+            <Button
+              onClick={handleAddToCart}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+            >
+              <ShoppingCart size={28} className="mr-4 group-hover:scale-110 transition-transform" />
+              Agregar al Carrito
+            </Button>
             <Button 
               onClick={handleWhatsAppClick}
-              className="w-full bg-zinc-900 hover:bg-orange-500 text-white h-24 rounded-[2.5rem] text-2xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+              variant="outline"
+              className="w-full border-2 border-zinc-200 hover:border-orange-500 text-zinc-700 hover:text-orange-500 h-16 rounded-[2.5rem] text-lg font-black uppercase tracking-tighter transition-all active:scale-95 group"
             >
-              <MessageCircle size={32} className="mr-4 group-hover:rotate-12 transition-transform" />
-              Consultar Ventas
+              <MessageCircle size={24} className="mr-4 group-hover:rotate-12 transition-transform" />
+              Consultar por WhatsApp
             </Button>
             
             <div className="flex justify-center gap-8 mt-4">

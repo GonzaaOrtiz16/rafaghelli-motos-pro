@@ -255,7 +255,7 @@ const RepuestosTab = () => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [formData, setFormData] = useState({
     title: '', price: '', category: '', description: '', brand: '', stock: '10',
-    original_price: '', free_shipping: false, is_on_sale: false
+    original_price: '', free_shipping: false, is_on_sale: false, sizes: ''
   });
   const [tempImages, setTempImages] = useState<string[]>([]);
 
@@ -276,7 +276,7 @@ const RepuestosTab = () => {
       title: product.title, price: product.price.toString(), category: product.category || '',
       description: product.description || '', brand: product.brand || '', stock: product.stock?.toString() || '10',
       original_price: product.original_price?.toString() || '', free_shipping: product.free_shipping || false,
-      is_on_sale: !!product.is_on_sale
+      is_on_sale: !!product.is_on_sale, sizes: (product.sizes || []).join(', ')
     });
     setTempImages(product.images || []);
     setIsAdding(true);
@@ -288,7 +288,7 @@ const RepuestosTab = () => {
       title: `${product.title} (Copia)`, price: product.price.toString(), category: product.category || '',
       description: product.description || '', brand: product.brand || '', stock: product.stock?.toString() || '10',
       original_price: product.original_price?.toString() || '', free_shipping: product.free_shipping || false,
-      is_on_sale: !!product.is_on_sale
+      is_on_sale: !!product.is_on_sale, sizes: (product.sizes || []).join(', ')
     });
     setTempImages(product.images || []);
     setIsAdding(true);
@@ -332,6 +332,7 @@ const RepuestosTab = () => {
       category: formData.category, brand: formData.brand, description: formData.description,
       stock: parseInt(formData.stock), free_shipping: formData.free_shipping,
       is_on_sale: formData.is_on_sale, slug, images: tempImages,
+      sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
     };
     let error;
     if (editingId) {
@@ -351,7 +352,7 @@ const RepuestosTab = () => {
 
   const resetForm = () => {
     setEditingId(null); setTempImages([]);
-    setFormData({ title: '', price: '', category: '', description: '', brand: '', stock: '10', original_price: '', free_shipping: false, is_on_sale: false });
+    setFormData({ title: '', price: '', category: '', description: '', brand: '', stock: '10', original_price: '', free_shipping: false, is_on_sale: false, sizes: '' });
   };
 
   return (
@@ -417,6 +418,11 @@ const RepuestosTab = () => {
                 </select>
               </div>
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+              
+              <div>
+                <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-1 block">Talles (opcional, separar con comas)</label>
+                <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Ej: S, M, L, XL o 38, 40, 42" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+              </div>
 
               <div className="bg-zinc-900 rounded-[32px] p-8 space-y-4">
                 <div className="grid grid-cols-2 gap-4">

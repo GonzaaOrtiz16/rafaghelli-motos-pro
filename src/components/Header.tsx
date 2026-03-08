@@ -140,13 +140,16 @@ const Header = () => {
             {categories.map(cat => (
               <Link
                 key={cat.id}
-                to={`/productos?categoria=${cat.id}`}
+                to={`/productos?categoria=${cat.slug}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
               >
-                {cat.name}
+                {cat.nombre}
               </Link>
             ))}
+            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
+              Motos
+            </Link>
             <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
               Taller
             </Link>

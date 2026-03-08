@@ -146,7 +146,7 @@ const CategoriasTab = () => {
           {repuestosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image ? (
+                {cat.image && cat.image.length > 0 ? (
                   <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>

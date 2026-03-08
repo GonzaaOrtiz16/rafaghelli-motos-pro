@@ -313,7 +313,7 @@ const Home = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
           {!isLoading && freeShipping.length > 0 ? (
-            freeShipping.slice(0, 4).map((p, i) => (
+            freeShipping.slice(0, 4).map((p) => (
               <motion.div key={p.id} variants={fadeUp}>
                 <ProductCard product={p as any} />
               </motion.div>

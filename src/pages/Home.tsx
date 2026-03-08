@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Search, Truck, Shield, CreditCard, ArrowRight, Bike, Zap, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,40 +28,17 @@ const scaleIn = {
 const Home = () => {
   const [q, setQ] = useState("");
   const [isMuted, setIsMuted] = useState(true);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const videoSectionRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
 
-  // Unmute when video section scrolls into view (requires prior user interaction)
-  useEffect(() => {
-    const handleInteraction = () => setHasInteracted(true);
-    window.addEventListener("click", handleInteraction, { once: true });
-    window.addEventListener("touchstart", handleInteraction, { once: true });
-    return () => {
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-    };
-  }, []);
-
-  useEffect(() => {
-    const section = videoSectionRef.current;
-    if (!section) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasInteracted && videoRef.current) {
-          videoRef.current.muted = false;
-          setIsMuted(false);
-        } else if (!entry.isIntersecting && videoRef.current) {
-          videoRef.current.muted = true;
-          setIsMuted(true);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [hasInteracted]);
+  const handleToggleSound = () => {
+    if (videoRef.current) {
+      const newMuted = !isMuted;
+      videoRef.current.muted = newMuted;
+      setIsMuted(newMuted);
+      if (!newMuted) videoRef.current.play().catch(() => {});
+    }
+  };
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
@@ -374,7 +351,6 @@ const Home = () => {
       {/* Banner Multimedia Dinámico */}
       {siteSettings?.home_media_url && (
         <motion.section
-          ref={videoSectionRef}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -383,16 +359,29 @@ const Home = () => {
         >
           {siteSettings.home_media_type === 'video' ? (
             <>
-              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted={isMuted} playsInline className="absolute inset-0 w-full h-full object-cover" />
-              <button
-                onClick={() => {
-                  setIsMuted(!isMuted);
-                  if (videoRef.current) videoRef.current.muted = !isMuted;
-                }}
-                className="absolute top-4 right-4 z-20 bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground p-3 rounded-full transition-colors"
+              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+              {/* Prominent sound toggle */}
+              <motion.button
+                onClick={handleToggleSound}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-full font-black uppercase text-xs tracking-wider shadow-xl transition-colors"
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
+                {isMuted ? (
+                  <>
+                    <VolumeX size={18} />
+                    <span className="hidden sm:inline">Activar sonido</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 size={18} />
+                    <span className="hidden sm:inline">Silenciar</span>
+                  </>
+                )}
+              </motion.button>
             </>
           ) : (
             <img src={siteSettings.home_media_url} alt="Banner Rafaghelli Motos" className="absolute inset-0 w-full h-full object-cover" />

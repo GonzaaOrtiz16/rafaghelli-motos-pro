@@ -72,7 +72,7 @@ const ProductList = () => {
     });
   }, [products, activeCat, qParam, brandFilter, priceFilter]);
 
-  const activeCategory = catParam || "";
+  const hasActiveFilters = !!(brandFilter || catFilter || catParam || priceFilter >= 0);
 
   const clearFilters = () => { 
     setBrandFilter(""); 

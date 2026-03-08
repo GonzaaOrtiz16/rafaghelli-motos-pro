@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, Menu, Wrench, Phone } from "lucide-react";
+import { Search, ShoppingCart, Menu, Wrench, Phone, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { categories } from "@/data/products";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();
+  const { user, signOut } = useAuth();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -59,6 +61,18 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-2 ml-auto">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">{user.email}</span>
+              <button onClick={signOut} className="p-2 text-header-foreground hover:text-primary transition-colors" title="Cerrar sesión">
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <Link to="/auth" className="p-2 text-header-foreground hover:text-primary transition-colors" title="Iniciar sesión">
+              <User className="h-6 w-6" />
+            </Link>
+          )}
           <button onClick={openCart} className="relative p-2 text-header-foreground hover:text-primary transition-colors">
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (

@@ -138,17 +138,23 @@ export type Database = {
         Row: {
           full_name: string | null
           id: string
+          phone: string | null
           role: string | null
+          wants_newsletter: boolean | null
         }
         Insert: {
           full_name?: string | null
           id: string
+          phone?: string | null
           role?: string | null
+          wants_newsletter?: boolean | null
         }
         Update: {
           full_name?: string | null
           id?: string
+          phone?: string | null
           role?: string | null
+          wants_newsletter?: boolean | null
         }
         Relationships: []
       }

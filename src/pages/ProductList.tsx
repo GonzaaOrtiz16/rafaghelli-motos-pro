@@ -130,11 +130,18 @@ const ProductList = () => {
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-black uppercase tracking-tighter italic">
-          {activeCategory || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
+          {activeCat || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
         </h2>
-        <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
-          <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" className="rounded-xl text-xs font-bold uppercase" onClick={clearFilters}>
+              Limpiar filtros
+            </Button>
+          )}
+          <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
+            <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-8">

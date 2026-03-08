@@ -14,6 +14,19 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categorias', 'repuestos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .eq('tipo', 'repuestos')
+        .order('nombre');
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) navigate(`/productos?q=${encodeURIComponent(query.trim())}`);

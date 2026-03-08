@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, ChevronRight, Truck, Shield, CreditCard, ArrowRight } from "lucide-react";
+import { Search, ChevronRight, Truck, Shield, CreditCard, ArrowRight, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
@@ -13,7 +13,6 @@ const Home = () => {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  // CONEXIÓN A SUPABASE: Traemos los datos frescos
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
@@ -26,15 +25,21 @@ const Home = () => {
     }
   });
 
-  // FILTROS CORREGIDOS
-  // Ahora priorizamos el campo 'is_on_sale' que activamos en el Admin
-  const featured = products.filter(p => 
-    p.is_on_sale === true || (p.original_price && Number(p.original_price) > Number(p.price))
-  );
+  const { data: siteSettings } = useQuery({
+    queryKey: ['site-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data;
+    }
+  });
 
-  const freeShipping = products.filter(p => 
-    p.free_shipping === true
-  );
+  const featured = products.filter(p => p.is_on_sale === true);
+  const freeShipping = products.filter(p => p.free_shipping === true);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +61,7 @@ const Home = () => {
               Rafaghelli <span className="text-orange-500">Motos</span>
             </h2>
             <p className="text-zinc-400 text-lg md:text-xl mb-10 font-medium max-w-xl">
-              Repuestos originales y accesorios premium. Potenciamos tu viaje con la garantía de @gos_motos.
+              Repuestos originales y accesorios premium. Potenciamos tu viaje con la garantía de @rafaghellimotos.
             </p>
             
             <form onSubmit={handleSearch} className="flex max-w-lg bg-white rounded-2xl p-1.5 shadow-2xl">
@@ -98,7 +103,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categorías Flotantes */}
+      {/* Categorías */}
       <section className="container py-20 px-6">
         <div className="flex items-end justify-between mb-12">
           <div>
@@ -112,28 +117,37 @@ const Home = () => {
         
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8">
           {categories.map((cat) => (
-            <Link 
-              key={cat.id} 
-              to={`/productos?categoria=${cat.id}`} 
-              className="group flex flex-col items-center text-center gap-4"
-            >
+            <Link key={cat.id} to={`/productos?categoria=${cat.id}`} className="group flex flex-col items-center text-center gap-4">
               <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-zinc-100 border-4 border-transparent group-hover:border-orange-500 transition-all duration-500 shadow-lg">
-                <img 
-                  src={cat.image} 
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                  alt={cat.name} 
-                />
+                <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.name} />
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
               </div>
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-900">
-                {cat.name}
-              </span>
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-900">{cat.name}</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Sección Ofertas (Fondo Oscuro) */}
+      {/* Banner Motos en Venta */}
+      <section className="mx-4 md:mx-10 my-10">
+        <Link to="/motos" className="block group">
+          <div className="bg-zinc-900 rounded-[3rem] md:rounded-[4rem] p-10 md:p-16 flex items-center justify-between overflow-hidden relative">
+            <div className="relative z-10">
+              <span className="text-orange-500 font-black uppercase text-[10px] tracking-[0.3em]">Nueva Sección</span>
+              <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-white leading-none mt-2">
+                Motos en <span className="text-orange-500">Venta</span>
+              </h3>
+              <p className="text-zinc-400 font-medium mt-3 max-w-md">0km y usadas seleccionadas con garantía Rafaghelli.</p>
+              <div className="mt-6 inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-tighter text-sm transition-all group-hover:gap-4">
+                Ver Motos <ArrowRight size={18} />
+              </div>
+            </div>
+            <Bike size={180} className="text-zinc-800 absolute right-10 top-1/2 -translate-y-1/2 hidden md:block group-hover:text-zinc-700 transition-colors" strokeWidth={1} />
+          </div>
+        </Link>
+      </section>
+
+      {/* Super Ofertas */}
       <section className="bg-zinc-900 py-24 px-6 rounded-[3rem] md:rounded-[5rem] mx-4 md:mx-10 my-10">
         <div className="container">
           <div className="flex items-center justify-between mb-12">
@@ -151,7 +165,7 @@ const Home = () => {
               {featured.length > 0 ? (
                 featured.slice(0, 4).map((p, i) => (
                   <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                    <ProductCard product={p} />
+                    <ProductCard product={p as any} />
                   </motion.div>
                 ))
               ) : (
@@ -164,7 +178,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Envío Gratis Section */}
+      {/* Envío Gratis */}
       <section className="container py-24 px-6">
         <div className="flex items-center gap-4 mb-12">
           <div className="bg-green-100 p-3 rounded-2xl">
@@ -177,7 +191,7 @@ const Home = () => {
           {!isLoading && freeShipping.length > 0 ? (
             freeShipping.slice(0, 4).map((p, i) => (
               <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <ProductCard product={p} />
+                <ProductCard product={p as any} />
               </motion.div>
             ))
           ) : (
@@ -189,16 +203,46 @@ const Home = () => {
 
         <div className="flex flex-col items-center gap-6">
           <Link to="/productos">
-            <Button 
-              className="bg-orange-500 hover:bg-orange-600 text-white h-20 px-16 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl shadow-orange-500/40 group transition-all active:scale-95"
-            >
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white h-20 px-16 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl shadow-orange-500/40 group transition-all active:scale-95">
               Ver Todo el Catálogo
               <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-3 transition-transform" />
             </Button>
           </Link>
-          <p className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Más de 500 productos en stock</p>
         </div>
       </section>
+
+      {/* Banner Multimedia Dinámico */}
+      {siteSettings?.home_media_url && (
+        <section className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
+          {siteSettings.home_media_type === 'video' ? (
+            <video
+              src={siteSettings.home_media_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={siteSettings.home_media_url}
+              alt="Banner Rafaghelli Motos"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
+            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+              <h3 className="text-5xl md:text-8xl font-black uppercase tracking-tighter italic text-white leading-[0.85] mb-4">
+                Potenciamos <br /> <span className="text-orange-500">tu viaje</span>
+              </h3>
+              <p className="text-zinc-300 text-lg font-medium max-w-md mx-auto">
+                Taller propio · Repuestos originales · Motos en venta
+              </p>
+            </motion.div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

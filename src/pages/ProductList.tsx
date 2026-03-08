@@ -52,7 +52,7 @@ const ProductList = () => {
       // 4. Filtro por Precio (Sidebar) - Usamos el precio final (con descuento si tiene)
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
-        const currentPrice = p.discount_price && p.is_on_sale ? p.discount_price : p.price;
+        const currentPrice = p.price;
         if (currentPrice < range.min || currentPrice > range.max) return false;
       }
       

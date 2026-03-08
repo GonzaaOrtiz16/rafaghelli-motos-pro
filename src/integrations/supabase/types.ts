@@ -14,63 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          id: string
+          nombre: string
+          slug: string
+        }
+        Insert: {
+          id?: string
+          nombre: string
+          slug: string
+        }
+        Update: {
+          id?: string
+          nombre?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      motorcycles: {
+        Row: {
+          brand: string
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          kilometers: number
+          model: string
+          price: number
+          title: string
+          year: number
+        }
+        Insert: {
+          brand: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          kilometers?: number
+          model: string
+          price: number
+          title: string
+          year: number
+        }
+        Update: {
+          brand?: string
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          kilometers?: number
+          model?: string
+          price?: number
+          title?: string
+          year?: number
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand: string
           category: string
-          cc: string[]
+          cc: string[] | null
           created_at: string
-          description: string
-          free_shipping: boolean
+          description: string | null
+          free_shipping: boolean | null
           id: string
-          images: string[]
-          moto_fit: string[]
+          images: string[] | null
+          is_on_sale: boolean | null
+          moto_fit: string[] | null
           original_price: number | null
           price: number
           slug: string
-          specs: Json
-          stock: number
+          stock: number | null
           title: string
-          updated_at: string
-          variants: Json | null
         }
         Insert: {
           brand: string
           category: string
-          cc?: string[]
+          cc?: string[] | null
           created_at?: string
-          description?: string
-          free_shipping?: boolean
+          description?: string | null
+          free_shipping?: boolean | null
           id?: string
-          images?: string[]
-          moto_fit?: string[]
+          images?: string[] | null
+          is_on_sale?: boolean | null
+          moto_fit?: string[] | null
           original_price?: number | null
           price: number
           slug: string
-          specs?: Json
-          stock?: number
+          stock?: number | null
           title: string
-          updated_at?: string
-          variants?: Json | null
         }
         Update: {
           brand?: string
           category?: string
-          cc?: string[]
+          cc?: string[] | null
           created_at?: string
-          description?: string
-          free_shipping?: boolean
+          description?: string | null
+          free_shipping?: boolean | null
           id?: string
-          images?: string[]
-          moto_fit?: string[]
+          images?: string[] | null
+          is_on_sale?: boolean | null
+          moto_fit?: string[] | null
           original_price?: number | null
           price?: number
           slug?: string
-          specs?: Json
-          stock?: number
+          stock?: number | null
           title?: string
-          updated_at?: string
-          variants?: Json | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          full_name: string | null
+          id: string
+          role: string | null
+        }
+        Insert: {
+          full_name?: string | null
+          id: string
+          role?: string | null
+        }
+        Update: {
+          full_name?: string | null
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          home_media_type: string | null
+          home_media_url: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          home_media_type?: string | null
+          home_media_url?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          home_media_type?: string | null
+          home_media_url?: string | null
+          id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

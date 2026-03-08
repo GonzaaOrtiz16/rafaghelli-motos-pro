@@ -418,6 +418,11 @@ const RepuestosTab = () => {
                 </select>
               </div>
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+              
+              <div>
+                <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-1 block">Talles (opcional, separar con comas)</label>
+                <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Ej: S, M, L, XL o 38, 40, 42" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+              </div>
 
               <div className="bg-zinc-900 rounded-[32px] p-8 space-y-4">
                 <div className="grid grid-cols-2 gap-4">

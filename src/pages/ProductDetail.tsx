@@ -183,13 +183,39 @@ const ProductDetail = () => {
             </div>
           </div>
 
+          {/* Selector de Talles */}
+          {hasSizes && (
+            <div className="mb-6">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 block">Seleccioná tu talle</label>
+              <div className="flex flex-wrap gap-3">
+                {product.sizes.map((size: string) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${selectedSize === size ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'border-zinc-200 text-zinc-600 hover:border-orange-300'}`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-4">
+            <Button
+              onClick={handleAddToCart}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+            >
+              <ShoppingCart size={28} className="mr-4 group-hover:scale-110 transition-transform" />
+              Agregar al Carrito
+            </Button>
             <Button 
               onClick={handleWhatsAppClick}
-              className="w-full bg-zinc-900 hover:bg-orange-500 text-white h-24 rounded-[2.5rem] text-2xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+              variant="outline"
+              className="w-full border-2 border-zinc-200 hover:border-orange-500 text-zinc-700 hover:text-orange-500 h-16 rounded-[2.5rem] text-lg font-black uppercase tracking-tighter transition-all active:scale-95 group"
             >
-              <MessageCircle size={32} className="mr-4 group-hover:rotate-12 transition-transform" />
-              Consultar Ventas
+              <MessageCircle size={24} className="mr-4 group-hover:rotate-12 transition-transform" />
+              Consultar por WhatsApp
             </Button>
             
             <div className="flex justify-center gap-8 mt-4">

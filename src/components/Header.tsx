@@ -61,6 +61,18 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-2 ml-auto">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">{user.email}</span>
+              <button onClick={signOut} className="p-2 text-header-foreground hover:text-primary transition-colors" title="Cerrar sesión">
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <Link to="/auth" className="p-2 text-header-foreground hover:text-primary transition-colors" title="Iniciar sesión">
+              <User className="h-6 w-6" />
+            </Link>
+          )}
           <button onClick={openCart} className="relative p-2 text-header-foreground hover:text-primary transition-colors">
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (

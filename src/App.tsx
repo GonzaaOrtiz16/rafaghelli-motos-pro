@@ -13,6 +13,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import Checkout from "@/pages/Checkout";
 import Workshop from "@/pages/Workshop";
 import Admin from "@/pages/Admin";
+import Motos from "@/pages/Motos";
 import NotFound from "./pages/NotFound";
 import { MessageCircle } from "lucide-react"; // Importamos el icono
 

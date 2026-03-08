@@ -94,6 +94,7 @@ export type Database = {
           moto_fit: string[] | null
           original_price: number | null
           price: number
+          sizes: string[] | null
           slug: string
           stock: number | null
           title: string
@@ -111,6 +112,7 @@ export type Database = {
           moto_fit?: string[] | null
           original_price?: number | null
           price: number
+          sizes?: string[] | null
           slug: string
           stock?: number | null
           title: string
@@ -128,6 +130,7 @@ export type Database = {
           moto_fit?: string[] | null
           original_price?: number | null
           price?: number
+          sizes?: string[] | null
           slug?: string
           stock?: number | null
           title?: string

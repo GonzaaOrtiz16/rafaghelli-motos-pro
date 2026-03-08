@@ -113,9 +113,9 @@ const Home = () => {
                     
                     <div className="flex items-center justify-between mt-8">
                       <div>
-                        <span className="block text-3xl font-black tracking-tighter">${(product.discount_price || product.price).toLocaleString('es-AR')}</span>
-                        {product.is_on_sale && (
-                          <span className="text-sm text-gray-400 line-through font-medium">${product.price.toLocaleString('es-AR')}</span>
+                        <span className="block text-3xl font-black tracking-tighter">${product.price.toLocaleString('es-AR')}</span>
+                        {product.is_on_sale && product.original_price && product.original_price > product.price && (
+                          <span className="text-sm text-gray-400 line-through font-medium">${product.original_price.toLocaleString('es-AR')}</span>
                         )}
                       </div>
                       <Link to={`/product/${product.slug}`} className="bg-zinc-100 text-black p-5 rounded-3xl hover:bg-black hover:text-white transition-all group/btn">

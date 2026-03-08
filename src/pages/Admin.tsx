@@ -146,7 +146,7 @@ const CategoriasTab = () => {
           {repuestosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image ? (
+                {cat.image && cat.image.length > 0 ? (
                   <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
@@ -174,7 +174,7 @@ const CategoriasTab = () => {
           {motosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image ? (
+                {cat.image && cat.image.length > 0 ? (
                   <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
@@ -221,7 +221,7 @@ const CategoriasTab = () => {
               {/* Image */}
               <div>
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Imagen de categoría</label>
-                {formData.image ? (
+                {formData.image && formData.image.length > 0 ? (
                   <div className="relative aspect-video rounded-2xl overflow-hidden border">
                     <img src={formData.image} className="w-full h-full object-cover" />
                     <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5"><X size={12}/></button>

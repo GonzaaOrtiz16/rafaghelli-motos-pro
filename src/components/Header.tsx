@@ -8,6 +8,7 @@ import { categories } from "@/data/products";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();
+  const { user, signOut } = useAuth();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();

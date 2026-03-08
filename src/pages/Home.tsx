@@ -351,7 +351,6 @@ const Home = () => {
       {/* Banner Multimedia Dinámico */}
       {siteSettings?.home_media_url && (
         <motion.section
-          ref={videoSectionRef}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -360,16 +359,29 @@ const Home = () => {
         >
           {siteSettings.home_media_type === 'video' ? (
             <>
-              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted={isMuted} playsInline className="absolute inset-0 w-full h-full object-cover" />
-              <button
-                onClick={() => {
-                  setIsMuted(!isMuted);
-                  if (videoRef.current) videoRef.current.muted = !isMuted;
-                }}
-                className="absolute top-4 right-4 z-20 bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground p-3 rounded-full transition-colors"
+              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+              {/* Prominent sound toggle */}
+              <motion.button
+                onClick={handleToggleSound}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-3 rounded-full font-black uppercase text-xs tracking-wider shadow-xl transition-colors"
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
+                {isMuted ? (
+                  <>
+                    <VolumeX size={18} />
+                    <span className="hidden sm:inline">Activar sonido</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 size={18} />
+                    <span className="hidden sm:inline">Silenciar</span>
+                  </>
+                )}
+              </motion.button>
             </>
           ) : (
             <img src={siteSettings.home_media_url} alt="Banner Rafaghelli Motos" className="absolute inset-0 w-full h-full object-cover" />

@@ -27,6 +27,8 @@ const scaleIn = {
 
 const Home = () => {
   const [q, setQ] = useState("");
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });

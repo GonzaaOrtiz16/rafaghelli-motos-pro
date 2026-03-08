@@ -16,6 +16,8 @@ const ProductDetail = () => {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {

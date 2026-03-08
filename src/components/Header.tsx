@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { categories } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();
@@ -12,6 +13,19 @@ const Header = () => {
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categorias', 'repuestos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .eq('tipo', 'repuestos')
+        .order('nombre');
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,12 +104,15 @@ const Header = () => {
           {categories.map(cat => (
             <Link
               key={cat.id}
-              to={`/productos?categoria=${cat.id}`}
+              to={`/productos?categoria=${cat.slug}`}
               className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
             >
-              {cat.name}
+              {cat.nombre}
             </Link>
           ))}
+          <Link to="/motos" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+            Motos
+          </Link>
           <Link to="/taller" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
             Taller
           </Link>
@@ -123,13 +140,16 @@ const Header = () => {
             {categories.map(cat => (
               <Link
                 key={cat.id}
-                to={`/productos?categoria=${cat.id}`}
+                to={`/productos?categoria=${cat.slug}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
               >
-                {cat.name}
+                {cat.nombre}
               </Link>
             ))}
+            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
+              Motos
+            </Link>
             <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
               Taller
             </Link>

@@ -355,11 +355,11 @@ const Home = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="relative w-full overflow-hidden"
+          className="relative w-full h-[56vw] md:h-[calc(100vh-4rem)] overflow-hidden"
         >
           {siteSettings.home_media_type === 'video' ? (
             <>
-              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted playsInline className="w-full h-auto block md:object-contain" />
+              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-contain bg-black" />
               {/* Prominent sound toggle */}
               <motion.button
                 onClick={handleToggleSound}

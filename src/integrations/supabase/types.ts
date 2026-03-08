@@ -17,18 +17,24 @@ export type Database = {
       categorias: {
         Row: {
           id: string
+          image: string | null
           nombre: string
           slug: string
+          tipo: string | null
         }
         Insert: {
           id?: string
+          image?: string | null
           nombre: string
           slug: string
+          tipo?: string | null
         }
         Update: {
           id?: string
+          image?: string | null
           nombre?: string
           slug?: string
+          tipo?: string | null
         }
         Relationships: []
       }

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Calendar, Gauge, ArrowLeft, MessageCircle, Eye, Bike, Filter } from "lucide-react";
+import { Calendar, Gauge, ArrowLeft, MessageCircle, Bike, Filter, X, ChevronRight, Shield, Phone, ImageIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
 const formatPrice = (n: number) =>
@@ -24,6 +24,8 @@ const fadeRight = {
 const Motos = () => {
   const [conditionFilter, setConditionFilter] = useState<string>("");
   const [brandFilter, setBrandFilter] = useState<string>("");
+  const [selectedMoto, setSelectedMoto] = useState<any>(null);
+  const [detailImage, setDetailImage] = useState(0);
 
   const { data: motos = [], isLoading } = useQuery({
     queryKey: ["public-motorcycles"],
@@ -48,6 +50,11 @@ const Motos = () => {
   }, [motos, conditionFilter, brandFilter]);
 
   const hasFilters = !!(conditionFilter || brandFilter);
+
+  const openDetail = (moto: any) => {
+    setSelectedMoto(moto);
+    setDetailImage(0);
+  };
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -175,7 +182,8 @@ const Motos = () => {
                   <motion.div
                     whileHover={{ y: -6 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="group bg-card rounded-[2.5rem] overflow-hidden border border-border shadow-sm hover:shadow-2xl transition-shadow duration-500 relative"
+                    className="group bg-card rounded-[2.5rem] overflow-hidden border border-border shadow-sm hover:shadow-2xl transition-shadow duration-500 relative cursor-pointer"
+                    onClick={() => openDetail(moto)}
                   >
                     {/* Badge */}
                     <motion.div
@@ -198,8 +206,9 @@ const Motos = () => {
                         loading="lazy"
                       />
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
-                          <Eye size={20} />
+                        <div className="bg-primary text-primary-foreground rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg flex items-center gap-2 px-5">
+                          <ChevronRight size={18} />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Ver ficha</span>
                         </div>
                       </div>
                     </div>
@@ -230,16 +239,7 @@ const Motos = () => {
                         <p className="text-2xl font-black text-foreground italic tracking-tighter">
                           {formatPrice(moto.price)}
                         </p>
-                        <motion.a
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          href={`https://wa.me/5491157074145?text=${encodeURIComponent(`Hola! Me interesa la moto: ${moto.title} (${moto.year})`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground p-3 rounded-2xl transition-colors"
-                        >
-                          <MessageCircle size={20} />
-                        </motion.a>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Ver más →</span>
                       </div>
                     </div>
 
@@ -251,6 +251,157 @@ const Motos = () => {
           </motion.div>
         )}
       </section>
+
+      {/* Modal Ficha Técnica */}
+      <AnimatePresence>
+        {selectedMoto && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-foreground/80 backdrop-blur-md z-50"
+              onClick={() => setSelectedMoto(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 60, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 60, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-4 md:inset-8 lg:inset-16 bg-card rounded-[3rem] z-50 overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-8 py-5 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full font-black text-[9px] uppercase ${selectedMoto.kilometers === 0 ? "bg-primary text-primary-foreground" : "bg-foreground text-background"}`}>
+                    {selectedMoto.kilometers === 0 ? "0KM" : "Usada"}
+                  </span>
+                  <h2 className="text-lg font-black uppercase italic tracking-tighter">{selectedMoto.title}</h2>
+                </div>
+                <button
+                  onClick={() => setSelectedMoto(null)}
+                  className="bg-muted hover:bg-muted/80 p-2.5 rounded-full transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-full">
+                  {/* Galería */}
+                  <div className="bg-muted/30 p-6 lg:p-10">
+                    <div className="aspect-[4/3] rounded-[2rem] overflow-hidden bg-muted mb-4">
+                      <img
+                        src={selectedMoto.images?.[detailImage] || "/placeholder.svg"}
+                        alt={selectedMoto.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {selectedMoto.images && selectedMoto.images.length > 1 && (
+                      <div className="flex gap-3 overflow-x-auto pb-2">
+                        {selectedMoto.images.map((img: string, i: number) => (
+                          <button
+                            key={i}
+                            onClick={() => setDetailImage(i)}
+                            className={`w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-3 transition-all ${i === detailImage ? "border-primary scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
+                          >
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-6 lg:p-10 flex flex-col">
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] italic mb-2">{selectedMoto.brand}</p>
+                    <h3 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-[0.9] text-foreground mb-6">
+                      {selectedMoto.title}
+                    </h3>
+
+                    {/* Ficha Técnica */}
+                    <div className="bg-muted/50 rounded-[2rem] p-6 mb-6 space-y-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Ficha Técnica</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-card rounded-xl p-4 border border-border">
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Marca</p>
+                          <p className="text-sm font-black uppercase mt-1">{selectedMoto.brand}</p>
+                        </div>
+                        <div className="bg-card rounded-xl p-4 border border-border">
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Modelo</p>
+                          <p className="text-sm font-black uppercase mt-1">{selectedMoto.model}</p>
+                        </div>
+                        <div className="bg-card rounded-xl p-4 border border-border">
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Año</p>
+                          <p className="text-sm font-black uppercase mt-1">{selectedMoto.year}</p>
+                        </div>
+                        <div className="bg-card rounded-xl p-4 border border-border">
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Kilómetros</p>
+                          <p className="text-sm font-black uppercase mt-1">
+                            {selectedMoto.kilometers === 0 ? "0 km" : `${selectedMoto.kilometers.toLocaleString("es-AR")} km`}
+                          </p>
+                        </div>
+                        <div className="bg-card rounded-xl p-4 border border-border">
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">Condición</p>
+                          <p className="text-sm font-black uppercase mt-1">{selectedMoto.condition}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Descripción */}
+                    {selectedMoto.description && (
+                      <div className="mb-6">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Descripción</h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed font-medium whitespace-pre-line">
+                          {selectedMoto.description}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Precio + Garantía */}
+                    <div className="bg-muted/50 rounded-[2rem] p-6 mb-6">
+                      <div className="text-4xl font-black text-foreground italic tracking-tighter mb-3">
+                        {formatPrice(selectedMoto.price)}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Shield size={16} className="text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Garantía oficial Rafaghelli</span>
+                      </div>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="mt-auto space-y-3">
+                      <motion.a
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        href={`https://wa.me/5491157074145?text=${encodeURIComponent(`¡Hola Rafaghelli! 👋 Me interesa la moto: ${selectedMoto.title} (${selectedMoto.year}). ¿Está disponible?`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-16 rounded-[2rem] font-black uppercase tracking-tighter text-lg flex items-center justify-center gap-3 shadow-xl transition-colors"
+                      >
+                        <MessageCircle size={22} />
+                        Consultar por WhatsApp
+                      </motion.a>
+
+                      <div className="flex justify-center gap-8">
+                        <div className="flex items-center gap-2">
+                          <Phone size={12} className="text-muted-foreground" />
+                          <span className="text-[9px] font-black uppercase text-muted-foreground">Ventas: 11 5707-4145</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone size={12} className="text-muted-foreground" />
+                          <span className="text-[9px] font-black uppercase text-muted-foreground">Taller: 11 7163-0707</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

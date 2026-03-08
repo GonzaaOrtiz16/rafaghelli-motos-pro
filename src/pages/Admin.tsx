@@ -352,7 +352,7 @@ const RepuestosTab = () => {
 
   const resetForm = () => {
     setEditingId(null); setTempImages([]);
-    setFormData({ title: '', price: '', category: '', description: '', brand: '', stock: '10', original_price: '', free_shipping: false, is_on_sale: false });
+    setFormData({ title: '', price: '', category: '', description: '', brand: '', stock: '10', original_price: '', free_shipping: false, is_on_sale: false, sizes: '' });
   };
 
   return (

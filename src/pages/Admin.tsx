@@ -276,7 +276,7 @@ const RepuestosTab = () => {
       title: product.title, price: product.price.toString(), category: product.category || '',
       description: product.description || '', brand: product.brand || '', stock: product.stock?.toString() || '10',
       original_price: product.original_price?.toString() || '', free_shipping: product.free_shipping || false,
-      is_on_sale: !!product.is_on_sale
+      is_on_sale: !!product.is_on_sale, sizes: (product.sizes || []).join(', ')
     });
     setTempImages(product.images || []);
     setIsAdding(true);

@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone } from "lucide-react";
+import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);

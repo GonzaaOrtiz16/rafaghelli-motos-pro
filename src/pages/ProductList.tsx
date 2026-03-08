@@ -2,7 +2,6 @@ import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { SlidersHorizontal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { brands } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -51,21 +50,29 @@ const ProductList = () => {
     }
   });
 
+  // Marcas dinámicas extraídas de los productos
+  const dynamicBrands = useMemo(() => {
+    const brandSet = new Set(products.map(p => p.brand).filter(Boolean));
+    return Array.from(brandSet).sort();
+  }, [products]);
+
+  // Categoría activa: priorizar parámetro URL, luego filtro manual
+  const activeCat = catParam || catFilter;
+
   const filtered = useMemo(() => {
     return products.filter(p => {
-      if (catParam && p.category !== catParam) return false;
-      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam)) return false;
+      if (activeCat && p.category !== activeCat) return false;
+      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam) && !p.brand.toLowerCase().includes(qParam)) return false;
       if (brandFilter && p.brand !== brandFilter) return false;
-      if (catFilter && p.category !== catFilter) return false;
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
         if (p.price < range.min || p.price > range.max) return false;
       }
       return true;
     });
-  }, [products, catParam, qParam, brandFilter, catFilter, priceFilter]);
+  }, [products, activeCat, qParam, brandFilter, priceFilter]);
 
-  const activeCategory = catParam || "";
+  const hasActiveFilters = !!(brandFilter || catFilter || catParam || priceFilter >= 0);
 
   const clearFilters = () => { 
     setBrandFilter(""); 
@@ -91,7 +98,7 @@ const ProductList = () => {
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Marca</h4>
         <div className="space-y-1">
-          {brands.map(b => (
+          {dynamicBrands.map(b => (
             <button key={b} onClick={() => setBrandFilter(brandFilter === b ? "" : b)}
               className={`block w-full text-left text-xs font-bold uppercase px-3 py-2 rounded-lg transition-colors ${brandFilter === b ? "bg-black text-white" : "hover:bg-muted text-gray-500"}`}>
               {b}
@@ -118,16 +125,23 @@ const ProductList = () => {
       <nav className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
         <Link to="/" className="hover:text-orange-500">Inicio</Link>
         <span>/</span>
-        <span className="text-black">{activeCategory || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
+        <span className="text-black">{activeCat || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
       </nav>
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-black uppercase tracking-tighter italic">
-          {activeCategory || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
+          {activeCat || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
         </h2>
-        <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
-          <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" className="rounded-xl text-xs font-bold uppercase" onClick={clearFilters}>
+              Limpiar filtros
+            </Button>
+          )}
+          <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
+            <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-8">

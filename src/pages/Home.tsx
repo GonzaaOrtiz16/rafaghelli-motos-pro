@@ -194,7 +194,7 @@ const Home = () => {
                       whileTap={{ scale: 0.95 }}
                       className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-muted border-4 border-transparent group-hover:border-primary transition-all duration-500 shadow-lg"
                     >
-                      {cat.image ? (
+                      {cat.image && cat.image.length > 0 ? (
                         <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.nombre} />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center bg-secondary text-muted-foreground font-black uppercase text-xs">{cat.nombre[0]}</div>

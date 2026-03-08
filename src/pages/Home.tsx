@@ -72,7 +72,7 @@ const Home = () => {
           src="/hero-wheelie.mp4"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
-        <div className="container py-16 md:py-28 px-6 relative z-10">
+        <div className="container py-16 md:py-28 px-6 relative z-10 text-white">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}

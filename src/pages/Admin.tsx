@@ -2,25 +2,26 @@ import React, { useState, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, LogOut, X, Upload, Copy, Loader2, Check, Bike, Settings, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, X, Upload, Copy, Loader2, Check, Bike, Settings, Package, LayoutGrid, Image } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
 // ===================== ADMIN PRINCIPAL =====================
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState<'repuestos' | 'motos' | 'ajustes'>('repuestos');
+  const [activeTab, setActiveTab] = useState<'repuestos' | 'motos' | 'categorias' | 'ajustes'>('repuestos');
   const navigate = useNavigate();
 
   const tabs = [
     { id: 'repuestos' as const, label: 'Repuestos', icon: Package },
     { id: 'motos' as const, label: 'Motos', icon: Bike },
+    { id: 'categorias' as const, label: 'Categorías', icon: LayoutGrid },
     { id: 'ajustes' as const, label: 'Ajustes', icon: Settings },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50/50 font-sans text-gray-900">
-      <header className="border-b px-8 py-4 flex justify-between items-center bg-white sticky top-0 z-20 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
+      <header className="border-b px-4 md:px-8 py-4 flex justify-between items-center bg-white sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center gap-4 md:gap-6 overflow-x-auto">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xl font-black uppercase text-orange-600 italic">Rafaghelli</span>
             <span className="text-xl font-black uppercase text-black italic">Admin</span>
           </div>
@@ -29,14 +30,14 @@ const Admin = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all ${activeTab === tab.id ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900'}`}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900'}`}
               >
                 <tab.icon size={14} /> {tab.label}
               </button>
             ))}
           </div>
         </div>
-        <button onClick={() => navigate('/')} className="text-gray-400 hover:text-black flex items-center gap-2 text-sm font-bold transition-all">
+        <button onClick={() => navigate('/')} className="text-gray-400 hover:text-black flex items-center gap-2 text-sm font-bold transition-all flex-shrink-0">
           <LogOut size={16} /> Salir
         </button>
       </header>
@@ -44,9 +45,203 @@ const Admin = () => {
       <main className="max-w-7xl mx-auto p-8">
         {activeTab === 'repuestos' && <RepuestosTab />}
         {activeTab === 'motos' && <MotosTab />}
+        {activeTab === 'categorias' && <CategoriasTab />}
         {activeTab === 'ajustes' && <AjustesTab />}
       </main>
     </div>
+  );
+};
+
+// ===================== HOOK: Categorías dinámicas =====================
+const useCategorias = (tipo?: string) => {
+  return useQuery({
+    queryKey: ['categorias', tipo],
+    queryFn: async () => {
+      let query = supabase.from('categorias').select('*').order('nombre');
+      if (tipo) query = query.eq('tipo', tipo);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    }
+  });
+};
+
+// ===================== CATEGORÍAS TAB =====================
+const CategoriasTab = () => {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({ nombre: '', tipo: 'repuestos', image: '' });
+
+  const { data: categorias } = useCategorias();
+
+  const handleEdit = (cat: any) => {
+    setEditingId(cat.id);
+    setFormData({ nombre: cat.nombre, tipo: cat.tipo || 'repuestos', image: cat.image || '' });
+    setIsAdding(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("¿Eliminar esta categoría?")) {
+      const { error } = await supabase.from('categorias').delete().eq('id', id);
+      if (!error) { toast.success("Categoría eliminada"); queryClient.invalidateQueries({ queryKey: ['categorias'] }); }
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fileName = `categorias/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+    const { error } = await supabase.storage.from('product-images').upload(fileName, file);
+    if (error) { toast.error("Error al subir"); setUploading(false); return; }
+    const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+    if (data?.publicUrl) setFormData(prev => ({ ...prev, image: data.publicUrl }));
+    setUploading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.nombre.trim()) return toast.error("Ingresá un nombre");
+    setLoading(true);
+    const slug = formData.nombre.toLowerCase().trim().replace(/[\s_-]+/g, '-').replace(/[^\w-]/g, '');
+    const catData = { nombre: formData.nombre, slug, tipo: formData.tipo, image: formData.image };
+
+    let error;
+    if (editingId) {
+      const { error: e } = await supabase.from('categorias').update(catData).eq('id', editingId);
+      error = e;
+    } else {
+      const { error: e } = await supabase.from('categorias').insert([catData]);
+      error = e;
+    }
+    setLoading(false);
+    if (!error) {
+      toast.success(editingId ? "¡Categoría actualizada!" : "¡Categoría creada!");
+      setIsAdding(false); setEditingId(null);
+      setFormData({ nombre: '', tipo: 'repuestos', image: '' });
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+    } else { toast.error("Error: " + error.message); }
+  };
+
+  const repuestosCats = categorias?.filter(c => c.tipo === 'repuestos') || [];
+  const motosCats = categorias?.filter(c => c.tipo === 'motos') || [];
+
+  return (
+    <>
+      <div className="flex justify-between items-end mb-10">
+        <h1 className="text-4xl font-black uppercase italic tracking-tighter">Categorías</h1>
+        <button onClick={() => { setEditingId(null); setFormData({ nombre: '', tipo: 'repuestos', image: '' }); setIsAdding(true); }} className="bg-orange-500 text-white px-8 py-4 rounded-2xl flex items-center gap-2 hover:bg-orange-600 transition-all font-black uppercase shadow-lg shadow-orange-500/20">
+          <Plus size={20} /> Nueva
+        </button>
+      </div>
+
+      {/* Repuestos Categories */}
+      <div className="mb-10">
+        <h3 className="text-sm font-black uppercase tracking-widest text-orange-500 mb-4">Repuestos</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {repuestosCats.map(cat => (
+            <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
+              <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
+                {cat.image ? (
+                  <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
+                )}
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-black uppercase text-sm tracking-tight">{cat.nombre}</span>
+                <div className="flex gap-1">
+                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-orange-500"><Pencil size={14}/></button>
+                  <button onClick={() => handleDelete(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500"><Trash2 size={14}/></button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {repuestosCats.length === 0 && (
+            <div className="col-span-full py-10 text-center border-2 border-dashed rounded-3xl text-zinc-400 font-bold text-sm uppercase">Sin categorías de repuestos</div>
+          )}
+        </div>
+      </div>
+
+      {/* Motos Categories */}
+      <div>
+        <h3 className="text-sm font-black uppercase tracking-widest text-orange-500 mb-4">Motos</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {motosCats.map(cat => (
+            <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
+              <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
+                {cat.image ? (
+                  <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
+                )}
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-black uppercase text-sm tracking-tight">{cat.nombre}</span>
+                <div className="flex gap-1">
+                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-orange-500"><Pencil size={14}/></button>
+                  <button onClick={() => handleDelete(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500"><Trash2 size={14}/></button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {motosCats.length === 0 && (
+            <div className="col-span-full py-10 text-center border-2 border-dashed rounded-3xl text-zinc-400 font-bold text-sm uppercase">Sin categorías de motos</div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {isAdding && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[40px] w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="px-10 py-6 border-b flex justify-between items-center">
+              <h2 className="text-2xl font-black uppercase italic">{editingId ? 'Editar' : 'Nueva'} Categoría</h2>
+              <button onClick={() => setIsAdding(false)} className="bg-gray-100 p-2 rounded-full"><X /></button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-10 space-y-6">
+              <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Nombre de la categoría" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} required />
+              
+              <div>
+                <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Tipo</label>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'repuestos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'repuestos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
+                    Repuestos
+                  </button>
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'motos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'motos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
+                    Motos
+                  </button>
+                </div>
+              </div>
+
+              {/* Image */}
+              <div>
+                <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Imagen de categoría</label>
+                {formData.image ? (
+                  <div className="relative aspect-video rounded-2xl overflow-hidden border">
+                    <img src={formData.image} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5"><X size={12}/></button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full aspect-video border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-zinc-400 hover:text-orange-500 hover:border-orange-500 transition-all">
+                    {uploading ? <Loader2 className="animate-spin" size={24} /> : <><Upload size={24} /><span className="text-[10px] font-black uppercase mt-2">Subir foto</span></>}
+                  </button>
+                )}
+                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+              </div>
+
+              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20">
+                {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Crear Categoría"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -72,6 +267,8 @@ const RepuestosTab = () => {
       return data;
     }
   });
+
+  const { data: categorias = [] } = useCategorias('repuestos');
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
@@ -178,7 +375,7 @@ const RepuestosTab = () => {
                   <img src={p.images?.[0]} className="w-12 h-12 rounded-xl object-cover bg-gray-100" />
                   <div>
                     <div className="font-black text-sm uppercase">{p.title}</div>
-                    <div className="text-[10px] text-gray-400 font-bold uppercase">{p.brand}</div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase">{p.brand} · {p.category}</div>
                   </div>
                 </td>
                 <td className="px-8 py-4">
@@ -214,8 +411,9 @@ const RepuestosTab = () => {
                 <input className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Marca" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 <select className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
                   <option value="">Categoría...</option>
-                  <option value="Transmisión">Transmisión</option><option value="Frenos">Frenos</option><option value="Motor">Motor</option>
-                  <option value="Cubiertas y Cámaras">Cubiertas</option><option value="Aceites y Filtros">Aceites</option><option value="Accesorios y Cascos">Accesorios</option>
+                  {categorias.map(c => (
+                    <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                  ))}
                 </select>
               </div>
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />

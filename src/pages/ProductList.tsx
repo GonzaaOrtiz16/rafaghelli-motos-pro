@@ -1,8 +1,8 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { SlidersHorizontal, X, Loader2 } from "lucide-react";
+import { SlidersHorizontal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categories, brands, ccOptions } from "@/data/products";
+import { brands } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,11 +21,10 @@ const ProductList = () => {
   const qParam = params.get("q")?.toLowerCase() || "";
 
   const [brandFilter, setBrandFilter] = useState<string>("");
-  const [ccFilter, setCcFilter] = useState<string>("");
+  const [catFilter, setCatFilter] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<number>(-1);
   const [showFilters, setShowFilters] = useState(false);
 
-  // CONSULTA A SUPABASE
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products-list'],
     queryFn: async () => {
@@ -38,40 +37,57 @@ const ProductList = () => {
     }
   });
 
+  // Categorías dinámicas
+  const { data: categorias = [] } = useQuery({
+    queryKey: ['categorias', 'repuestos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .eq('tipo', 'repuestos')
+        .order('nombre');
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const filtered = useMemo(() => {
     return products.filter(p => {
-      // 1. Filtro por Categoría (URL)
       if (catParam && p.category !== catParam) return false;
-      
-      // 2. Filtro por Búsqueda (URL)
       if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam)) return false;
-      
-      // 3. Filtro por Marca (Sidebar)
       if (brandFilter && p.brand !== brandFilter) return false;
-      
-      // 4. Filtro por Precio (Sidebar) - Usamos el precio final (con descuento si tiene)
+      if (catFilter && p.category !== catFilter) return false;
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
-        const currentPrice = p.price;
-        if (currentPrice < range.min || currentPrice > range.max) return false;
+        if (p.price < range.min || p.price > range.max) return false;
       }
-      
       return true;
     });
-  }, [products, catParam, qParam, brandFilter, priceFilter]);
+  }, [products, catParam, qParam, brandFilter, catFilter, priceFilter]);
 
-  const activeCategory = categories.find(c => c.id === catParam);
-  const hasFilters = brandFilter || ccFilter || priceFilter >= 0;
+  const activeCategory = catParam || "";
 
   const clearFilters = () => { 
     setBrandFilter(""); 
-    setCcFilter(""); 
+    setCatFilter(""); 
     setPriceFilter(-1); 
-    setSearchParams({}); // También limpia la búsqueda de la URL
+    setSearchParams({});
   };
 
   const FilterSection = () => (
     <div className="space-y-6">
+      {/* Categorías dinámicas */}
+      <div>
+        <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Categoría</h4>
+        <div className="space-y-1">
+          {categorias.map(c => (
+            <button key={c.id} onClick={() => setCatFilter(catFilter === c.nombre ? "" : c.nombre)}
+              className={`block w-full text-left text-xs font-bold uppercase px-3 py-2 rounded-lg transition-colors ${catFilter === c.nombre ? "bg-black text-white" : "hover:bg-muted text-gray-500"}`}>
+              {c.nombre}
+            </button>
+          ))}
+        </div>
+      </div>
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-500">Marca</h4>
         <div className="space-y-1">
@@ -99,16 +115,15 @@ const ProductList = () => {
 
   return (
     <div className="container py-6 min-h-screen">
-      {/* Breadcrumb */}
       <nav className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
         <Link to="/" className="hover:text-orange-500">Inicio</Link>
         <span>/</span>
-        <span className="text-black">{activeCategory?.name || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
+        <span className="text-black">{activeCategory || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
       </nav>
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-black uppercase tracking-tighter italic">
-          {activeCategory?.name || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
+          {activeCategory || (qParam ? `Buscando: ${qParam}` : "Catálogo Completo")}
         </h2>
         <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-black" onClick={() => setShowFilters(!showFilters)}>
           <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
@@ -116,7 +131,6 @@ const ProductList = () => {
       </div>
 
       <div className="flex gap-8">
-        {/* Desktop filters */}
         <aside className="hidden lg:block w-64 flex-shrink-0">
           <div className="sticky top-24 bg-white rounded-[32px] border border-gray-100 p-6 shadow-sm">
             <h3 className="font-black uppercase tracking-tighter text-lg mb-6 flex items-center gap-2">
@@ -126,7 +140,22 @@ const ProductList = () => {
           </div>
         </aside>
 
-        {/* Products grid */}
+        {/* Mobile filters */}
+        {showFilters && (
+          <div className="fixed inset-0 bg-black/80 z-50 lg:hidden flex justify-end">
+            <div className="bg-white w-80 p-6 overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-black uppercase">Filtros</h3>
+                <button onClick={() => setShowFilters(false)} className="text-zinc-400">✕</button>
+              </div>
+              <FilterSection />
+              <button onClick={() => setShowFilters(false)} className="w-full mt-6 bg-orange-500 text-white py-3 rounded-xl font-black uppercase text-sm">
+                Aplicar
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
@@ -148,7 +177,7 @@ const ProductList = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   {filtered.map((p, i) => (
                     <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                      <ProductCard product={p} />
+                      <ProductCard product={p as any} />
                     </motion.div>
                   ))}
                 </div>

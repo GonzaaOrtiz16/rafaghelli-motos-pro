@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, ChevronRight, Truck, Shield, CreditCard, ArrowRight, Bike } from "lucide-react";
+import { Search, Truck, Shield, CreditCard, ArrowRight, Bike } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +19,20 @@ const Home = () => {
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Categorías dinámicas de repuestos desde la BD
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categorias', 'repuestos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .eq('tipo', 'repuestos')
+        .order('nombre');
       if (error) throw error;
       return data;
     }
@@ -103,7 +116,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categorías */}
+      {/* Categorías Dinámicas */}
       <section className="container py-20 px-6">
         <div className="flex items-end justify-between mb-12">
           <div>
@@ -115,17 +128,27 @@ const Home = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8">
-          {categories.map((cat) => (
-            <Link key={cat.id} to={`/productos?categoria=${cat.id}`} className="group flex flex-col items-center text-center gap-4">
-              <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-zinc-100 border-4 border-transparent group-hover:border-orange-500 transition-all duration-500 shadow-lg">
-                <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.name} />
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-              </div>
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-900">{cat.name}</span>
-            </Link>
-          ))}
-        </div>
+        {categories.length > 0 ? (
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8">
+            {categories.map((cat) => (
+              <Link key={cat.id} to={`/productos?categoria=${cat.nombre}`} className="group flex flex-col items-center text-center gap-4">
+                <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-zinc-100 border-4 border-transparent group-hover:border-orange-500 transition-all duration-500 shadow-lg">
+                  {cat.image ? (
+                    <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.nombre} />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-200 text-zinc-400 font-black uppercase text-xs">{cat.nombre[0]}</div>
+                  )}
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+                </div>
+                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-900">{cat.nombre}</span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="py-16 text-center border-2 border-dashed border-zinc-200 rounded-[3rem]">
+            <p className="text-zinc-400 font-bold uppercase tracking-widest text-sm">Creá categorías desde el panel Admin</p>
+          </div>
+        )}
       </section>
 
       {/* Banner Motos en Venta */}

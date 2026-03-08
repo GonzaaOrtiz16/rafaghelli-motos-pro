@@ -58,16 +58,8 @@ const ProductCard = ({ product }: { product: Product }) => {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             loading="lazy"
           />
-          {/* Overlay con botón "Ver" al hacer hover */}
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              className="bg-primary text-primary-foreground rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"
-            >
-              <Eye size={20} />
-            </motion.div>
-          </div>
+          {/* Overlay sutil al hover */}
+          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300" />
         </div>
 
         {/* INFO */}

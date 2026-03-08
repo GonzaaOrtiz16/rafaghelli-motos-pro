@@ -255,7 +255,7 @@ const RepuestosTab = () => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [formData, setFormData] = useState({
     title: '', price: '', category: '', description: '', brand: '', stock: '10',
-    original_price: '', free_shipping: false, is_on_sale: false
+    original_price: '', free_shipping: false, is_on_sale: false, sizes: ''
   });
   const [tempImages, setTempImages] = useState<string[]>([]);
 

@@ -104,12 +104,15 @@ const Header = () => {
           {categories.map(cat => (
             <Link
               key={cat.id}
-              to={`/productos?categoria=${cat.id}`}
+              to={`/productos?categoria=${cat.slug}`}
               className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
             >
-              {cat.name}
+              {cat.nombre}
             </Link>
           ))}
+          <Link to="/motos" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+            Motos
+          </Link>
           <Link to="/taller" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
             Taller
           </Link>

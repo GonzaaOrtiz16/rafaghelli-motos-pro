@@ -332,6 +332,7 @@ const RepuestosTab = () => {
       category: formData.category, brand: formData.brand, description: formData.description,
       stock: parseInt(formData.stock), free_shipping: formData.free_shipping,
       is_on_sale: formData.is_on_sale, slug, images: tempImages,
+      sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
     };
     let error;
     if (editingId) {

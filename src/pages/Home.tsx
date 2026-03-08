@@ -60,9 +60,18 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="bg-zinc-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-background">
+      {/* Hero Section with Video Background */}
+      <section className="relative overflow-hidden min-h-[70vh] flex items-center">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/hero-wheelie.mp4"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
         <div className="container py-16 md:py-28 px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, x: -30 }}

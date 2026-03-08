@@ -62,6 +62,30 @@ const ProductDetail = () => {
     );
   }
 
+  const hasSizes = product.sizes && product.sizes.length > 0;
+
+  const handleAddToCart = () => {
+    if (hasSizes && !selectedSize) {
+      toast.error("Seleccioná un talle antes de agregar al carrito");
+      return;
+    }
+    addItem({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      original_price: product.original_price,
+      images: product.images || [],
+      category: product.category,
+      brand: product.brand,
+      free_shipping: product.free_shipping,
+      description: product.description || '',
+      stock: product.stock || 0,
+      is_on_sale: product.is_on_sale,
+    }, selectedSize || undefined);
+    toast.success("¡Agregado al carrito!");
+  };
+
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(`¡Hola Rafaghelli Motos! 👋 Me interesa este producto: ${product.title}. ¿Tienen stock disponible?`);
     // Número de VENTAS actualizado: 1157074145

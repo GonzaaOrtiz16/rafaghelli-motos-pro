@@ -349,7 +349,18 @@ const Home = () => {
           className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden"
         >
           {siteSettings.home_media_type === 'video' ? (
-            <video src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+            <>
+              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted={isMuted} playsInline className="absolute inset-0 w-full h-full object-cover" />
+              <button
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  if (videoRef.current) videoRef.current.muted = !isMuted;
+                }}
+                className="absolute top-4 right-4 z-20 bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground p-3 rounded-full transition-colors"
+              >
+                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              </button>
+            </>
           ) : (
             <img src={siteSettings.home_media_url} alt="Banner Rafaghelli Motos" className="absolute inset-0 w-full h-full object-cover" />
           )}

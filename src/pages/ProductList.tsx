@@ -125,7 +125,7 @@ const ProductList = () => {
       <nav className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
         <Link to="/" className="hover:text-orange-500">Inicio</Link>
         <span>/</span>
-        <span className="text-black">{activeCategory || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
+        <span className="text-black">{activeCat || (qParam ? `"${qParam}"` : "Todos los productos")}</span>
       </nav>
 
       <div className="flex items-center justify-between mb-8">

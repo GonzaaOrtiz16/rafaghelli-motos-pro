@@ -221,7 +221,7 @@ const CategoriasTab = () => {
               {/* Image */}
               <div>
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Imagen de categoría</label>
-                {formData.image ? (
+                {formData.image && formData.image.length > 0 ? (
                   <div className="relative aspect-video rounded-2xl overflow-hidden border">
                     <img src={formData.image} className="w-full h-full object-cover" />
                     <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5"><X size={12}/></button>

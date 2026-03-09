@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Truck, Tag } from "lucide-react";
 import { motion } from "framer-motion";
+import React, { useState } from "react";
 
 interface Product {
   id: string;
@@ -22,7 +23,8 @@ const formatPrice = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = React.memo(({ product }: { product: Product }) => {
+  const [imgLoaded, setImgLoaded] = useState(false);
   const hasDiscount = product.is_on_sale && product.original_price && product.original_price > product.price;
   const discountPercentage = hasDiscount
     ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
@@ -35,7 +37,6 @@ const ProductCard = ({ product }: { product: Product }) => {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="bg-card rounded-[2rem] h-full overflow-hidden border border-border shadow-sm hover:shadow-xl transition-shadow duration-300 relative flex flex-col"
       >
-        {/* BADGE DE OFERTA FLOTANTE */}
         {hasDiscount && (
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
@@ -49,19 +50,24 @@ const ProductCard = ({ product }: { product: Product }) => {
           </motion.div>
         )}
 
-        {/* CONTENEDOR DE IMAGEN: Forzado a cuadrado perfecto */}
-        <div className="relative w-full aspect-square overflow-hidden bg-zinc-100 flex items-center justify-center">
+        {/* CONTENEDOR DE IMAGEN */}
+        <div className="relative w-full aspect-square overflow-hidden bg-muted flex items-center justify-center">
+          {/* Skeleton placeholder */}
+          {!imgLoaded && (
+            <div className="absolute inset-0 bg-muted animate-pulse" />
+          )}
           <img
             src={product.images?.[0] || "/placeholder.svg"}
             alt={product.title}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+            className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
           />
-          {/* Overlay sutil al hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
         </div>
 
-        {/* INFO: Usamos flex-1 para que todas las tarjetas midan lo mismo de alto */}
+        {/* INFO */}
         <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-start">
@@ -69,7 +75,6 @@ const ProductCard = ({ product }: { product: Product }) => {
                 {product.brand || "Original"}
               </p>
             </div>
-
             <p className="text-sm text-foreground font-black uppercase italic leading-tight mt-1">
               {product.title}
             </p>
@@ -86,7 +91,6 @@ const ProductCard = ({ product }: { product: Product }) => {
                 <p className="text-xl font-black text-foreground italic tracking-tighter">
                   {formatPrice(product.price)}
                 </p>
-
                 {product.free_shipping && (
                   <div className="bg-orange-500/10 p-1.5 rounded-full text-orange-600 shadow-sm">
                     <Truck className="h-4 w-4" strokeWidth={3} />
@@ -94,7 +98,6 @@ const ProductCard = ({ product }: { product: Product }) => {
                 )}
               </div>
             </div>
-
             {product.free_shipping && (
               <p className="text-[9px] font-black text-orange-600 uppercase tracking-tighter mt-1">
                 Envío Gratis
@@ -103,12 +106,12 @@ const ProductCard = ({ product }: { product: Product }) => {
           </div>
         </div>
 
-        {/* Línea decorativa inferior */}
         <div className="h-1.5 w-full bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
       </motion.div>
     </Link>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;
-

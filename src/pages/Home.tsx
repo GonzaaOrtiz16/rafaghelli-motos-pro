@@ -258,6 +258,7 @@ const Home = () => {
               loop
               muted={isMuted}
               playsInline
+              preload="none"
               onLoadedData={() => console.log("Video de banner cargado")}
             />
 

@@ -45,7 +45,7 @@ const ProductList = () => {
   const { data: categorias = [] } = useQuery({
     queryKey: ['categorias', 'repuestos'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias').select('*').eq('tipo', 'repuestos').order('nombre');
+      const { data, error } = await supabase.from('categorias').select('id, nombre, slug').eq('tipo', 'repuestos').order('nombre');
       if (error) throw error;
       return data;
     }

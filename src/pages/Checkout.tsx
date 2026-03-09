@@ -2,11 +2,50 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+
+// Tarifas Correo Argentino por zona (paquete hasta 5kg, envío a domicilio)
+// Actualizado manualmente - revisar periódicamente
+const SHIPPING_ZONES: Record<string, { zone: string; price: number }> = {
+  "CABA":                { zone: "AMBA",      price: 5500 },
+  "Buenos Aires":        { zone: "AMBA",      price: 5500 },
+  "Santa Fe":            { zone: "Centro",    price: 7200 },
+  "Córdoba":             { zone: "Centro",    price: 7200 },
+  "Entre Ríos":          { zone: "Centro",    price: 7200 },
+  "La Pampa":            { zone: "Centro",    price: 7200 },
+  "Mendoza":             { zone: "Cuyo",      price: 8500 },
+  "San Juan":            { zone: "Cuyo",      price: 8500 },
+  "San Luis":            { zone: "Cuyo",      price: 8500 },
+  "Tucumán":             { zone: "NOA",       price: 9200 },
+  "Salta":               { zone: "NOA",       price: 9200 },
+  "Jujuy":               { zone: "NOA",       price: 9200 },
+  "Catamarca":           { zone: "NOA",       price: 9200 },
+  "Santiago del Estero": { zone: "NOA",       price: 9200 },
+  "La Rioja":            { zone: "NOA",       price: 9200 },
+  "Corrientes":          { zone: "NEA",       price: 9200 },
+  "Misiones":            { zone: "NEA",       price: 9200 },
+  "Chaco":               { zone: "NEA",       price: 9200 },
+  "Formosa":             { zone: "NEA",       price: 9200 },
+  "Neuquén":             { zone: "Patagonia", price: 10800 },
+  "Río Negro":           { zone: "Patagonia", price: 10800 },
+  "Chubut":              { zone: "Patagonia", price: 10800 },
+  "Santa Cruz":          { zone: "Patagonia", price: 10800 },
+  "Tierra del Fuego":    { zone: "Patagonia", price: 10800 },
+};
+
+const PROVINCIAS = Object.keys(SHIPPING_ZONES).sort((a, b) => {
+  if (a === "CABA") return -1;
+  if (b === "CABA") return 1;
+  if (a === "Buenos Aires") return -1;
+  if (b === "Buenos Aires") return 1;
+  return a.localeCompare(b);
+});
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const { user, loading } = useAuth();
   const [shippingCost, setShippingCost] = useState(0);
+  const [selectedZone, setSelectedZone] = useState('');
   const [userData, setUserData] = useState({
     nombre: '',
     direccion: '',
@@ -20,12 +59,12 @@ const Checkout = () => {
   const handleProvinciaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const prov = e.target.value;
     setUserData({ ...userData, provincia: prov });
-    if (prov === "CABA" || prov === "Buenos Aires") {
-      setShippingCost(4500);
-    } else if (prov === "") {
-      setShippingCost(0);
+    if (prov && SHIPPING_ZONES[prov]) {
+      setShippingCost(SHIPPING_ZONES[prov].price);
+      setSelectedZone(SHIPPING_ZONES[prov].zone);
     } else {
-      setShippingCost(6800);
+      setShippingCost(0);
+      setSelectedZone('');
     }
   };
 
@@ -41,7 +80,7 @@ const Checkout = () => {
       `*Entrega:* ${userData.direccion}, ${userData.localidad} (${userData.provincia})%0A%0A` +
       `*Productos:*%0A${productosTxt}%0A%0A` +
       `*Subtotal:* $${total}%0A` +
-      `*Envío (Correo Argentino):* $${shippingCost}%0A` +
+      `*Envío (Correo Argentino - Zona ${selectedZone}):* $${shippingCost}%0A` +
       `*TOTAL A PAGAR:* $${totalFinal}%0A%0A` +
       `Hola! Vengo de la web, ¿me confirman stock para transferir?`;
     window.open(`https://wa.me/${nro}?text=${mensaje}`, '_blank');
@@ -74,31 +113,17 @@ const Checkout = () => {
             value={userData.provincia}
           >
             <option value="">Seleccionar Provincia</option>
-            <option value="CABA">CABA</option>
-            <option value="Buenos Aires">Buenos Aires</option>
-            <option value="Catamarca">Catamarca</option>
-            <option value="Chaco">Chaco</option>
-            <option value="Chubut">Chubut</option>
-            <option value="Córdoba">Córdoba</option>
-            <option value="Corrientes">Corrientes</option>
-            <option value="Entre Ríos">Entre Ríos</option>
-            <option value="Formosa">Formosa</option>
-            <option value="Jujuy">Jujuy</option>
-            <option value="La Pampa">La Pampa</option>
-            <option value="La Rioja">La Rioja</option>
-            <option value="Mendoza">Mendoza</option>
-            <option value="Misiones">Misiones</option>
-            <option value="Neuquén">Neuquén</option>
-            <option value="Río Negro">Río Negro</option>
-            <option value="Salta">Salta</option>
-            <option value="San Juan">San Juan</option>
-            <option value="San Luis">San Luis</option>
-            <option value="Santa Cruz">Santa Cruz</option>
-            <option value="Santa Fe">Santa Fe</option>
-            <option value="Santiago del Estero">Santiago del Estero</option>
-            <option value="Tierra del Fuego">Tierra del Fuego</option>
-            <option value="Tucumán">Tucumán</option>
+            {PROVINCIAS.map(prov => (
+              <option key={prov} value={prov}>{prov}</option>
+            ))}
           </select>
+          {selectedZone && (
+            <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">📦 Correo Argentino - Zona {selectedZone}</p>
+              <p>Envío a domicilio (hasta 5kg): <span className="font-bold text-primary">${shippingCost.toLocaleString('es-AR')}</span></p>
+              <p className="text-xs mt-1">Tarifas referenciales. Pueden variar según peso y dimensiones.</p>
+            </div>
+          )}
         </div>
 
         <div className="bg-card p-6 rounded-xl border border-border">
@@ -107,22 +132,22 @@ const Checkout = () => {
             {items.map((item) => (
               <div key={item.product.id} className="flex justify-between text-sm text-foreground">
                 <span>{item.product.title} (x{item.quantity})</span>
-                <span>${item.product.price * item.quantity}</span>
+                <span>${(item.product.price * item.quantity).toLocaleString('es-AR')}</span>
               </div>
             ))}
           </div>
           <div className="border-t border-border pt-4 space-y-2">
             <div className="flex justify-between text-foreground">
               <span>Subtotal</span>
-              <span>${total}</span>
+              <span>${total.toLocaleString('es-AR')}</span>
             </div>
             <div className="flex justify-between text-primary">
-              <span>Envío Correo Argentino</span>
-              <span>{shippingCost > 0 ? `$${shippingCost}` : 'A calcular'}</span>
+              <span>Envío Correo Argentino {selectedZone && `(${selectedZone})`}</span>
+              <span>{shippingCost > 0 ? `$${shippingCost.toLocaleString('es-AR')}` : 'Seleccioná provincia'}</span>
             </div>
             <div className="flex justify-between font-black text-lg border-t border-border pt-2 text-foreground">
               <span>Total Final</span>
-              <span>${total + shippingCost}</span>
+              <span>${(total + shippingCost).toLocaleString('es-AR')}</span>
             </div>
           </div>
           <Button
@@ -140,8 +165,5 @@ const Checkout = () => {
     </div>
   );
 };
-
-// Need Button import
-import { Button } from "@/components/ui/button";
 
 export default Checkout;

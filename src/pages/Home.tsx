@@ -240,12 +240,12 @@ const Home = () => {
 
       {/* SECCIÓN DE VIDEO FINAL CON MARKETING INTEGRADO */}
       {siteSettings?.home_media_url && (
-        <section className="container pb-24 px-4 md:px-6">
+        <section className="pb-24 px-2 md:px-6">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black aspect-video shadow-2xl border-4 border-muted"
+            className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black shadow-2xl border-4 border-muted aspect-[9/16] md:aspect-video max-h-[85vh]"
           >
             <video
               key={siteSettings.home_media_url}
@@ -260,7 +260,7 @@ const Home = () => {
             />
 
             {/* FRASE DE MARKETING */}
-            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-xs md:max-w-md pointer-events-none">
+            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-[70%] md:max-w-md pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -276,16 +276,16 @@ const Home = () => {
               </motion.div>
             </div>
             
-            {/* Controles e Interacción */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6 md:p-10">
+            {/* Controles - visibles siempre en mobile, hover en desktop */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-4 md:p-10">
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-md h-12 w-12"
+                  className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-md h-10 w-10 md:h-12 md:w-12"
                   onClick={handleToggleSound}
                 >
-                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </Button>
                 <span className="text-white font-black uppercase text-[10px] tracking-widest hidden md:block">
                   {isMuted ? "Sin sonido" : "Audio activo"}
@@ -293,8 +293,8 @@ const Home = () => {
               </div>
               
               <Link to="/productos">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-8 h-12 transition-transform hover:scale-105 shadow-xl">
-                  Explorar Repuestos <ArrowRight className="ml-2 h-4 w-4" />
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-5 md:px-8 h-10 md:h-12 text-xs md:text-sm transition-transform hover:scale-105 shadow-xl">
+                  Explorar <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
             </div>

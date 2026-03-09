@@ -46,6 +46,7 @@ const Checkout = () => {
   const { user, loading } = useAuth();
   const [shippingCost, setShippingCost] = useState(0);
   const [selectedZone, setSelectedZone] = useState('');
+  const [shippingMethod, setShippingMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [userData, setUserData] = useState({
     nombre: '',
     direccion: '',

@@ -16,6 +16,7 @@ import Workshop from "@/pages/Workshop";
 import Admin from "@/pages/Admin";
 import Motos from "@/pages/Motos";
 import Auth from "@/pages/Auth";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { MessageCircle } from "lucide-react"; // Importamos el icono
 
@@ -61,6 +62,7 @@ const App = () => (
                 <Route path="/taller" element={<Workshop />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

@@ -20,6 +20,27 @@ const Auth = () => {
   });
   const navigate = useNavigate();
 
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("¡Te enviamos un email para restablecer tu contraseña!");
+      setShowForgot(false);
+    } catch (err: any) {
+      toast.error(err.message || "Error al enviar el email");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -152,7 +173,18 @@ const Auth = () => {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        {isLogin && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setShowForgot(true)}
+              className="text-sm text-muted-foreground hover:text-primary hover:underline"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-sm text-primary hover:underline font-medium"
@@ -162,6 +194,56 @@ const Auth = () => {
               : "¿Ya tenés cuenta? Iniciá sesión"}
           </button>
         </div>
+
+        {showForgot && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowForgot(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              className="bg-card border border-border rounded-2xl p-8 w-full max-w-md shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-2xl font-black italic text-foreground text-center mb-2">
+                RECUPERAR CONTRASEÑA
+              </h2>
+              <p className="text-muted-foreground text-center text-sm mb-6">
+                Ingresá tu email y te enviaremos un enlace para restablecer tu contraseña
+              </p>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Email"
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter text-lg py-6"
+                >
+                  {forgotLoading ? "Enviando..." : "ENVIAR ENLACE"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setShowForgot(false)}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Cancelar
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

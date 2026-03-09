@@ -119,7 +119,7 @@ const Home = () => {
         </motion.div>
       </div>
 
-      {/* Hero Section with Parallax */}
+      {/* Hero Section */}
       <section ref={heroRef} className="relative overflow-hidden min-h-[75vh] flex items-center">
         <motion.img
           style={{ y: heroY }}
@@ -129,12 +129,7 @@ const Home = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
         <motion.div style={{ opacity: heroOpacity }} className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="max-w-3xl"
-          >
+          <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-3xl">
             <motion.h2 variants={fadeRight} className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
               Rafaghelli <span className="text-primary">Motos</span>
             </motion.h2>
@@ -142,12 +137,7 @@ const Home = () => {
               Repuestos originales y accesorios premium. Potenciamos tu viaje con la garantía de @rafaghellimotos.
             </motion.p>
             
-            {/* BUSCADOR: Arreglado para que el botón no pise el texto en mobile */}
-            <motion.form 
-              variants={fadeUp} 
-              onSubmit={handleSearch} 
-              className="flex flex-col md:flex-row w-full max-w-lg bg-transparent md:bg-card rounded-2xl md:p-1.5 md:shadow-2xl gap-3 md:gap-0"
-            >
+            <motion.form variants={fadeUp} onSubmit={handleSearch} className="flex flex-col md:flex-row w-full max-w-lg bg-transparent md:bg-card rounded-2xl md:p-1.5 md:shadow-2xl gap-3 md:gap-0">
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
@@ -162,24 +152,14 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Trust Badges - Carrusel Mobile */}
+      {/* Trust Badges */}
       <section className="border-b bg-muted/50">
         <div className="container py-8 px-6">
           <div className="md:hidden relative h-24 flex items-center justify-center">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={currentBadge}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center gap-5"
-              >
+              <motion.div key={currentBadge} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-5">
                 <div className="bg-card p-4 rounded-2xl shadow-sm border border-border">
-                  {(() => {
-                    const Icon = badges[currentBadge].icon;
-                    return <Icon className="h-6 w-6 text-primary" />;
-                  })()}
+                  {(() => { const Icon = badges[currentBadge].icon; return <Icon className="h-6 w-6 text-primary" />; })()}
                 </div>
                 <div>
                   <p className="text-sm font-black uppercase tracking-tight text-foreground">{badges[currentBadge].text}</p>
@@ -187,24 +167,18 @@ const Home = () => {
                 </div>
               </motion.div>
             </AnimatePresence>
-            <div className="absolute bottom-0 flex gap-1.5">
-              {badges.map((_, i) => (
-                <div key={i} className={`h-1 w-3 rounded-full transition-all ${currentBadge === i ? 'bg-primary w-6' : 'bg-muted-foreground/30'}`} />
-              ))}
-            </div>
           </div>
-
           <div className="hidden md:grid grid-cols-3 gap-8">
             {badges.map(({ icon: Icon, text, sub }) => (
-              <motion.div key={text} className="flex items-center gap-5 group">
-                <motion.div whileHover={{ rotate: [0, -10, 10, -5, 0], scale: 1.1 }} className="bg-card p-4 rounded-2xl shadow-sm border border-border group-hover:bg-primary transition-colors duration-300">
-                  <Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
-                </motion.div>
+              <div key={text} className="flex items-center gap-5 group">
+                <div className="bg-card p-4 rounded-2xl shadow-sm border border-border group-hover:bg-primary transition-colors">
+                  <Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground" />
+                </div>
                 <div>
                   <p className="text-sm font-black uppercase tracking-tight text-foreground">{text}</p>
                   <p className="text-xs text-muted-foreground font-bold">{sub}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -212,118 +186,54 @@ const Home = () => {
 
       {/* CATEGORÍAS */}
       <section className="container py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={stagger}>
-          <motion.div variants={fadeUp} className="flex items-end justify-between mb-12">
-            <div>
-              <span className="text-primary font-black uppercase text-xs tracking-[0.2em]">Explorar</span>
-              <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Categorías</h3>
-            </div>
-            <Link to="/productos" className="bg-muted hover:bg-muted/80 p-3 rounded-full transition-colors">
-              <ArrowRight className="h-5 w-5 text-foreground" />
-            </Link>
-          </motion.div>
-          {categories.length > 0 ? (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8">
-              {categories.map((cat, i) => (
-                <motion.div key={cat.id} variants={scaleIn} custom={i}>
-                  <Link to={`/productos?categoria=${cat.nombre}`} className="group flex flex-col items-center text-center gap-4">
-                    <motion.div whileHover={{ scale: 1.05, rotate: 2 }} whileTap={{ scale: 0.95 }} className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-muted border-4 border-transparent group-hover:border-primary transition-all duration-500 shadow-lg">
-                      {cat.image && cat.image.length > 0 ? (
-                        <img src={cat.image} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.nombre} />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-secondary text-muted-foreground font-black uppercase text-xs">{cat.nombre[0]}</div>
-                      )}
-                    </motion.div>
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-foreground">{cat.nombre}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-16 text-center border-2 border-dashed border-border rounded-[3rem]">
-              <p className="text-muted-foreground font-bold uppercase tracking-widest text-sm">Creá categorías desde el panel Admin</p>
-            </div>
-          )}
-        </motion.div>
-      </section>
-
-      {/* SECCIÓN MOTOS */}
-      <section className="mx-4 md:mx-10 my-10">
-        <Link to="/motos" className="block group">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={scaleIn} whileHover={{ scale: 1.01 }} className="bg-foreground rounded-[3rem] md:rounded-[4rem] p-10 md:p-16 flex items-center justify-between overflow-hidden relative">
-            <div className="relative z-10">
-              <motion.span variants={fadeUp} className="text-primary font-black uppercase text-[10px] tracking-[0.3em]">Nueva Sección</motion.span>
-              <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-background leading-none mt-2">
-                Motos en <span className="text-primary">Venta</span>
-              </h3>
-              <p className="text-muted-foreground font-medium mt-3 max-w-md">0km y usadas seleccionadas con garantía Rafaghelli.</p>
-              <div className="mt-6 inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-black uppercase tracking-tighter text-sm transition-all group-hover:gap-4">
-                Ver Motos <ArrowRight size={18} />
+        <div className="flex items-end justify-between mb-12">
+          <div>
+            <span className="text-primary font-black uppercase text-xs tracking-[0.2em]">Explorar</span>
+            <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Categorías</h3>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8">
+          {categories.map((cat) => (
+            <Link key={cat.id} to={`/productos?categoria=${cat.nombre}`} className="group flex flex-col items-center text-center gap-4">
+              <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-muted border-4 border-transparent group-hover:border-primary transition-all duration-500 shadow-lg">
+                <img src={cat.image || ''} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={cat.nombre} />
               </div>
-            </div>
-            <Bike size={180} className="text-muted/20 absolute right-10 top-1/2 -translate-y-1/2 hidden md:block" strokeWidth={1} />
-          </motion.div>
-        </Link>
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-foreground">{cat.nombre}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
-      {/* SUPER OFERTAS: CORREGIDO PARA QUE SE VEA IGUAL A ENVÍO GRATIS */}
+      {/* SUPER OFERTAS */}
       <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-6 rounded-[3rem] md:rounded-[5rem] mx-4 md:mx-10 my-10">
         <div className="container">
-          <motion.div variants={fadeRight} className="flex items-center justify-between mb-12">
-            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-background leading-none">
+          <div className="flex items-center justify-between mb-12">
+            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-background">
               <span className="text-primary">Super</span> Ofertas
             </h3>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
-          </motion.div>
-          {/* Aquí el cambio de gap y grid columns */}
+          </div>
+          {/* Grilla consistente 2 cols mobile / 4 cols desktop */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {featured.slice(0, 4).map((p) => (
-              <motion.div key={p.id} variants={fadeUp}><ProductCard product={p as any} /></motion.div>
+              <ProductCard key={p.id} product={p as any} />
             ))}
           </div>
         </div>
       </motion.section>
 
       {/* ENVÍO GRATIS */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="container py-24 px-6">
-        <motion.div variants={fadeRight} className="flex items-center gap-4 mb-12">
-          <Truck className="h-8 w-8 text-success" />
+      <section className="container py-24 px-6">
+        <div className="flex items-center gap-4 mb-12">
+          <Truck className="h-8 w-8 text-orange-500" />
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
-        </motion.div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-20">
           {freeShipping.slice(0, 4).map((p) => (
-            <motion.div key={p.id} variants={fadeUp}><ProductCard product={p as any} /></motion.div>
+            <ProductCard key={p.id} product={p as any} />
           ))}
         </div>
-        <div className="flex flex-col items-center">
-          <Link to="/productos">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-20 px-16 rounded-[2.5rem] text-xl font-black uppercase shadow-2xl group">
-              Ver Todo el Catálogo <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-3 transition-transform" />
-            </Button>
-          </Link>
-        </div>
-      </motion.section>
-
-      {/* BANNER MULTIMEDIA */}
-      {siteSettings?.home_media_url && (
-        <section className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
-          {siteSettings.home_media_type === 'video' ? (
-            <>
-              <video ref={videoRef} src={siteSettings.home_media_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
-              <button onClick={handleToggleSound} className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-full font-black uppercase text-xs shadow-xl">
-                {isMuted ? <><VolumeX size={18} /> sonido</> : <><Volume2 size={18} /> silenciar</>}
-              </button>
-            </>
-          ) : (
-            <img src={siteSettings.home_media_url} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-8 left-8 z-10">
-            <h3 className="text-2xl md:text-4xl font-black uppercase italic text-primary-foreground">Potenciamos <span className="text-primary">tu viaje</span></h3>
-            <p className="text-muted-foreground text-xs">Taller propio · Repuestos originales · Motos en venta</p>
-          </div>
-        </section>
-      )}
+      </section>
     </div>
   );
 };

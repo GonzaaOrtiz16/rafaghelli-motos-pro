@@ -238,6 +238,71 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {/* SECCIÓN DE VIDEO FINAL CON MARKETING */}
+      {siteSettings?.video_url && (
+        <section className="container pb-24 px-4 md:px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black aspect-video shadow-2xl border-4 border-muted"
+          >
+            <video
+              ref={videoRef}
+              src={siteSettings.video_url}
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted={isMuted}
+              playsInline
+            />
+
+            {/* FRASE DE MARKETING (Esquina superior izquierda) */}
+            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-xs md:max-w-md">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+              >
+                <h4 className="text-white text-2xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-lg">
+                  SENTÍ LA <span className="text-primary">POTENCIA</span>
+                </h4>
+                <p className="text-zinc-200 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] drop-shadow-md">
+                  Equipamiento premium para pilotos exigentes
+                </p>
+                <div className="w-12 h-1 bg-primary mt-4 rounded-full" />
+              </motion.div>
+            </div>
+            
+            {/* Controles y Botón (Esquina inferior) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6 md:p-10">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-md h-12 w-12"
+                  onClick={handleToggleSound}
+                >
+                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </Button>
+                <span className="text-white font-black uppercase text-[10px] tracking-widest hidden md:block">
+                  {isMuted ? "Sin sonido" : "Audio activo"}
+                </span>
+              </div>
+              
+              <Link to="/motos">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-8 h-12 transition-transform hover:scale-105">
+                  Ver unidades <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Borde decorativo interno */}
+            <div className="absolute inset-0 pointer-events-none border-[12px] border-black/5 rounded-[2rem] md:rounded-[3rem]" />
+          </motion.div>
+        </section>
+      )}
     </div>
   );
 };

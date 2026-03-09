@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React, { useState } from 'react'; // Añadimos useState
+import React, { useState, useEffect } from 'react'; // Importamos useEffect
 import ScrollToTop from "@/components/ScrollToTop";
 import { CartProvider } from "@/context/CartContext";
 import Header from "@/components/Header";
@@ -19,7 +19,7 @@ import Motos from "@/pages/Motos";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import { MessageCircle, X, Instagram } from "lucide-react"; // Importamos iconos necesarios
+import { MessageCircle, X, Instagram } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -71,42 +71,64 @@ const WhatsAppFloating = () => (
   </a>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <CartProvider>
-          <ScrollToTop />
-          <div className="flex flex-col min-h-screen relative">
-            <Header />
-            <CartDrawer />
-            
-            {/* BOTONES FLOTANTES */}
-            <WhatsAppFloating />
-            <Watermark /> {/* Tu sello a la izquierda */}
+const App = () => {
+  // --- LÓGICA PARA BORRAR EL SELLO DE LOVABLE POR CÓDIGO ---
+  useEffect(() => {
+    const removeBadge = () => {
+      // Buscamos el elemento de Lovable por ID o Clase
+      const badge = document.querySelector('#lovable-badge') || 
+                    document.querySelector('.lovable-badge') ||
+                    document.querySelector('iframe[title*="Lovable"]');
+      if (badge) {
+        badge.remove();
+      }
+    };
 
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/productos" element={<ProductList />} />
-                <Route path="/producto/:slug" element={<ProductDetail />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/motos" element={<Motos />} />
-                <Route path="/taller" element={<Workshop />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </CartProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    // Intentamos borrarlo al cargar
+    removeBadge();
+    
+    // Lo seguimos intentando cada 1 segundo por si vuelve a aparecer
+    const interval = setInterval(removeBadge, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <CartProvider>
+            <ScrollToTop />
+            <div className="flex flex-col min-h-screen relative">
+              <Header />
+              <CartDrawer />
+              
+              {/* BOTONES FLOTANTES */}
+              <WhatsAppFloating />
+              <Watermark />
+
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={ <Home /> } />
+                  <Route path="/productos" element={ <ProductList /> } />
+                  <Route path="/producto/:slug" element={ <ProductDetail /> } />
+                  <Route path="/checkout" element={ <Checkout /> } />
+                  <Route path="/motos" element={ <Motos /> } />
+                  <Route path="/taller" element={ <Workshop /> } />
+                  <Route path="/admin" element={ <Admin /> } />
+                  <Route path="/auth" element={ <Auth /> } />
+                  <Route path="/reset-password" element={ <ResetPassword /> } />
+                  <Route path="*" element={ <NotFound /> } />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </CartProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

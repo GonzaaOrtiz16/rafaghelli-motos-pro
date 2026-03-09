@@ -239,7 +239,7 @@ const Home = () => {
       </section>
 
       {/* SECCIÓN DE VIDEO FINAL CON MARKETING INTEGRADO */}
-      {siteSettings?.video_url && (
+      {siteSettings?.home_media_url && (
         <section className="container pb-24 px-4 md:px-6">
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -248,9 +248,9 @@ const Home = () => {
             className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black aspect-video shadow-2xl border-4 border-muted"
           >
             <video
-              key={siteSettings.video_url} // Clave para forzar recarga si cambia la URL
+              key={siteSettings.home_media_url}
               ref={videoRef}
-              src={siteSettings.video_url}
+              src={siteSettings.home_media_url}
               className="w-full h-full object-cover"
               autoPlay
               loop

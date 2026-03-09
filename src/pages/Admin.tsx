@@ -2,7 +2,11 @@ import React, { useState, useRef, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, LogOut, X, Upload, Copy, Loader2, Check, Bike, Settings, Package, LayoutGrid, Image, Search } from "lucide-react";
+import { 
+  Plus, Pencil, Trash2, LogOut, X, Upload, Copy, Loader2, 
+  Check, Bike, Settings, Package, LayoutGrid, Image, Search, 
+  Tag, Truck 
+} from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
 // ===================== ADMIN PRINCIPAL =====================
@@ -98,7 +102,6 @@ const RepuestosTab = () => {
 
   const { data: categorias = [] } = useCategorias('repuestos');
 
-  // Lógica de búsqueda
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     return products.filter(p => 
@@ -216,13 +219,32 @@ const RepuestosTab = () => {
       {/* MODO CELULAR: TARJETAS */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {filteredProducts?.map((p) => (
-          <div key={p.id} className="bg-white rounded-3xl border shadow-sm p-4 flex gap-4">
+          <div key={p.id} className="bg-white rounded-3xl border shadow-sm p-4 flex gap-4 relative overflow-hidden">
+            {/* BADGES FLOTANTES PARA CELU */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+              {p.is_on_sale && (
+                <div className="bg-orange-500 text-white p-1 rounded-lg shadow-lg">
+                  <Tag size={12} fill="currentColor" />
+                </div>
+              )}
+              {p.free_shipping && (
+                <div className="bg-green-500 text-white p-1 rounded-lg shadow-lg">
+                  <Truck size={12} fill="currentColor" />
+                </div>
+              )}
+            </div>
+
             <img src={p.images?.[0]} className="w-24 h-24 rounded-2xl object-cover shrink-0 bg-zinc-100" />
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               <div>
                 <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
                 <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
-                <p className="font-black text-sm text-zinc-900 mt-1">${p.price.toLocaleString('es-AR')}</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className="font-black text-sm text-zinc-900">${p.price.toLocaleString('es-AR')}</p>
+                  {p.is_on_sale && (
+                    <span className="text-[8px] text-orange-600 font-black uppercase italic bg-orange-50 px-1 rounded">Oferta</span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 mt-2">
                 <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
@@ -240,6 +262,7 @@ const RepuestosTab = () => {
           <thead className="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400 font-black">
             <tr>
               <th className="px-8 py-6">Producto</th>
+              <th className="px-8 py-6">Estado</th>
               <th className="px-8 py-6">Categoría</th>
               <th className="px-8 py-6 text-right">Precio</th>
               <th className="px-8 py-6 text-center">Acciones</th>
@@ -256,9 +279,34 @@ const RepuestosTab = () => {
                   </div>
                 </td>
                 <td className="px-8 py-4">
+                  <div className="flex gap-2">
+                    {p.is_on_sale ? (
+                      <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase">
+                        <Tag size={10} fill="currentColor" /> Oferta
+                      </span>
+                    ) : (
+                      <span className="text-[8px] text-zinc-300 font-black uppercase tracking-tighter">Normal</span>
+                    )}
+                    {p.free_shipping && (
+                      <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase">
+                        <Truck size={10} fill="currentColor" /> Envío Gratis
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-8 py-4">
                    <span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span>
                 </td>
-                <td className="px-8 py-4 text-right font-black text-lg text-orange-600">${p.price.toLocaleString('es-AR')}</td>
+                <td className="px-8 py-4 text-right">
+                  {p.is_on_sale && p.original_price && (
+                    <div className="text-[10px] text-zinc-400 line-through font-bold leading-none mb-1">
+                      ${p.original_price.toLocaleString('es-AR')}
+                    </div>
+                  )}
+                  <div className="font-black text-lg text-orange-600 leading-none">
+                    ${p.price.toLocaleString('es-AR')}
+                  </div>
+                </td>
                 <td className="px-8 py-4 text-center">
                   <div className="flex justify-center gap-1">
                     <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
@@ -340,7 +388,7 @@ const RepuestosTab = () => {
   );
 };
 
-// ===================== MOTOS TAB (HÍBRIDO + BUSCADOR) =====================
+// ===================== MOTOS TAB =====================
 const MotosTab = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -365,7 +413,6 @@ const MotosTab = () => {
     }
   });
 
-  // Lógica de búsqueda para motos
   const filteredMotos = useMemo(() => {
     if (!motos) return [];
     return motos.filter(m => 
@@ -461,7 +508,6 @@ const MotosTab = () => {
         </button>
       </div>
 
-      {/* MODO CELULAR: TARJETAS */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {filteredMotos?.map(m => (
           <div key={m.id} className="bg-white rounded-3xl border shadow-sm p-4">
@@ -482,7 +528,6 @@ const MotosTab = () => {
         ))}
       </div>
 
-      {/* MODO PC: LISTA TIPO TABLA */}
       <div className="hidden md:block bg-white border rounded-[32px] overflow-hidden shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400 font-black">
@@ -516,8 +561,6 @@ const MotosTab = () => {
           </tbody>
         </table>
       </div>
-
-      {/* El modal de Nueva Moto sigue aquí igual que antes... */}
     </>
   );
 };
@@ -601,7 +644,7 @@ const CategoriasTab = () => {
           {repuestosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image && cat.image.length > 0 ? (
+                {cat.image ? (
                   <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
@@ -625,7 +668,7 @@ const CategoriasTab = () => {
           {motosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image && cat.image.length > 0 ? (
+                {cat.image ? (
                   <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
@@ -667,7 +710,7 @@ const CategoriasTab = () => {
 
               <div>
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Imagen de categoría</label>
-                {formData.image && formData.image.length > 0 ? (
+                {formData.image ? (
                   <div className="relative aspect-video rounded-2xl overflow-hidden border">
                     <img src={formData.image} className="w-full h-full object-cover" />
                     <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5"><X size={12}/></button>
@@ -767,4 +810,5 @@ const AjustesTab = () => {
 };
 
 export default Admin;
+
 

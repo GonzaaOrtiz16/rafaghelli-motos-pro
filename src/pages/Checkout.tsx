@@ -69,23 +69,45 @@ const Checkout = () => {
     }
   };
 
+  const handleShippingMethodChange = (method: 'delivery' | 'pickup') => {
+    setShippingMethod(method);
+    if (method === 'pickup') {
+      setShippingCost(0);
+      setSelectedZone('');
+      setUserData(prev => ({ ...prev, provincia: '', direccion: '', localidad: '' }));
+    }
+  };
+
   const enviarWhatsApp = () => {
     const nro = "5491165483728";
     const totalFinal = total + shippingCost;
     const productosTxt = items.map(item =>
       `- ${item.product.title} x${item.quantity} ($${item.product.price * item.quantity})`
     ).join('%0A');
+
+    const entregaTxt = shippingMethod === 'pickup'
+      ? `*Entrega:* Retiro por el local`
+      : `*Entrega:* ${userData.direccion}, ${userData.localidad} (${userData.provincia})`;
+
+    const envioTxt = shippingMethod === 'pickup'
+      ? `*Envío:* Retiro por el local - GRATIS`
+      : `*Envío (Correo Argentino - Zona ${selectedZone}):* $${shippingCost}`;
+
     const mensaje = `*NUEVO PEDIDO - RAFAGHELLI MOTOS*%0A%0A` +
       `*Cliente:* ${userData.nombre}%0A` +
       `*Email:* ${user.email}%0A` +
-      `*Entrega:* ${userData.direccion}, ${userData.localidad} (${userData.provincia})%0A%0A` +
+      `${entregaTxt}%0A%0A` +
       `*Productos:*%0A${productosTxt}%0A%0A` +
       `*Subtotal:* $${total}%0A` +
-      `*Envío (Correo Argentino - Zona ${selectedZone}):* $${shippingCost}%0A` +
+      `${envioTxt}%0A` +
       `*TOTAL A PAGAR:* $${totalFinal}%0A%0A` +
       `Hola! Vengo de la web, ¿me confirman stock para transferir?`;
     window.open(`https://wa.me/${nro}?text=${mensaje}`, '_blank');
   };
+
+  const isFormValid = shippingMethod === 'pickup'
+    ? items.length > 0 && !!userData.nombre
+    : items.length > 0 && !!userData.nombre && !!userData.provincia && !!userData.direccion;
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-10">
@@ -98,32 +120,74 @@ const Checkout = () => {
             className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
             onChange={(e) => setUserData({ ...userData, nombre: e.target.value })}
           />
-          <input
-            type="text" placeholder="Calle y número"
-            className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
-            onChange={(e) => setUserData({ ...userData, direccion: e.target.value })}
-          />
-          <input
-            type="text" placeholder="Localidad"
-            className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
-            onChange={(e) => setUserData({ ...userData, localidad: e.target.value })}
-          />
-          <select
-            className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
-            onChange={handleProvinciaChange}
-            value={userData.provincia}
-          >
-            <option value="">Seleccionar Provincia</option>
-            {PROVINCIAS.map(prov => (
-              <option key={prov} value={prov}>{prov}</option>
-            ))}
-          </select>
-          {selectedZone && (
-            <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-              <p className="font-semibold text-foreground">📦 Correo Argentino - Zona {selectedZone}</p>
-              <p>Envío a domicilio (hasta 5kg): <span className="font-bold text-primary">${shippingCost.toLocaleString('es-AR')}</span></p>
-              <p className="text-xs mt-1">Tarifas referenciales. Pueden variar según peso y dimensiones.</p>
+
+          {/* Método de envío */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Método de entrega</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleShippingMethodChange('pickup')}
+                className={`p-3 rounded-lg border text-sm font-semibold transition-all ${
+                  shippingMethod === 'pickup'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                🏪 Retiro por el local
+              </button>
+              <button
+                type="button"
+                onClick={() => handleShippingMethodChange('delivery')}
+                className={`p-3 rounded-lg border text-sm font-semibold transition-all ${
+                  shippingMethod === 'delivery'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                🚚 Envío a domicilio
+              </button>
             </div>
+          </div>
+
+          {shippingMethod === 'pickup' && (
+            <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">🏪 Retiro por el local</p>
+              <p>Retirá tu pedido sin costo de envío.</p>
+              <p className="text-xs mt-1">Te avisamos por WhatsApp cuando esté listo.</p>
+            </div>
+          )}
+
+          {shippingMethod === 'delivery' && (
+            <>
+              <input
+                type="text" placeholder="Calle y número"
+                className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
+                onChange={(e) => setUserData({ ...userData, direccion: e.target.value })}
+              />
+              <input
+                type="text" placeholder="Localidad"
+                className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
+                onChange={(e) => setUserData({ ...userData, localidad: e.target.value })}
+              />
+              <select
+                className="w-full p-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary outline-none"
+                onChange={handleProvinciaChange}
+                value={userData.provincia}
+              >
+                <option value="">Seleccionar Provincia</option>
+                {PROVINCIAS.map(prov => (
+                  <option key={prov} value={prov}>{prov}</option>
+                ))}
+              </select>
+              {selectedZone && (
+                <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">📦 Correo Argentino - Zona {selectedZone}</p>
+                  <p>Envío a domicilio (hasta 5kg): <span className="font-bold text-primary">${shippingCost.toLocaleString('es-AR')}</span></p>
+                  <p className="text-xs mt-1">Tarifas referenciales. Pueden variar según peso y dimensiones.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -143,8 +207,18 @@ const Checkout = () => {
               <span>${total.toLocaleString('es-AR')}</span>
             </div>
             <div className="flex justify-between text-primary">
-              <span>Envío Correo Argentino {selectedZone && `(${selectedZone})`}</span>
-              <span>{shippingCost > 0 ? `$${shippingCost.toLocaleString('es-AR')}` : 'Seleccioná provincia'}</span>
+              <span>
+                {shippingMethod === 'pickup'
+                  ? 'Retiro por el local'
+                  : `Envío Correo Argentino ${selectedZone ? `(${selectedZone})` : ''}`}
+              </span>
+              <span>
+                {shippingMethod === 'pickup'
+                  ? 'GRATIS'
+                  : shippingCost > 0
+                    ? `$${shippingCost.toLocaleString('es-AR')}`
+                    : 'Seleccioná provincia'}
+              </span>
             </div>
             <div className="flex justify-between font-black text-lg border-t border-border pt-2 text-foreground">
               <span>Total Final</span>
@@ -153,7 +227,7 @@ const Checkout = () => {
           </div>
           <Button
             onClick={enviarWhatsApp}
-            disabled={items.length === 0 || !userData.nombre || !userData.provincia}
+            disabled={!isFormValid}
             className="w-full mt-6 bg-primary text-primary-foreground py-4 rounded-lg font-black uppercase tracking-tighter text-lg hover:bg-primary/90 transition-colors disabled:opacity-40"
           >
             COMPRAR POR WHATSAPP

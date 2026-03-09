@@ -58,7 +58,7 @@ const Home = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
@@ -204,33 +204,37 @@ const Home = () => {
         </div>
       </section>
 
-      {/* SUPER OFERTAS */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-6 rounded-[3rem] md:rounded-[5rem] mx-4 md:mx-10 my-10">
-        <div className="container">
-          <div className="flex items-center justify-between mb-12">
+      {/* SUPER OFERTAS - CORREGIDO */}
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-4 md:px-6 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">
+        <div className="container max-w-[1300px]">
+          <div className="flex items-center justify-between mb-12 px-2">
             <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-background">
               <span className="text-primary">Super</span> Ofertas
             </h3>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          {/* Grilla consistente 2 cols mobile / 4 cols desktop */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {/* Grilla mejorada: gap más grande para que las cartas no se peguen */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
             {featured.slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p as any} />
+              <div key={p.id} className="w-full">
+                <ProductCard product={p as any} />
+              </div>
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* ENVÍO GRATIS */}
-      <section className="container py-24 px-6">
+      {/* ENVÍO GRATIS - CORREGIDO */}
+      <section className="container py-24 px-4 md:px-6">
         <div className="flex items-center gap-4 mb-12">
           <Truck className="h-8 w-8 text-orange-500" />
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-20">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 mb-20">
           {freeShipping.slice(0, 4).map((p) => (
-            <ProductCard key={p.id} product={p as any} />
+            <div key={p.id} className="w-full">
+              <ProductCard product={p as any} />
+            </div>
           ))}
         </div>
       </section>

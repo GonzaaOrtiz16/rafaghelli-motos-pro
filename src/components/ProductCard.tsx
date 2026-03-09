@@ -70,7 +70,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               </p>
             </div>
 
-            <p className="text-sm text-foreground font-black uppercase italic leading-tight line-clamp-2 mt-1">
+            <p className="text-sm text-foreground font-black uppercase italic leading-tight mt-1">
               {product.title}
             </p>
           </div>

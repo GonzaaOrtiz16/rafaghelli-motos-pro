@@ -22,18 +22,18 @@ import { MessageCircle } from "lucide-react"; // Importamos el icono
 
 const queryClient = new QueryClient();
 
-// COMPONENTE DEL BOTÓN FLOTANTE (Esquina Izquierda)
+// COMPONENTE DEL BOTÓN FLOTANTE (Corregido a la Derecha)
 const WhatsAppFloating = () => (
   <a
     href="https://wa.me/5491157074145" // Tu número de ventas
     target="_blank"
     rel="noopener noreferrer"
-    className="fixed bottom-6 left-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95 flex items-center justify-center group border-2 border-white"
+    className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95 flex items-center justify-center group border-2 border-white"
   >
-    <MessageCircle size={32} />
-    <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-500 font-black uppercase text-[10px] whitespace-nowrap tracking-tighter">
+    <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:mr-2 transition-all duration-500 font-black uppercase text-[10px] whitespace-nowrap tracking-tighter order-first">
       Consultar Ventas
     </span>
+    <MessageCircle size={32} />
   </a>
 );
 

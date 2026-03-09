@@ -36,7 +36,7 @@ const ProductList = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products-list'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     }
@@ -45,7 +45,7 @@ const ProductList = () => {
   const { data: categorias = [] } = useQuery({
     queryKey: ['categorias', 'repuestos'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias').select('*').eq('tipo', 'repuestos').order('nombre');
+      const { data, error } = await supabase.from('categorias').select('id, nombre, slug').eq('tipo', 'repuestos').order('nombre');
       if (error) throw error;
       return data;
     }

@@ -61,7 +61,7 @@ const Home = () => {
   const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     }
@@ -70,7 +70,7 @@ const Home = () => {
   const { data: categories = [] } = useQuery({
     queryKey: ['categorias', 'repuestos'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias').select('*').eq('tipo', 'repuestos').order('nombre');
+      const { data, error } = await supabase.from('categorias').select('id, nombre, image').eq('tipo', 'repuestos').order('nombre');
       if (error) throw error;
       return data;
     }
@@ -79,7 +79,7 @@ const Home = () => {
   const { data: siteSettings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('site_settings').select('*').limit(1).single();
+      const { data, error } = await supabase.from('site_settings').select('home_media_url, home_media_type').limit(1).single();
       if (error) throw error;
       return data;
     }
@@ -126,6 +126,8 @@ const Home = () => {
           src="/hero-moto-street.jpg"
           alt="Moto de calle"
           className="absolute inset-0 w-full h-full object-cover scale-110"
+          loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
         <motion.div style={{ opacity: heroOpacity }} className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
@@ -256,6 +258,7 @@ const Home = () => {
               loop
               muted={isMuted}
               playsInline
+              preload="none"
               onLoadedData={() => console.log("Video de banner cargado")}
             />
 

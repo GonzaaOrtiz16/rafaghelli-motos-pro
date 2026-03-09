@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useState } from 'react'; // Añadimos useState
 import ScrollToTop from "@/components/ScrollToTop";
 import { CartProvider } from "@/context/CartContext";
 import Header from "@/components/Header";
@@ -18,19 +19,52 @@ import Motos from "@/pages/Motos";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import { MessageCircle } from "lucide-react"; // Importamos el icono
+import { MessageCircle, X, Instagram } from "lucide-react"; // Importamos iconos necesarios
 
 const queryClient = new QueryClient();
 
-// COMPONENTE DEL BOTÓN FLOTANTE (Corregido a la Derecha)
+// ===================== SELLO PERSONAL (ESTILO VENPLAST) =====================
+const Watermark = () => {
+  const [isVisible, setIsVisible] = useState(true);
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed bottom-6 left-6 z-[60] flex items-center gap-1.5 bg-white/60 backdrop-blur-sm border border-zinc-200/40 pl-2 pr-1 py-1 rounded-full shadow-sm">
+      <div className="flex items-center gap-1.5 px-1">
+        <div className="text-[#E1306C]">
+          <Instagram size={13} strokeWidth={2} />
+        </div>
+        <div className="flex items-center gap-1 whitespace-nowrap">
+          <span className="text-[10px] font-medium text-zinc-400 font-sans">Edit by</span>
+          <a 
+            href="https://instagram.com/gonzaaortiz16" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[10px] font-bold text-[#00BAE2] font-sans"
+          >
+            @gonzaaortiz16
+          </a>
+        </div>
+      </div>
+      <button 
+        onClick={() => setIsVisible(false)}
+        className="ml-1 p-0.5 hover:bg-zinc-200/50 rounded-full text-zinc-300 transition-colors"
+      >
+        <X size={12} strokeWidth={2.5} />
+      </button>
+    </div>
+  );
+};
+
+// COMPONENTE DEL BOTÓN FLOTANTE (A la Derecha)
 const WhatsAppFloating = () => (
   <a
-    href="https://wa.me/5491157074145" // Tu número de ventas
+    href="https://wa.me/5491157074145"
     target="_blank"
     rel="noopener noreferrer"
     className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95 flex items-center justify-center group border-2 border-white"
   >
-    <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:mr-2 transition-all duration-500 font-black uppercase text-[10px] whitespace-nowrap tracking-tighter order-first">
+    <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:mr-2 transition-all duration-500 font-black uppercase text-[10px] whitespace-nowrap tracking-tighter order-first font-sans">
       Consultar Ventas
     </span>
     <MessageCircle size={32} />
@@ -49,8 +83,9 @@ const App = () => (
             <Header />
             <CartDrawer />
             
-            {/* BOTÓN FLOTANTE SIEMPRE VISIBLE */}
+            {/* BOTONES FLOTANTES */}
             <WhatsAppFloating />
+            <Watermark /> {/* Tu sello a la izquierda */}
 
             <main className="flex-1">
               <Routes>

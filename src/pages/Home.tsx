@@ -204,7 +204,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* SUPER OFERTAS - CORREGIDO */}
+      {/* SUPER OFERTAS */}
       <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-4 md:px-6 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">
         <div className="container max-w-[1300px]">
           <div className="flex items-center justify-between mb-12 px-2">
@@ -213,7 +213,6 @@ const Home = () => {
             </h3>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          {/* Grilla mejorada: gap más grande para que las cartas no se peguen */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
             {featured.slice(0, 4).map((p) => (
               <div key={p.id} className="w-full">
@@ -224,7 +223,7 @@ const Home = () => {
         </div>
       </motion.section>
 
-      {/* ENVÍO GRATIS - CORREGIDO */}
+      {/* ENVÍO GRATIS */}
       <section className="container py-24 px-4 md:px-6">
         <div className="flex items-center gap-4 mb-12">
           <Truck className="h-8 w-8 text-orange-500" />
@@ -239,7 +238,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* SECCIÓN DE VIDEO FINAL CON MARKETING */}
+      {/* SECCIÓN DE VIDEO FINAL CON MARKETING INTEGRADO */}
       {siteSettings?.video_url && (
         <section className="container pb-24 px-4 md:px-6">
           <motion.div 
@@ -249,6 +248,7 @@ const Home = () => {
             className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black aspect-video shadow-2xl border-4 border-muted"
           >
             <video
+              key={siteSettings.video_url} // Clave para forzar recarga si cambia la URL
               ref={videoRef}
               src={siteSettings.video_url}
               className="w-full h-full object-cover"
@@ -256,10 +256,11 @@ const Home = () => {
               loop
               muted={isMuted}
               playsInline
+              onLoadedData={() => console.log("Video de banner cargado")}
             />
 
-            {/* FRASE DE MARKETING (Esquina superior izquierda) */}
-            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-xs md:max-w-md">
+            {/* FRASE DE MARKETING */}
+            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-xs md:max-w-md pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -271,12 +272,12 @@ const Home = () => {
                 <p className="text-zinc-200 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] drop-shadow-md">
                   Equipamiento premium para pilotos exigentes
                 </p>
-                <div className="w-12 h-1 bg-primary mt-4 rounded-full" />
+                <div className="w-12 h-1 bg-primary mt-4 rounded-full shadow-lg" />
               </motion.div>
             </div>
             
-            {/* Controles y Botón (Esquina inferior) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6 md:p-10">
+            {/* Controles e Interacción */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-6 md:p-10">
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
@@ -291,14 +292,13 @@ const Home = () => {
                 </span>
               </div>
               
-              <Link to="/motos">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-8 h-12 transition-transform hover:scale-105">
-                  Ver unidades <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/productos">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-8 h-12 transition-transform hover:scale-105 shadow-xl">
+                  Explorar Repuestos <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
 
-            {/* Borde decorativo interno */}
             <div className="absolute inset-0 pointer-events-none border-[12px] border-black/5 rounded-[2rem] md:rounded-[3rem]" />
           </motion.div>
         </section>

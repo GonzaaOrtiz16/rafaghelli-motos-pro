@@ -26,7 +26,7 @@ const CategoryItem = React.memo(({ cat }: { cat: Category }) => {
   return (
     <Link
       to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
-      className="group flex flex-col items-center text-center gap-3 flex-shrink-0 w-[calc(33.333%-0.667rem)] md:w-[calc(16.666%-1.333rem)]"
+      className="group flex flex-col items-center text-center gap-3"
     >
       <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-muted border-4 border-transparent group-hover:border-primary transition-all duration-500 shadow-lg">
         {!loaded && (
@@ -90,7 +90,7 @@ const CategoryGrid = React.memo(({ categories }: { categories: Category[] }) => 
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {categories.map((cat) => (
-          <div key={cat.id} className="snap-start">
+          <div key={cat.id} className="snap-start flex-shrink-0 w-28 md:w-40">
             <CategoryItem cat={cat} />
           </div>
         ))}

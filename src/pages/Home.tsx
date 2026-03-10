@@ -21,10 +21,6 @@ const fadeRight = {
   hidden: { opacity: 0, x: -40 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
-};
 
 const Home = () => {
   const [q, setQ] = useState("");
@@ -54,6 +50,7 @@ const Home = () => {
       if (!newMuted) videoRef.current.play().catch(() => {});
     }
   };
+
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
@@ -128,7 +125,6 @@ const Home = () => {
           alt="Moto de calle"
           className="absolute inset-0 w-full h-full object-cover scale-110"
           loading="eager"
-          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
         <motion.div style={{ opacity: heroOpacity }} className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
@@ -145,9 +141,9 @@ const Home = () => {
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 placeholder="Buscá por marca o repuesto..."
-                className="flex-1 px-5 py-4 md:py-3 rounded-2xl md:rounded-l-xl text-foreground outline-none font-bold placeholder:text-muted-foreground bg-card md:bg-transparent shadow-xl md:shadow-none"
+                className="flex-1 px-5 py-4 md:py-3 rounded-2xl md:rounded-l-xl text-foreground outline-none font-bold placeholder:text-muted-foreground bg-card md:bg-transparent"
               />
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl md:rounded-xl px-8 h-14 md:h-12 font-black uppercase tracking-tight w-full md:w-auto shadow-xl md:shadow-none min-w-[140px]">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl md:rounded-xl px-8 h-14 md:h-12 font-black uppercase tracking-tight w-full md:w-auto">
                 <Search className="h-5 w-5 mr-2 shrink-0" /> <span className="whitespace-nowrap">Buscar</span>
               </Button>
             </motion.form>
@@ -198,6 +194,47 @@ const Home = () => {
         <CategoryGrid categories={categories} />
       </section>
 
+      {/* SECCIÓN PRÓXIMA MOTO (RECUPERADA) */}
+      <section className="container py-12 px-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-white/10 group shadow-2xl"
+        >
+          <div className="flex flex-col md:flex-row items-center">
+            <div className="flex-1 p-10 md:p-20 z-10 text-left">
+              <span className="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-[0.2em] uppercase bg-primary text-black rounded-full">
+                Unidades Seleccionadas
+              </span>
+              <h3 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.85] mb-8">
+                Encontrá tu <br />
+                <span className="text-primary italic">Próxima Moto</span>
+              </h3>
+              <p className="text-zinc-400 text-lg mb-10 max-w-sm font-medium">
+                Revisá nuestro catálogo de motos usadas y 0km con la garantía de confianza Rafaghelli.
+              </p>
+              <Link to="/motos">
+                <Button className="bg-white text-black hover:bg-primary hover:text-black transition-all font-black uppercase px-10 py-7 rounded-2xl flex gap-3 items-center group/btn shadow-xl text-base tracking-tight">
+                  Ver catálogo
+                  <ArrowRight className="group-hover/btn:translate-x-2 transition-transform h-6 w-6 text-primary" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex-1 relative h-[350px] md:h-[600px] w-full overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1558981403-c5f91cbba527?q=80&w=2070&auto=format&fit=crop" 
+                alt="Motos en venta"
+                className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/30 to-transparent hidden md:block" />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent md:hidden" />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* SUPER OFERTAS */}
       <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-4 md:px-6 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">
         <div className="container max-w-[1300px]">
@@ -232,7 +269,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* SECCIÓN DE VIDEO FINAL CON MARKETING INTEGRADO */}
+      {/* VIDEO FINAL */}
       {siteSettings?.home_media_url && (
         <section className="pb-24 px-2 md:px-6">
           <motion.div 
@@ -251,27 +288,19 @@ const Home = () => {
               muted={isMuted}
               playsInline
               preload="none"
-              onLoadedData={() => console.log("Video de banner cargado")}
             />
-
-            {/* FRASE DE MARKETING */}
-            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 max-w-[70%] md:max-w-md pointer-events-none">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              >
+            <div className="absolute top-6 left-6 md:top-12 md:left-12 z-20 pointer-events-none">
+              <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 0.8 }}>
                 <h4 className="text-white text-2xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-2 drop-shadow-lg">
                   SENTÍ LA <span className="text-primary">POTENCIA</span>
                 </h4>
                 <p className="text-zinc-200 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] drop-shadow-md">
                   Equipamiento premium para pilotos exigentes
                 </p>
-                <div className="w-12 h-1 bg-primary mt-4 rounded-full shadow-lg" />
+                <div className="w-12 h-1 bg-primary mt-4 rounded-full" />
               </motion.div>
             </div>
             
-            {/* Controles - visibles siempre en mobile, hover en desktop */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-4 md:p-10">
               <div className="flex items-center gap-4">
                 <Button
@@ -282,19 +311,13 @@ const Home = () => {
                 >
                   {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </Button>
-                <span className="text-white font-black uppercase text-[10px] tracking-widest hidden md:block">
-                  {isMuted ? "Sin sonido" : "Audio activo"}
-                </span>
               </div>
-              
               <Link to="/productos">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-5 md:px-8 h-10 md:h-12 text-xs md:text-sm transition-transform hover:scale-105 shadow-xl">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-tighter rounded-full px-5 md:px-8 h-10 md:h-12 text-xs md:text-sm shadow-xl">
                   Explorar <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-
-            <div className="absolute inset-0 pointer-events-none border-[12px] border-black/5 rounded-[2rem] md:rounded-[3rem]" />
           </motion.div>
         </section>
       )}
@@ -303,4 +326,3 @@ const Home = () => {
 };
 
 export default Home;
-

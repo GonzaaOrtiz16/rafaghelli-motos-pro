@@ -75,7 +75,7 @@ const useCategorias = (tipo?: string) => {
   });
 };
 
-// ===================== REPUESTOS TAB (HÍBRIDO + BUSCADOR) =====================
+// ===================== REPUESTOS TAB =====================
 const RepuestosTab = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -216,24 +216,13 @@ const RepuestosTab = () => {
         </button>
       </div>
 
-      {/* MODO CELULAR: TARJETAS */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {filteredProducts?.map((p) => (
           <div key={p.id} className="bg-white rounded-3xl border shadow-sm p-4 flex gap-4 relative overflow-hidden">
-            {/* BADGES FLOTANTES PARA CELU */}
             <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-              {p.is_on_sale && (
-                <div className="bg-orange-500 text-white p-1 rounded-lg shadow-lg">
-                  <Tag size={12} fill="currentColor" />
-                </div>
-              )}
-              {p.free_shipping && (
-                <div className="bg-green-500 text-white p-1 rounded-lg shadow-lg">
-                  <Truck size={12} fill="currentColor" />
-                </div>
-              )}
+              {p.is_on_sale && <div className="bg-orange-500 text-white p-1 rounded-lg shadow-lg"><Tag size={12} fill="currentColor" /></div>}
+              {p.free_shipping && <div className="bg-green-500 text-white p-1 rounded-lg shadow-lg"><Truck size={12} fill="currentColor" /></div>}
             </div>
-
             <img src={p.images?.[0]} className="w-24 h-24 rounded-2xl object-cover shrink-0 bg-zinc-100" />
             <div className="flex-1 min-w-0 flex flex-col justify-between">
               <div>
@@ -241,9 +230,6 @@ const RepuestosTab = () => {
                 <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
                 <div className="flex items-baseline gap-2 mt-1">
                   <p className="font-black text-sm text-zinc-900">${p.price.toLocaleString('es-AR')}</p>
-                  {p.is_on_sale && (
-                    <span className="text-[8px] text-orange-600 font-black uppercase italic bg-orange-50 px-1 rounded">Oferta</span>
-                  )}
                 </div>
               </div>
               <div className="flex gap-2 mt-2">
@@ -256,7 +242,6 @@ const RepuestosTab = () => {
         ))}
       </div>
 
-      {/* MODO PC: LISTA TIPO TABLA */}
       <div className="hidden md:block bg-white border rounded-[32px] overflow-hidden shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400 font-black">
@@ -280,32 +265,13 @@ const RepuestosTab = () => {
                 </td>
                 <td className="px-8 py-4">
                   <div className="flex gap-2">
-                    {p.is_on_sale ? (
-                      <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase">
-                        <Tag size={10} fill="currentColor" /> Oferta
-                      </span>
-                    ) : (
-                      <span className="text-[8px] text-zinc-300 font-black uppercase tracking-tighter">Normal</span>
-                    )}
-                    {p.free_shipping && (
-                      <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase">
-                        <Truck size={10} fill="currentColor" /> Envío Gratis
-                      </span>
-                    )}
+                    {p.is_on_sale && <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
+                    {p.free_shipping && <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Truck size={10} fill="currentColor" /> Envío Gratis</span>}
                   </div>
                 </td>
-                <td className="px-8 py-4">
-                   <span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span>
-                </td>
+                <td className="px-8 py-4"><span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span></td>
                 <td className="px-8 py-4 text-right">
-                  {p.is_on_sale && p.original_price && (
-                    <div className="text-[10px] text-zinc-400 line-through font-bold leading-none mb-1">
-                      ${p.original_price.toLocaleString('es-AR')}
-                    </div>
-                  )}
-                  <div className="font-black text-lg text-orange-600 leading-none">
-                    ${p.price.toLocaleString('es-AR')}
-                  </div>
+                  <div className="font-black text-lg text-orange-600">${p.price.toLocaleString('es-AR')}</div>
                 </td>
                 <td className="px-8 py-4 text-center">
                   <div className="flex justify-center gap-1">
@@ -333,9 +299,7 @@ const RepuestosTab = () => {
                 <input className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Marca" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 <select className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
                   <option value="">Categoría...</option>
-                  {categorias.map(c => (
-                    <option key={c.id} value={c.nombre}>{c.nombre}</option>
-                  ))}
+                  {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
                 </select>
               </div>
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
@@ -351,17 +315,6 @@ const RepuestosTab = () => {
                     <input className="w-full bg-white/10 rounded-xl px-5 py-3 text-white font-black text-xl outline-none" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                   </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-3">
-                  <button type="button" onClick={() => setFormData({...formData, is_on_sale: !formData.is_on_sale})} className={`flex-1 py-4 rounded-xl font-black text-[10px] uppercase transition-all ${formData.is_on_sale ? 'bg-orange-500 text-white' : 'bg-white/5 text-zinc-500'}`}>
-                    {formData.is_on_sale && <Check size={12} className="inline mr-1" />} Oferta
-                  </button>
-                  <button type="button" onClick={() => setFormData({...formData, free_shipping: !formData.free_shipping})} className={`flex-1 py-4 rounded-xl font-black text-[10px] uppercase transition-all ${formData.free_shipping ? 'bg-green-500 text-white' : 'bg-white/5 text-zinc-500'}`}>
-                    {formData.free_shipping && <Check size={12} className="inline mr-1" />} Envío Gratis
-                  </button>
-                </div>
-                {formData.is_on_sale && (
-                  <input className="w-full bg-white rounded-xl px-5 py-3 font-black text-black outline-none" placeholder="Precio Original (tachado)" type="number" value={formData.original_price} onChange={e => setFormData({...formData, original_price: e.target.value})} />
-                )}
               </div>
 
               <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
@@ -388,7 +341,7 @@ const RepuestosTab = () => {
   );
 };
 
-// ===================== MOTOS TAB =====================
+// ===================== MOTOS TAB (CORREGIDO) =====================
 const MotosTab = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -433,6 +386,18 @@ const MotosTab = () => {
     setIsAdding(true);
   };
 
+  const handleDuplicate = (moto: any) => {
+    setEditingId(null);
+    setFormData({
+      title: `${moto.title} (Copia)`, brand: moto.brand, model: moto.model,
+      year: moto.year.toString(), kilometers: moto.kilometers.toString(),
+      price: moto.price.toString(), condition: moto.condition, description: moto.description || ''
+    });
+    setTempImages(moto.images || []);
+    setIsAdding(true);
+    toast.info("Copiado. Editá lo que necesites.");
+  };
+
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Eliminar esta moto?")) {
       const { error } = await supabase.from('motorcycles').delete().eq('id', id);
@@ -444,15 +409,17 @@ const MotosTab = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploadingImages(true);
+    const newUrls: string[] = [];
     for (const file of Array.from(files)) {
       try {
         const fileName = `motos/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
         const { error } = await supabase.storage.from('product-images').upload(fileName, file);
         if (error) throw error;
         const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
-        if (data?.publicUrl) setTempImages(prev => [...prev, data.publicUrl]);
+        if (data?.publicUrl) newUrls.push(data.publicUrl);
       } catch { toast.error("Error al subir"); }
     }
+    setTempImages(prev => [...prev, ...newUrls]);
     setUploadingImages(false);
   };
 
@@ -522,6 +489,7 @@ const MotosTab = () => {
             </div>
             <div className="flex gap-2 mt-4 pt-4 border-t">
               <button onClick={() => handleEdit(m)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[10px] font-black uppercase">Editar</button>
+              <button onClick={() => handleDuplicate(m)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
               <button onClick={() => handleDelete(m.id)} className="p-2 bg-red-50 text-red-500 rounded-xl"><Trash2 size={14}/></button>
             </div>
           </div>
@@ -553,6 +521,7 @@ const MotosTab = () => {
                 <td className="px-8 py-4 text-center">
                    <div className="flex justify-center gap-1">
                     <button onClick={() => handleEdit(m)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
+                    <button onClick={() => handleDuplicate(m)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
                     <button onClick={() => handleDelete(m.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                   </div>
                 </td>
@@ -561,6 +530,68 @@ const MotosTab = () => {
           </tbody>
         </table>
       </div>
+
+      {/* FORMULARIO DE MOTOS (LO QUE FALTABA) */}
+      {isAdding && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 md:px-10 md:py-6 border-b flex justify-between items-center">
+              <h2 className="text-xl md:text-2xl font-black uppercase italic">{editingId ? 'Editar Moto' : 'Nueva Moto'}</h2>
+              <button onClick={() => setIsAdding(false)} className="bg-gray-100 p-2 rounded-full"><X /></button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 md:p-10 space-y-6 overflow-y-auto custom-scrollbar">
+              <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Título (ej: Honda Tornado XR 250)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Marca (ej: Honda)" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} required />
+                <input className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Modelo (ej: Tornado)" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} required />
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Año</label>
+                  <input className="w-full bg-gray-50 rounded-2xl px-6 py-3 outline-none font-bold" type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} required />
+                </div>
+                <div>
+                  <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Kilómetros</label>
+                  <input className="w-full bg-gray-50 rounded-2xl px-6 py-3 outline-none font-bold" type="number" value={formData.kilometers} onChange={e => setFormData({...formData, kilometers: e.target.value})} required />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Condición</label>
+                  <select className="w-full bg-gray-50 rounded-2xl px-6 py-3 outline-none font-bold" value={formData.condition} onChange={e => setFormData({...formData, condition: e.target.value})}>
+                    <option value="Nueva">Nueva</option>
+                    <option value="Usada">Usada</option>
+                  </select>
+                </div>
+              </div>
+
+              <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción de la moto..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+              
+              <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8">
+                <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Precio de Venta ($)</label>
+                <input className="w-full bg-white/10 rounded-xl px-5 py-4 text-orange-500 font-black text-2xl outline-none mt-2" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
+              </div>
+
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+                {tempImages.map((url, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border">
+                    <img src={url} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setTempImages(prev => prev.filter(u => u !== url))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"><X size={10}/></button>
+                  </div>
+                ))}
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed rounded-xl flex items-center justify-center text-gray-300 hover:text-orange-500 hover:border-orange-500 transition-colors">
+                  {uploadingImages ? <Loader2 className="animate-spin"/> : <Upload/>}
+                </button>
+              </div>
+              <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+              
+              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 sticky bottom-0 transition-all">
+                {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Publicar Moto"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 };
@@ -644,11 +675,7 @@ const CategoriasTab = () => {
           {repuestosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image ? (
-                  <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
-                )}
+                {cat.image ? <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} /> : <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>}
               </div>
               <div className="p-4 flex items-center justify-between">
                 <span className="font-black uppercase text-sm tracking-tight truncate mr-2">{cat.nombre}</span>
@@ -668,11 +695,7 @@ const CategoriasTab = () => {
           {motosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
               <div className="aspect-[3/2] bg-zinc-100 overflow-hidden">
-                {cat.image ? (
-                  <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>
-                )}
+                {cat.image ? <img src={cat.image} className="w-full h-full object-cover" alt={cat.nombre} /> : <div className="w-full h-full flex items-center justify-center text-zinc-300"><Image size={40} /></div>}
               </div>
               <div className="p-4 flex items-center justify-between">
                 <span className="font-black uppercase text-sm tracking-tight truncate mr-2">{cat.nombre}</span>
@@ -699,12 +722,8 @@ const CategoriasTab = () => {
               <div>
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Tipo</label>
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setFormData({...formData, tipo: 'repuestos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'repuestos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
-                    Repuestos
-                  </button>
-                  <button type="button" onClick={() => setFormData({...formData, tipo: 'motos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'motos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
-                    Motos
-                  </button>
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'repuestos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'repuestos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Repuestos</button>
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'motos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'motos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Motos</button>
                 </div>
               </div>
 
@@ -723,7 +742,7 @@ const CategoriasTab = () => {
                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
               </div>
 
-              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20">
+              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">
                 {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Crear Categoría"}
               </button>
             </form>
@@ -734,7 +753,7 @@ const CategoriasTab = () => {
   );
 };
 
-// ===================== AJUSTES TAB =====================
+// ===================== AJUSTES TAB (MEJORADO CON UPSERT) =====================
 const AjustesTab = () => {
   const queryClient = useQueryClient();
   const [mediaUrl, setMediaUrl] = useState('');
@@ -745,8 +764,8 @@ const AjustesTab = () => {
   const { data: settings } = useQuery({
     queryKey: ['admin-site-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('site_settings').select('*').limit(1).single();
-      if (error) throw error;
+      const { data, error } = await supabase.from('site_settings').select('*').limit(1).maybeSingle();
+      if (error && error.code !== 'PGRST116') throw error;
       if (data) { setMediaUrl(data.home_media_url || ''); setMediaType(data.home_media_type || 'image'); }
       return data;
     }
@@ -761,23 +780,26 @@ const AjustesTab = () => {
     const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
     if (data?.publicUrl) {
       setMediaUrl(data.publicUrl);
-      const isVideo = file.type.startsWith('video');
-      setMediaType(isVideo ? 'video' : 'image');
+      setMediaType(file.type.startsWith('video') ? 'video' : 'image');
     }
   };
 
   const handleSave = async () => {
-    if (!settings?.id) return;
     setSaving(true);
-    const { error } = await supabase.from('site_settings').update({
+    const payload = {
       home_media_url: mediaUrl,
       home_media_type: mediaType,
       updated_at: new Date().toISOString()
-    }).eq('id', settings.id);
+    };
+    
+    const { error } = settings?.id 
+      ? await supabase.from('site_settings').update(payload).eq('id', settings.id)
+      : await supabase.from('site_settings').insert([payload]);
+
     setSaving(false);
     if (!error) {
       toast.success("¡Banner actualizado!");
-      queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-site-settings'] });
     } else { toast.error("Error: " + error.message); }
   };
 
@@ -810,5 +832,4 @@ const AjustesTab = () => {
 };
 
 export default Admin;
-
 

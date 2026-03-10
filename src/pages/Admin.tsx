@@ -304,15 +304,58 @@ const RepuestosTab = () => {
               </div>
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               
-              <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Precio Actual</label>
+                    <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 block mb-1">Precio Actual</label>
                     <input className="w-full bg-white/10 rounded-xl px-5 py-3 text-orange-500 font-black text-xl outline-none" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Stock</label>
+                    <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 block mb-1">Stock</label>
                     <input className="w-full bg-white/10 rounded-xl px-5 py-3 text-white font-black text-xl outline-none" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
+                  </div>
+                </div>
+
+                {/* --- NUEVA SECCIÓN DE OFERTAS Y ENVÍO --- */}
+                <div className="pt-4 border-t border-white/10 space-y-4">
+                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                    
+                    {/* Switch Oferta */}
+                    <div className="flex items-center gap-3">
+                      <button 
+                        type="button" 
+                        onClick={() => setFormData({...formData, is_on_sale: !formData.is_on_sale})}
+                        className={`w-12 h-6 rounded-full relative transition-colors ${formData.is_on_sale ? 'bg-orange-500' : 'bg-zinc-700'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.is_on_sale ? 'left-7' : 'left-1'}`} />
+                      </button>
+                      <span className="text-white text-[10px] font-black uppercase">Activar Oferta</span>
+                    </div>
+
+                    {/* Input Precio Original (solo si está en oferta) */}
+                    {formData.is_on_sale && (
+                      <div className="flex-1 w-full md:w-auto">
+                        <input 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-zinc-400 font-bold text-sm outline-none focus:border-orange-500/50" 
+                          placeholder="Precio anterior (ej: 12000)" 
+                          type="number"
+                          value={formData.original_price} 
+                          onChange={e => setFormData({...formData, original_price: e.target.value})} 
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Switch Envío Gratis */}
+                  <div className="flex items-center gap-3">
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData({...formData, free_shipping: !formData.free_shipping})}
+                      className={`w-12 h-6 rounded-full relative transition-colors ${formData.free_shipping ? 'bg-green-500' : 'bg-zinc-700'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.free_shipping ? 'left-7' : 'left-1'}`} />
+                    </button>
+                    <span className="text-white text-[10px] font-black uppercase">Envío Gratis</span>
                   </div>
                 </div>
               </div>
@@ -341,7 +384,7 @@ const RepuestosTab = () => {
   );
 };
 
-// ===================== MOTOS TAB (CORREGIDO) =====================
+// ===================== MOTOS TAB =====================
 const MotosTab = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -531,7 +574,6 @@ const MotosTab = () => {
         </table>
       </div>
 
-      {/* FORMULARIO DE MOTOS (LO QUE FALTABA) */}
       {isAdding && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -832,4 +874,3 @@ const AjustesTab = () => {
 };
 
 export default Admin;
-

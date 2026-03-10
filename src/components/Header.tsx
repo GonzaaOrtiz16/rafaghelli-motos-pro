@@ -15,7 +15,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const { data: categories = [] } = useQuery({
-    queryKey: ['categorias', 'repuestos'],
+    queryKey: ['categorias', 'repuestos', 'nav'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categorias')

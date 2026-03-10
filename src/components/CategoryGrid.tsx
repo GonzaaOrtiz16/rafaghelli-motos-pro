@@ -90,7 +90,7 @@ const CategoryGrid = React.memo(({ categories }: { categories: Category[] }) => 
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {categories.map((cat) => (
-          <div key={cat.id} className="snap-start">
+          <div key={cat.id} className="snap-start flex-shrink-0 w-28 md:w-40">
             <CategoryItem cat={cat} />
           </div>
         ))}

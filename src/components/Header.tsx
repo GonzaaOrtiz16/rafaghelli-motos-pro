@@ -104,7 +104,8 @@ const Header = () => {
           {categories.map(cat => (
             <Link
               key={cat.id}
-              to={`/productos?categoria=${cat.slug}`}
+              /* CORRECCIÓN: Usamos cat.nombre para que el filtro de la página de productos lo reconozca */
+              to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
               className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {cat.nombre}
@@ -140,7 +141,8 @@ const Header = () => {
             {categories.map(cat => (
               <Link
                 key={cat.id}
-                to={`/productos?categoria=${cat.slug}`}
+                /* CORRECCIÓN: Usamos cat.nombre también en el menú móvil */
+                to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
               >

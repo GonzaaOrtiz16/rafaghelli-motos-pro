@@ -62,7 +62,8 @@ const Home = () => {
       const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: categories = [] } = useQuery({
@@ -71,7 +72,8 @@ const Home = () => {
       const { data, error } = await supabase.from('categorias').select('id, nombre, image').eq('tipo', 'repuestos').order('nombre');
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: siteSettings } = useQuery({
@@ -80,7 +82,8 @@ const Home = () => {
       const { data, error } = await supabase.from('site_settings').select('home_media_url, home_media_type').limit(1).single();
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 10,
   });
 
   const featured = products.filter(p => p.is_on_sale === true);

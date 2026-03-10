@@ -19,12 +19,13 @@ const Header = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('categorias')
-        .select('*')
+        .select('id, nombre')
         .eq('tipo', 'repuestos')
         .order('nombre');
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
   const handleSearch = (e: React.FormEvent) => {

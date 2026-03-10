@@ -34,21 +34,23 @@ const ProductList = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['public-products-list'],
+    queryKey: ['public-products'],
     queryFn: async () => {
       const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: categorias = [] } = useQuery({
     queryKey: ['categorias', 'repuestos'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias').select('id, nombre, slug').eq('tipo', 'repuestos').order('nombre');
+      const { data, error } = await supabase.from('categorias').select('id, nombre').eq('tipo', 'repuestos').order('nombre');
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
   const dynamicBrands = useMemo(() => {

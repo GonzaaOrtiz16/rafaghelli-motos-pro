@@ -63,7 +63,7 @@ const ProductList = () => {
   const filtered = useMemo(() => {
     return products.filter(p => {
       if (activeCat && p.category !== activeCat) return false;
-      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam) && !p.brand.toLowerCase().includes(qParam)) return false;
+      if (qParam && !p.title.toLowerCase().includes(qParam) && !(p.category || '').toLowerCase().includes(qParam) && !(p.brand || '').toLowerCase().includes(qParam)) return false;
       if (brandFilter && p.brand !== brandFilter) return false;
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];

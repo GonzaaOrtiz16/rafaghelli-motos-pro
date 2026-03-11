@@ -39,6 +39,12 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="bg-card rounded-[2rem] h-full overflow-hidden border border-border shadow-sm hover:shadow-xl transition-shadow duration-300 relative flex flex-col"
       >
+        {outOfStock && (
+          <div className="absolute top-3 right-3 z-10 bg-red-600 text-white px-3 py-1 rounded-full font-black text-[10px] uppercase shadow-lg">
+            SIN STOCK
+          </div>
+        )}
+
         {hasDiscount && (
           <motion.div
             initial={{ scale: 0, rotate: -20 }}

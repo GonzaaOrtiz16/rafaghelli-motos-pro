@@ -98,8 +98,11 @@ const ProductList = () => {
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-primary">Categoría</h4>
         <div className="space-y-1">
+          <FilterButton active={!activeCat} onClick={() => { setCatFilter(""); setSearchParams({}); }}>
+            Ver todo
+          </FilterButton>
           {categorias.map(c => (
-            <FilterButton key={c.id} active={catFilter === c.nombre} onClick={() => setCatFilter(catFilter === c.nombre ? "" : c.nombre)}>
+            <FilterButton key={c.id} active={activeCat === c.nombre} onClick={() => { setCatFilter(c.nombre); setSearchParams({}); }}>
               {c.nombre}
             </FilterButton>
           ))}

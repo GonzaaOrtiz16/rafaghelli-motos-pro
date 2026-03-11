@@ -209,10 +209,11 @@ const ProductDetail = () => {
           <div className="flex flex-col gap-4">
             <Button
               onClick={handleAddToCart}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group"
+              disabled={outOfStock}
+              className={`w-full h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group ${outOfStock ? 'bg-zinc-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
             >
               <ShoppingCart size={28} className="mr-4 group-hover:scale-110 transition-transform" />
-              Agregar al Carrito
+              {outOfStock ? 'SIN STOCK' : 'Agregar al Carrito'}
             </Button>
             <Button 
               onClick={handleWhatsAppClick}

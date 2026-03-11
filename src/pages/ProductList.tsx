@@ -58,7 +58,7 @@ const ProductList = () => {
     return Array.from(brandSet).sort();
   }, [products]);
 
-  const activeCat = catParam || catFilter;
+  const activeCat = catFilter || catParam || "";
 
   const filtered = useMemo(() => {
     return products.filter(p => {

@@ -14,6 +14,7 @@ interface Product {
   free_shipping: boolean;
   is_on_sale: boolean;
   slug: string;
+  stock?: number | null;
 }
 
 const formatPrice = (n: number) =>

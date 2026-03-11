@@ -30,6 +30,7 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
   const discountPercentage = hasDiscount
     ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
     : 0;
+  const outOfStock = (product.stock ?? 0) <= 0;
 
   return (
     <Link to={`/producto/${product.slug}`} className="group block h-full">

@@ -36,7 +36,7 @@ const ProductList = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale, stock').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },

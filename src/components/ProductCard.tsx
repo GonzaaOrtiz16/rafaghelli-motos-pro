@@ -14,6 +14,7 @@ interface Product {
   free_shipping: boolean;
   is_on_sale: boolean;
   slug: string;
+  stock?: number | null;
 }
 
 const formatPrice = (n: number) =>
@@ -29,6 +30,7 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
   const discountPercentage = hasDiscount
     ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
     : 0;
+  const outOfStock = (product.stock ?? 0) <= 0;
 
   return (
     <Link to={`/producto/${product.slug}`} className="group block h-full">
@@ -37,6 +39,12 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="bg-card rounded-[2rem] h-full overflow-hidden border border-border shadow-sm hover:shadow-xl transition-shadow duration-300 relative flex flex-col"
       >
+        {outOfStock && (
+          <div className="absolute top-3 right-3 z-10 bg-red-600 text-white px-3 py-1 rounded-full font-black text-[10px] uppercase shadow-lg">
+            SIN STOCK
+          </div>
+        )}
+
         {hasDiscount && (
           <motion.div
             initial={{ scale: 0, rotate: -20 }}

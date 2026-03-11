@@ -36,7 +36,7 @@ const ProductList = () => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale, stock').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -58,12 +58,12 @@ const ProductList = () => {
     return Array.from(brandSet).sort();
   }, [products]);
 
-  const activeCat = catParam || catFilter;
+  const activeCat = catFilter || catParam || "";
 
   const filtered = useMemo(() => {
     return products.filter(p => {
       if (activeCat && p.category !== activeCat) return false;
-      if (qParam && !p.title.toLowerCase().includes(qParam) && !p.category.toLowerCase().includes(qParam) && !p.brand.toLowerCase().includes(qParam)) return false;
+      if (qParam && !p.title.toLowerCase().includes(qParam) && !(p.category || '').toLowerCase().includes(qParam) && !(p.brand || '').toLowerCase().includes(qParam)) return false;
       if (brandFilter && p.brand !== brandFilter) return false;
       if (priceFilter >= 0) {
         const range = priceRanges[priceFilter];
@@ -98,8 +98,11 @@ const ProductList = () => {
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest mb-3 text-primary">Categoría</h4>
         <div className="space-y-1">
+          <FilterButton active={!activeCat} onClick={() => { setCatFilter(""); setSearchParams({}); }}>
+            Ver todo
+          </FilterButton>
           {categorias.map(c => (
-            <FilterButton key={c.id} active={catFilter === c.nombre} onClick={() => setCatFilter(catFilter === c.nombre ? "" : c.nombre)}>
+            <FilterButton key={c.id} active={activeCat === c.nombre} onClick={() => { setCatFilter(c.nombre); setSearchParams({}); }}>
               {c.nombre}
             </FilterButton>
           ))}

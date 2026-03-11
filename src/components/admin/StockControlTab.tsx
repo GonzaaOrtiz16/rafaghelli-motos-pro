@@ -1,0 +1,321 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Html5Qrcode } from "html5-qrcode";
+
+const StockControlTab = () => {
+  const queryClient = useQueryClient();
+  const [scanning, setScanning] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState<any>(null);
+  const [stockDelta, setStockDelta] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [manualSearch, setManualSearch] = useState('');
+  const [importing, setImporting] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: products = [] } = useQuery({
+    queryKey: ['admin-products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*').order('title');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const startScanner = useCallback(async () => {
+    setScanning(true);
+    try {
+      const scanner = new Html5Qrcode("scanner-container");
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          handleScanResult(decodedText);
+          stopScanner();
+        },
+        () => {}
+      );
+    } catch (err) {
+      toast.error("No se pudo acceder a la cámara");
+      setScanning(false);
+    }
+  }, []);
+
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        scannerRef.current.clear();
+      } catch {}
+      scannerRef.current = null;
+    }
+    setScanning(false);
+  }, []);
+
+  useEffect(() => {
+    return () => { stopScanner(); };
+  }, [stopScanner]);
+
+  const handleScanResult = async (code: string) => {
+    // Search by barcode first, then by ID
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .or(`barcode.eq.${code},id.eq.${code}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      setScannedProduct(data);
+      setStockDelta(0);
+    } else {
+      toast.error(`No se encontró producto con código: ${code}`);
+    }
+  };
+
+  const handleManualSearch = () => {
+    if (!manualSearch.trim()) return;
+    const found = products.find(p =>
+      p.title.toLowerCase().includes(manualSearch.toLowerCase()) ||
+      (p as any).barcode === manualSearch ||
+      p.id === manualSearch
+    );
+    if (found) {
+      setScannedProduct(found);
+      setStockDelta(0);
+      setManualSearch('');
+    } else {
+      toast.error("Producto no encontrado");
+    }
+  };
+
+  const handleUpdateStock = async () => {
+    if (!scannedProduct || stockDelta === 0) return;
+    setSaving(true);
+    const newStock = Math.max(0, (scannedProduct.stock || 0) + stockDelta);
+    const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', scannedProduct.id);
+    setSaving(false);
+    if (!error) {
+      toast.success(`Stock actualizado: ${scannedProduct.stock} → ${newStock}`);
+      setScannedProduct({ ...scannedProduct, stock: newStock });
+      setStockDelta(0);
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    } else {
+      toast.error("Error al actualizar stock");
+    }
+  };
+
+  // ===== EXPORT CSV =====
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Título', 'Código de Barras', 'Stock', 'Precio', 'Categoría', 'Marca'];
+    const rows = products.map(p => [
+      p.id,
+      `"${p.title.replace(/"/g, '""')}"`,
+      (p as any).barcode || '',
+      p.stock ?? 0,
+      p.price,
+      `"${p.category}"`,
+      `"${p.brand}"`
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventario_rafaghelli_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado correctamente");
+  };
+
+  // ===== IMPORT CSV =====
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+
+    const text = await file.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { toast.error("El CSV está vacío"); setImporting(false); return; }
+
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const idIdx = headers.findIndex(h => h === 'id');
+    const stockIdx = headers.findIndex(h => h === 'stock');
+    const barcodeIdx = headers.findIndex(h => h.includes('barr') || h.includes('barcode') || h.includes('código'));
+
+    if (idIdx === -1 || stockIdx === -1) {
+      toast.error("El CSV debe tener columnas 'ID' y 'Stock'");
+      setImporting(false);
+      return;
+    }
+
+    let updated = 0;
+    let errors = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+      const id = cols[idIdx];
+      const stock = parseInt(cols[stockIdx]);
+      if (!id || isNaN(stock)) continue;
+
+      const updateData: any = { stock };
+      if (barcodeIdx !== -1 && cols[barcodeIdx]) {
+        updateData.barcode = cols[barcodeIdx];
+      }
+
+      const { error } = await supabase.from('products').update(updateData).eq('id', id);
+      if (error) errors++;
+      else updated++;
+    }
+
+    setImporting(false);
+    queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    toast.success(`Importación completada: ${updated} actualizados, ${errors} errores`);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none">Control de Stock</h1>
+
+      {/* Scanner Section */}
+      <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-6">
+        <div className="flex items-center gap-3">
+          <Camera size={24} className="text-orange-500" />
+          <h3 className="font-black uppercase tracking-tighter text-lg">Escáner de Productos</h3>
+        </div>
+
+        {/* Manual search */}
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, código o ID..."
+              className="w-full bg-gray-50 border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+              value={manualSearch}
+              onChange={e => setManualSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleManualSearch()}
+            />
+          </div>
+          <button onClick={handleManualSearch} className="bg-zinc-900 text-white px-6 rounded-2xl font-black uppercase text-xs">Buscar</button>
+        </div>
+
+        {/* Camera scanner */}
+        <div className="flex gap-3">
+          {!scanning ? (
+            <button onClick={startScanner} className="flex-1 bg-orange-500 text-white py-4 rounded-2xl font-black uppercase text-sm flex items-center justify-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
+              <Camera size={20} /> Abrir Escáner
+            </button>
+          ) : (
+            <button onClick={stopScanner} className="flex-1 bg-red-500 text-white py-4 rounded-2xl font-black uppercase text-sm flex items-center justify-center gap-2 hover:bg-red-600 transition-all">
+              <X size={20} /> Cerrar Escáner
+            </button>
+          )}
+        </div>
+
+        {scanning && (
+          <div className="rounded-2xl overflow-hidden border bg-black aspect-video max-w-lg mx-auto">
+            <div id="scanner-container" className="w-full h-full" />
+          </div>
+        )}
+
+        {/* Product modal after scan */}
+        {scannedProduct && (
+          <div className="bg-zinc-50 rounded-[24px] border-2 border-orange-500/20 p-6 space-y-4">
+            <div className="flex justify-between items-start">
+              <div className="flex gap-4 items-center">
+                <img src={scannedProduct.images?.[0] || '/placeholder.svg'} className="w-16 h-16 rounded-xl object-cover" />
+                <div>
+                  <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{scannedProduct.brand}</p>
+                  <h4 className="font-black uppercase text-sm">{scannedProduct.title}</h4>
+                  {(scannedProduct as any).barcode && (
+                    <p className="text-[10px] text-zinc-400 font-bold mt-1">Código: {(scannedProduct as any).barcode}</p>
+                  )}
+                </div>
+              </div>
+              <button onClick={() => { setScannedProduct(null); setStockDelta(0); }} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 py-4">
+              <button onClick={() => setStockDelta(d => d - 1)} className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors">
+                <Minus size={24} />
+              </button>
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase text-zinc-400">Stock actual</p>
+                <p className="text-4xl font-black text-zinc-900">{(scannedProduct.stock || 0) + stockDelta}</p>
+                {stockDelta !== 0 && (
+                  <p className={`text-sm font-black ${stockDelta > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {stockDelta > 0 ? '+' : ''}{stockDelta}
+                  </p>
+                )}
+              </div>
+              <button onClick={() => setStockDelta(d => d + 1)} className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition-colors">
+                <Plus size={24} />
+              </button>
+            </div>
+
+            <button
+              onClick={handleUpdateStock}
+              disabled={stockDelta === 0 || saving}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 text-white py-4 rounded-2xl font-black uppercase text-sm transition-all shadow-lg shadow-orange-500/20 disabled:shadow-none"
+            >
+              {saving ? "Guardando..." : "Actualizar Stock"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Import / Export Section */}
+      <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-6">
+        <div className="flex items-center gap-3">
+          <FileSpreadsheet size={24} className="text-orange-500" />
+          <h3 className="font-black uppercase tracking-tighter text-lg">Importar / Exportar</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button onClick={handleExportCSV} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
+            <Download size={20} /> Exportar CSV
+          </button>
+          <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-orange-500 text-orange-500 py-5 rounded-2xl font-black uppercase text-sm hover:bg-orange-50 transition-all disabled:opacity-50">
+            {importing ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
+            {importing ? 'Importando...' : 'Importar CSV'}
+          </button>
+          <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleImportCSV} />
+        </div>
+
+        <div className="bg-zinc-50 rounded-2xl p-4 text-[11px] text-zinc-500 font-medium space-y-1">
+          <p className="font-black uppercase text-zinc-700 text-xs mb-2">Formato del CSV:</p>
+          <p>• Columnas obligatorias: <strong>ID, Stock</strong></p>
+          <p>• Columnas opcionales: Título, Código de Barras, Precio, Categoría, Marca</p>
+          <p>• Podés exportar primero para obtener la plantilla con los IDs correctos</p>
+        </div>
+
+        {/* Quick stock overview */}
+        <div>
+          <h4 className="font-black uppercase text-xs tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Package size={14} /> Resumen de Stock</h4>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-green-50 rounded-2xl p-4 text-center border border-green-100">
+              <p className="text-2xl font-black text-green-600">{products.filter(p => (p.stock ?? 0) > 5).length}</p>
+              <p className="text-[9px] font-black uppercase text-green-700">Con stock</p>
+            </div>
+            <div className="bg-orange-50 rounded-2xl p-4 text-center border border-orange-100">
+              <p className="text-2xl font-black text-orange-600">{products.filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5).length}</p>
+              <p className="text-[9px] font-black uppercase text-orange-700">Stock bajo</p>
+            </div>
+            <div className="bg-red-50 rounded-2xl p-4 text-center border border-red-100">
+              <p className="text-2xl font-black text-red-600">{products.filter(p => (p.stock ?? 0) <= 0).length}</p>
+              <p className="text-[9px] font-black uppercase text-red-700">Sin stock</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StockControlTab;

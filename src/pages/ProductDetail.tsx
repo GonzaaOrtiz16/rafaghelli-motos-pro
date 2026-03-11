@@ -63,8 +63,13 @@ const ProductDetail = () => {
   }
 
   const hasSizes = product.sizes && product.sizes.length > 0;
+  const outOfStock = (product.stock ?? 0) <= 0;
 
   const handleAddToCart = () => {
+    if (outOfStock) {
+      toast.error("Este producto no tiene stock disponible");
+      return;
+    }
     if (hasSizes && !selectedSize) {
       toast.error("Seleccioná un talle antes de agregar al carrito");
       return;

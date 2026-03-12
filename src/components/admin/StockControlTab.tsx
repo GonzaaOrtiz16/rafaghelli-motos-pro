@@ -372,6 +372,8 @@ const StockControlTab = () => {
           </div>
         </div>
       </div>
+
+      <ProductQRModal open={!!qrProduct} onOpenChange={(o) => !o && setQrProduct(null)} product={qrProduct} />
     </div>
   );
 };

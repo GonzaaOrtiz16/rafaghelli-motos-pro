@@ -295,7 +295,14 @@ const StockControlTab = () => {
                   )}
                 </div>
               </div>
-              <button onClick={() => { setScannedProduct(null); setStockDelta(0); }} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+              <div className="flex items-center gap-2">
+                {scannedProduct.barcode && (
+                  <button onClick={() => setQrProduct(scannedProduct)} className="text-orange-500 hover:text-orange-600" title="Ver QR">
+                    <QrCode size={20} />
+                  </button>
+                )}
+                <button onClick={() => { setScannedProduct(null); setStockDelta(0); }} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+              </div>
             </div>
             <div className="flex items-center justify-center gap-6 py-4">
               <button onClick={() => setStockDelta(d => d - 1)} className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors">

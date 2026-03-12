@@ -1,0 +1,1 @@
+UPDATE public.profiles SET role = 'encargado' WHERE id = '6ad86a26-2c26-49a5-be33-1ee7954bf072';

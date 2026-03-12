@@ -505,6 +505,8 @@ const POS = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ProductQRModal open={!!qrProduct} onOpenChange={(o) => !o && setQrProduct(null)} product={qrProduct} />
     </div>
   );
 };

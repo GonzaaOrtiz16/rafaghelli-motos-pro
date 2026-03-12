@@ -18,6 +18,7 @@ import Admin from "@/pages/Admin";
 import Motos from "@/pages/Motos";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
+import POS from "@/pages/POS";
 import NotFound from "./pages/NotFound";
 import { MessageCircle, X, Instagram } from "lucide-react";
 
@@ -117,6 +118,7 @@ const App = () => {
                   <Route path="/motos" element={ <Motos /> } />
                   <Route path="/taller" element={ <Workshop /> } />
                   <Route path="/admin" element={ <Admin /> } />
+                  <Route path="/ventas" element={ <POS /> } />
                   <Route path="/auth" element={ <Auth /> } />
                   <Route path="/reset-password" element={ <ResetPassword /> } />
                   <Route path="*" element={ <NotFound /> } />

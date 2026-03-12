@@ -39,6 +39,7 @@ const POS = () => {
   const [voidTarget, setVoidTarget] = useState<any>(null);
   const [pin, setPin] = useState('');
   const [voiding, setVoiding] = useState(false);
+  const [qrProduct, setQrProduct] = useState<any>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   // Redirect if not staff

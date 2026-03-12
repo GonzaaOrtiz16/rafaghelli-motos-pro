@@ -1,7 +1,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);

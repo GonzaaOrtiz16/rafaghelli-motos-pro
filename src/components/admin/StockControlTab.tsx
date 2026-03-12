@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users } from "lucide-react";
+import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import ProductQRModal from "@/components/ProductQRModal";
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);

@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Camera, X, Plus, Minus, Search, ShoppingCart, Trash2, CheckCircle, RotateCcw, Lock, ScanLine } from "lucide-react";
+import { Camera, X, Plus, Minus, Search, ShoppingCart, Trash2, CheckCircle, RotateCcw, Lock, ScanLine, LogOut, Shield } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 
 const SUPERVISOR_PIN = '1234';
 
@@ -23,6 +26,9 @@ interface CartItem {
 
 const POS = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { isEncargado, isVendedor, isStaff, displayName, loading: roleLoading } = useUserRole();
   const [scanning, setScanning] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [manualSearch, setManualSearch] = useState('');
@@ -33,6 +39,21 @@ const POS = () => {
   const [pin, setPin] = useState('');
   const [voiding, setVoiding] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  // Redirect if not staff
+  useEffect(() => {
+    if (!roleLoading && user && !isStaff) {
+      toast.error("No tenés permisos para acceder a Ventas");
+      navigate('/');
+    }
+  }, [roleLoading, user, isStaff, navigate]);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!roleLoading && !user) {
+      navigate('/auth');
+    }
+  }, [roleLoading, user, navigate]);
 
   const { data: products = [] } = useQuery({
     queryKey: ['pos-products'],
@@ -58,12 +79,10 @@ const POS = () => {
     refetchInterval: 15000,
   });
 
-  // Group sales by timestamp (same second = same sale)
   const salesGrouped = React.useMemo(() => {
     const ventas = todayMovements.filter(m => m.movement_type === 'venta');
     const groups: Record<string, typeof ventas> = {};
     ventas.forEach(v => {
-      // Group by created_at rounded to second
       const key = v.created_at.slice(0, 19);
       if (!groups[key]) groups[key] = [];
       groups[key].push(v);
@@ -71,7 +90,6 @@ const POS = () => {
     return Object.entries(groups).sort(([a], [b]) => b.localeCompare(a));
   }, [todayMovements]);
 
-  // Check if a sale group has been voided
   const isVoided = useCallback((saleKey: string) => {
     return todayMovements.some(m => m.movement_type === 'anulacion' && m.reason?.includes(saleKey));
   }, [todayMovements]);
@@ -154,7 +172,6 @@ const POS = () => {
 
   const total = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
 
-  // Manual search
   const handleSearch = (query: string) => {
     setManualSearch(query);
     if (query.length < 2) { setSearchResults([]); return; }
@@ -164,12 +181,13 @@ const POS = () => {
     ).slice(0, 6));
   };
 
-  // Confirm sale
+  // Confirm sale - saves seller_name
   const confirmSale = async () => {
     if (cart.length === 0) return;
     setConfirming(true);
     try {
       const now = new Date().toISOString();
+      const sellerName = user?.email || 'desconocido';
       for (const item of cart) {
         const newStock = Math.max(0, item.stock - item.quantity);
         await supabase.from('products').update({ stock: newStock }).eq('id', item.id);
@@ -179,7 +197,8 @@ const POS = () => {
           quantity: -item.quantity,
           reason: `Venta POS - ${item.title} x${item.quantity}`,
           created_at: now,
-        });
+          seller_name: sellerName,
+        } as any);
       }
       toast.success(`Venta confirmada: ${formatPrice(total)}`);
       setCart([]);
@@ -192,30 +211,49 @@ const POS = () => {
     setConfirming(false);
   };
 
-  // Void sale
-  const handleVoid = async () => {
+  // Void sale - encargado skips PIN
+  const initiateVoid = (saleKey: string, items: any[]) => {
+    if (isEncargado) {
+      // Direct void without PIN
+      setVoidTarget([saleKey, items]);
+      performVoid(saleKey, items);
+    } else {
+      // Vendedor needs PIN
+      setVoidTarget([saleKey, items]);
+      setVoidModalOpen(true);
+      setPin('');
+    }
+  };
+
+  const handleVoidWithPin = async () => {
     if (pin !== SUPERVISOR_PIN) {
       toast.error("PIN incorrecto");
       return;
     }
     if (!voidTarget) return;
+    const [saleKey, items] = voidTarget;
+    await performVoid(saleKey, items);
+    setVoidModalOpen(false);
+    setPin('');
+  };
+
+  const performVoid = async (saleKey: string, items: any[]) => {
     setVoiding(true);
-    const [saleKey, items] = voidTarget as [string, any[]];
     try {
+      const sellerName = user?.email || 'desconocido';
       for (const mov of items) {
         const absQty = Math.abs(mov.quantity);
-        // Restore stock
         const { data: prod } = await supabase.from('products').select('stock').eq('id', mov.product_id).single();
         if (prod) {
           await supabase.from('products').update({ stock: (prod.stock ?? 0) + absQty }).eq('id', mov.product_id);
         }
-        // Record void movement
         await supabase.from('stock_movements').insert({
           product_id: mov.product_id,
           movement_type: 'anulacion',
           quantity: absQty,
           reason: `Anulación de venta ${saleKey}`,
-        });
+          seller_name: sellerName,
+        } as any);
       }
       toast.success("Venta anulada correctamente");
       queryClient.invalidateQueries({ queryKey: ['pos-products'] });
@@ -225,9 +263,7 @@ const POS = () => {
       toast.error("Error al anular la venta");
     }
     setVoiding(false);
-    setVoidModalOpen(false);
     setVoidTarget(null);
-    setPin('');
   };
 
   const getProductTitle = (productId: string | null) => {
@@ -236,16 +272,56 @@ const POS = () => {
     return p?.title || productId.slice(0, 8);
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-bold text-zinc-400">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 font-sans pb-32">
       {/* Header */}
       <header className="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <ScanLine size={20} className="text-orange-500" />
-          <span className="font-black uppercase text-sm italic tracking-tight">Punto de Venta</span>
+          <div>
+            <span className="font-black uppercase text-sm italic tracking-tight">Rafaghelli Motos</span>
+            <span className="text-[9px] text-zinc-400 font-bold ml-2 uppercase">POS</span>
+          </div>
         </div>
-        <a href="/" className="text-zinc-400 text-xs font-bold hover:text-white transition-colors">Volver</a>
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-[10px] text-zinc-400 font-bold">{displayName}</p>
+            <p className="text-[9px] text-orange-400 font-black uppercase">{isEncargado ? 'Encargado' : 'Vendedor'}</p>
+          </div>
+          {isEncargado && (
+            <button onClick={() => navigate('/admin')} className="text-zinc-400 hover:text-white text-[10px] font-black uppercase flex items-center gap-1 transition-colors">
+              <Shield size={14} /> Admin
+            </button>
+          )}
+          <button onClick={handleLogout} className="text-zinc-400 hover:text-white transition-colors">
+            <LogOut size={18} />
+          </button>
+        </div>
       </header>
+
+      {/* Mobile user badge */}
+      <div className="sm:hidden bg-zinc-800 px-4 py-2 flex items-center justify-between">
+        <p className="text-[10px] text-zinc-300 font-bold truncate">{displayName}</p>
+        <span className="text-[9px] text-orange-400 font-black uppercase bg-orange-500/10 px-2 py-0.5 rounded-full">
+          {isEncargado ? 'Encargado' : 'Vendedor'}
+        </span>
+      </div>
 
       <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
         {/* Scanner */}
@@ -353,12 +429,14 @@ const POS = () => {
                 const voided = isVoided(key);
                 const saleTotal = items.reduce((s, i) => s + Math.abs(i.quantity) * (products.find(p => p.id === i.product_id)?.price ?? 0), 0);
                 const time = new Date(key).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+                const seller = (items[0] as any)?.seller_name || '';
                 return (
                   <div key={key} className={`px-4 py-3 ${voided ? 'opacity-50 bg-red-50/50' : ''}`}>
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-black text-zinc-500">{time}</span>
+                          {seller && <span className="text-[9px] font-bold text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-full">{seller}</span>}
                           {voided && <span className="text-[9px] font-black text-red-500 bg-red-100 px-2 py-0.5 rounded-full uppercase">Anulada</span>}
                         </div>
                         <div className="mt-1 space-y-0.5">
@@ -373,7 +451,7 @@ const POS = () => {
                         <span className="font-black text-sm">{formatPrice(saleTotal)}</span>
                         {!voided && (
                           <button
-                            onClick={() => { setVoidTarget([key, items]); setVoidModalOpen(true); setPin(''); }}
+                            onClick={() => initiateVoid(key, items)}
                             className="text-red-400 hover:text-red-600 p-1"
                           >
                             <RotateCcw size={16} />
@@ -389,7 +467,7 @@ const POS = () => {
         </div>
       </div>
 
-      {/* Void PIN Modal */}
+      {/* Void PIN Modal - only for vendedores */}
       <Dialog open={voidModalOpen} onOpenChange={setVoidModalOpen}>
         <DialogContent className="max-w-sm rounded-[24px]">
           <DialogHeader>
@@ -409,7 +487,7 @@ const POS = () => {
               autoFocus
             />
             <button
-              onClick={handleVoid}
+              onClick={handleVoidWithPin}
               disabled={pin.length < 4 || voiding}
               className="w-full bg-red-500 hover:bg-red-600 disabled:bg-zinc-300 text-white py-4 rounded-2xl font-black uppercase text-sm transition-all"
             >

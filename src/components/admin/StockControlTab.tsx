@@ -17,6 +17,7 @@ const StockControlTab = () => {
   const [saving, setSaving] = useState(false);
   const [manualSearch, setManualSearch] = useState('');
   const [importing, setImporting] = useState(false);
+  const [qrProduct, setQrProduct] = useState<any>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

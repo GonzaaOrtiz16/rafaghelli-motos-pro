@@ -183,14 +183,21 @@ const StockControlTab = () => {
       setImporting(false);
       return;
     }
-    let updated = 0, errors = 0;
+    let updated = 0, errors = 0, generated = 0;
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
       const id = cols[idIdx];
       const stock = parseInt(cols[stockIdx]);
       if (!id || isNaN(stock)) continue;
       const updateData: any = { stock };
-      if (barcodeIdx !== -1 && cols[barcodeIdx]) updateData.barcode = cols[barcodeIdx];
+      const csvBarcode = barcodeIdx !== -1 ? cols[barcodeIdx] : '';
+      if (csvBarcode) {
+        updateData.barcode = csvBarcode;
+      } else {
+        // Auto-generate barcode if empty
+        updateData.barcode = `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        generated++;
+      }
       const { error } = await supabase.from('products').update(updateData).eq('id', id);
       if (error) errors++; else updated++;
     }

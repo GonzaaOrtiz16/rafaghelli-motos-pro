@@ -203,7 +203,7 @@ const StockControlTab = () => {
     }
     setImporting(false);
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    toast.success(`Importación completada: ${updated} actualizados, ${errors} errores`);
+    toast.success(`Importación completada: ${updated} actualizados, ${generated} códigos generados, ${errors} errores`);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

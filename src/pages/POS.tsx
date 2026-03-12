@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Camera, X, Plus, Minus, Search, ShoppingCart, Trash2, CheckCircle, RotateCcw, Lock, ScanLine, LogOut, Shield } from "lucide-react";
+import { Camera, X, Plus, Minus, Search, ShoppingCart, Trash2, CheckCircle, RotateCcw, Lock, ScanLine, LogOut, Shield, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ProductQRModal from "@/components/ProductQRModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,7 @@ const POS = () => {
   const [voidTarget, setVoidTarget] = useState<any>(null);
   const [pin, setPin] = useState('');
   const [voiding, setVoiding] = useState(false);
+  const [qrProduct, setQrProduct] = useState<any>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   // Redirect if not staff
@@ -355,14 +357,21 @@ const POS = () => {
           {searchResults.length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-1 bg-white border rounded-2xl shadow-xl z-20 overflow-hidden max-h-64 overflow-y-auto">
               {searchResults.map(p => (
-                <button key={p.id} onClick={() => addToCart(p)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors text-left border-b last:border-b-0">
-                  <img src={p.images?.[0] || '/placeholder.svg'} className="w-10 h-10 rounded-lg object-cover" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black uppercase truncate">{p.title}</p>
-                    <p className="text-[10px] text-zinc-400 font-bold">Stock: {p.stock ?? 0}</p>
-                  </div>
-                  <p className="text-sm font-black text-orange-500">{formatPrice(p.price)}</p>
-                </button>
+                <div key={p.id} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors text-left border-b last:border-b-0">
+                  <button onClick={() => addToCart(p)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+                    <img src={p.images?.[0] || '/placeholder.svg'} className="w-10 h-10 rounded-lg object-cover" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black uppercase truncate">{p.title}</p>
+                      <p className="text-[10px] text-zinc-400 font-bold">Stock: {p.stock ?? 0}</p>
+                    </div>
+                    <p className="text-sm font-black text-orange-500">{formatPrice(p.price)}</p>
+                  </button>
+                  {p.barcode && (
+                    <button onClick={() => setQrProduct(p)} className="text-orange-500 hover:text-orange-600 flex-shrink-0" title="Ver QR">
+                      <QrCode size={18} />
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           )}
@@ -496,6 +505,8 @@ const POS = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ProductQRModal open={!!qrProduct} onOpenChange={(o) => !o && setQrProduct(null)} product={qrProduct} />
     </div>
   );
 };

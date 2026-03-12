@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users } from "lucide-react";
+import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
+import ProductQRModal from "@/components/ProductQRModal";
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -16,6 +17,7 @@ const StockControlTab = () => {
   const [saving, setSaving] = useState(false);
   const [manualSearch, setManualSearch] = useState('');
   const [importing, setImporting] = useState(false);
+  const [qrProduct, setQrProduct] = useState<any>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -181,20 +183,27 @@ const StockControlTab = () => {
       setImporting(false);
       return;
     }
-    let updated = 0, errors = 0;
+    let updated = 0, errors = 0, generated = 0;
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
       const id = cols[idIdx];
       const stock = parseInt(cols[stockIdx]);
       if (!id || isNaN(stock)) continue;
       const updateData: any = { stock };
-      if (barcodeIdx !== -1 && cols[barcodeIdx]) updateData.barcode = cols[barcodeIdx];
+      const csvBarcode = barcodeIdx !== -1 ? cols[barcodeIdx] : '';
+      if (csvBarcode) {
+        updateData.barcode = csvBarcode;
+      } else {
+        // Auto-generate barcode if empty
+        updateData.barcode = `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        generated++;
+      }
       const { error } = await supabase.from('products').update(updateData).eq('id', id);
       if (error) errors++; else updated++;
     }
     setImporting(false);
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    toast.success(`Importación completada: ${updated} actualizados, ${errors} errores`);
+    toast.success(`Importación completada: ${updated} actualizados, ${generated} códigos generados, ${errors} errores`);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -286,7 +295,14 @@ const StockControlTab = () => {
                   )}
                 </div>
               </div>
-              <button onClick={() => { setScannedProduct(null); setStockDelta(0); }} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+              <div className="flex items-center gap-2">
+                {scannedProduct.barcode && (
+                  <button onClick={() => setQrProduct(scannedProduct)} className="text-orange-500 hover:text-orange-600" title="Ver QR">
+                    <QrCode size={20} />
+                  </button>
+                )}
+                <button onClick={() => { setScannedProduct(null); setStockDelta(0); }} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+              </div>
             </div>
             <div className="flex items-center justify-center gap-6 py-4">
               <button onClick={() => setStockDelta(d => d - 1)} className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors">
@@ -356,6 +372,8 @@ const StockControlTab = () => {
           </div>
         </div>
       </div>
+
+      <ProductQRModal open={!!qrProduct} onOpenChange={(o) => !o && setQrProduct(null)} product={qrProduct} />
     </div>
   );
 };

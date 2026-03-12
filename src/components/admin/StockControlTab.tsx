@@ -25,24 +25,29 @@ const StockControlTab = () => {
     }
   });
 
-  const startScanner = useCallback(async () => {
+ const startScanner = useCallback(() => {
     setScanning(true);
-    try {
-      const scanner = new Html5Qrcode("scanner-container");
-      scannerRef.current = scanner;
-      await scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          handleScanResult(decodedText);
-          stopScanner();
-        },
-        () => {}
-      );
-    } catch (err) {
-      toast.error("No se pudo acceder a la cámara");
-      setScanning(false);
-    }
+    
+    // Le damos 100ms a React para que renderice el div #scanner-container en el DOM
+    setTimeout(async () => {
+      try {
+        const scanner = new Html5Qrcode("scanner-container");
+        scannerRef.current = scanner;
+        await scanner.start(
+          { facingMode: "environment" }, // Usa la cámara trasera del celu
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            handleScanResult(decodedText);
+            stopScanner();
+          },
+          () => {} // Ignorar errores de escaneo frame a frame
+        );
+      } catch (err) {
+        console.error("Error al abrir cámara:", err);
+        toast.error("No se pudo acceder a la cámara. Verificá los permisos.");
+        setScanning(false);
+      }
+    }, 100);
   }, []);
 
   const stopScanner = useCallback(async () => {

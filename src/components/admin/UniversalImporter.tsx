@@ -11,15 +11,22 @@ const cleanPrice = (raw: any): number | null => {
   if (raw == null || raw === '') return null;
   let s = String(raw).replace(/[^0-9.,\-]/g, '').trim();
   if (!s) return null;
-  // Detect format: if last separator is comma and has ≤2 digits after → comma is decimal
   const lastComma = s.lastIndexOf(',');
   const lastDot = s.lastIndexOf('.');
   if (lastComma > lastDot) {
-    // 15.400,50 → remove dots, replace comma with dot
+    // 15.400,50 → comma is decimal, dots are thousands
     s = s.replace(/\./g, '').replace(',', '.');
-  } else if (lastDot > lastComma) {
-    // 15,400.50 → remove commas
+  } else if (lastDot > lastComma && lastComma !== -1) {
+    // 15,400.50 → dot is decimal, commas are thousands
     s = s.replace(/,/g, '');
+  } else if (lastDot !== -1 && lastComma === -1) {
+    // Only dots, no commas: e.g. 53.528 → Argentine thousands separator
+    // If digits after last dot are exactly 3, treat dot as thousands separator
+    const afterDot = s.substring(lastDot + 1);
+    if (afterDot.length === 3) {
+      s = s.replace(/\./g, '');
+    }
+    // else: e.g. 53.52 → treat dot as decimal (2 digits after)
   } else {
     s = s.replace(/,/g, '');
   }

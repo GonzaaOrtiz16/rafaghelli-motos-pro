@@ -109,8 +109,14 @@ const UniversalImporter = () => {
       const text = await file.text();
       const lines = text.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) { toast.error("El archivo está vacío"); return; }
-      parsedHeaders = lines[0].split(/[,;\t]/).map(h => h.trim().replace(/^"|"$/g, ''));
-      parsedRows = lines.slice(1).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')));
+      // Auto-detect delimiter: use the one that appears most in the header
+      const headerLine = lines[0];
+      const semicolons = (headerLine.match(/;/g) || []).length;
+      const commas = (headerLine.match(/,/g) || []).length;
+      const tabs = (headerLine.match(/\t/g) || []).length;
+      const delimiter = semicolons >= commas && semicolons >= tabs ? ';' : tabs > commas ? '\t' : ',';
+      parsedHeaders = headerLine.split(delimiter).map(h => h.trim().replace(/^"|"$/g, '').replace(/^\uFEFF/, ''));
+      parsedRows = lines.slice(1).map(l => l.split(delimiter).map(c => c.trim().replace(/^"|"$/g, '')));
     } else if (ext === 'xlsx' || ext === 'xls') {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: 'array' });

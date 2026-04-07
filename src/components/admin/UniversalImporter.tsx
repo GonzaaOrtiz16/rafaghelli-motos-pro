@@ -503,6 +503,9 @@ const UniversalImporter = () => {
             <h3 className="font-black uppercase text-xl tracking-tighter">Importación Completa</h3>
             <p className="text-sm text-zinc-500 mt-2">
               <span className="font-black text-green-600">{importResult.inserted}</span> productos insertados
+              {importResult.skipped > 0 && (
+                <>, <span className="font-black text-yellow-600">{importResult.skipped}</span> duplicados omitidos</>
+              )}
               {importResult.errors > 0 && (
                 <>, <span className="font-black text-red-500">{importResult.errors}</span> errores</>
               )}

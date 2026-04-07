@@ -421,9 +421,9 @@ const UniversalImporter = () => {
                     <tr className="bg-zinc-100">
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Código</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Producto</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">P. Lista</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">P. Público</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Precio</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Categoría</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Color</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Stock</th>
                     </tr>
                   </thead>
@@ -437,11 +437,11 @@ const UniversalImporter = () => {
                           )}
                         </td>
                         <td className="px-3 py-2.5 font-bold text-zinc-800 max-w-[200px] truncate">{item.name}</td>
-                        <td className="px-3 py-2.5 font-bold text-zinc-600">{formatPrice(item.price)}</td>
-                        <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price)}</td>
+                        <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price || item.price)}</td>
                         <td className="px-3 py-2.5">
                           <span className="bg-zinc-100 text-zinc-600 text-[9px] font-black uppercase px-2 py-1 rounded-full">{item.category}</span>
                         </td>
+                        <td className="px-3 py-2.5 text-zinc-600 text-xs">{item.color || '—'}</td>
                         <td className="px-3 py-2.5">
                           {item.available ? (
                             <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1 w-fit">

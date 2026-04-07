@@ -96,7 +96,7 @@ const UniversalImporter = () => {
     barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
   });
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ inserted: number; errors: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   // --- File reading ---

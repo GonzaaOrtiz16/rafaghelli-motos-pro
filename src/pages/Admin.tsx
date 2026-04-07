@@ -12,7 +12,7 @@ import UniversalImporter from '@/components/admin/UniversalImporter';
 import { toast } from 'sonner';
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState<'repuestos' | 'motos' | 'categorias' | 'stock' | 'ajustes'>('repuestos');
+  const [activeTab, setActiveTab] = useState<'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'ajustes'>('repuestos');
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isEncargado, isVendedor, loading } = useUserRole();

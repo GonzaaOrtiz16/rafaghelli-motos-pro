@@ -99,6 +99,7 @@ const Admin = () => {
         {activeTab === 'motos' && <MotosTab />}
         {activeTab === 'categorias' && <CategoriasTab />}
         {activeTab === 'stock' && <StockControlTab />}
+        {activeTab === 'importar' && <UniversalImporter />}
         {activeTab === 'ajustes' && <AjustesTab />}
       </main>
     </div>

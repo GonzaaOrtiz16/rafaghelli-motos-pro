@@ -8,6 +8,7 @@ import MotosTab from '@/components/admin/MotosTab';
 import CategoriasTab from '@/components/admin/CategoriasTab';
 import AjustesTab from '@/components/admin/AjustesTab';
 import StockControlTab from '@/components/admin/StockControlTab';
+import UniversalImporter from '@/components/admin/UniversalImporter';
 import { toast } from 'sonner';
 
 const Admin = () => {

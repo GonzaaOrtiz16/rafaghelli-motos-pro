@@ -78,6 +78,7 @@ const DB_FIELDS = [
   { key: 'price', label: 'Precio de Lista', required: true },
   { key: 'public_price', label: 'Precio Público', required: false },
   { key: 'category', label: 'Categoría', required: false },
+  { key: 'color', label: 'Color', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
 ] as const;
 

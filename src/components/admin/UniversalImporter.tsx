@@ -166,7 +166,7 @@ const UniversalImporter = () => {
 
     const { inferredCategories } = inferCategoryRows(rows, headers, mappedCols);
 
-    return rows.slice(0, 200).map((row, idx) => {
+    return rows.map((row, idx) => {
       const nameVal = mappedCols['name'] != null ? String(row[mappedCols['name']] ?? '').trim() : '';
       if (!nameVal) return null;
 

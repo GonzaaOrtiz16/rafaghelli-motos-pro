@@ -96,7 +96,7 @@ const UniversalImporter = () => {
     barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
   });
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ inserted: number; errors: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   // --- File reading ---
@@ -210,7 +210,13 @@ const UniversalImporter = () => {
   const handleImport = async () => {
     if (previewData.length === 0) { toast.error("No hay datos para importar"); return; }
     setImporting(true);
-    let inserted = 0, errors = 0;
+    let inserted = 0, errors = 0, skipped = 0;
+
+    // Fetch existing product titles from DB to detect duplicates
+    const { data: existingProducts } = await supabase.from('products').select('title');
+    const existingTitles = new Set(
+      (existingProducts || []).map((p: any) => p.title?.toLowerCase().trim())
+    );
 
     // Build full dataset (not just preview slice)
     const mappedCols: Record<string, number> = {};
@@ -218,9 +224,20 @@ const UniversalImporter = () => {
     const { inferredCategories } = inferCategoryRows(rows, headers, mappedCols);
 
     const batch: any[] = [];
+    const seenInFile = new Set<string>();
+
     rows.forEach((row, idx) => {
       const nameVal = mappedCols['name'] != null ? String(row[mappedCols['name']] ?? '').trim() : '';
       if (!nameVal) return;
+
+      const normalizedName = nameVal.toLowerCase().trim();
+
+      // Skip duplicates: already in DB or already seen in this file
+      if (existingTitles.has(normalizedName) || seenInFile.has(normalizedName)) {
+        skipped++;
+        return;
+      }
+      seenInFile.add(normalizedName);
 
       const priceRaw = mappedCols['price'] != null ? row[mappedCols['price']] : null;
       const pubPriceRaw = mappedCols['public_price'] != null ? row[mappedCols['public_price']] : null;
@@ -264,10 +281,11 @@ const UniversalImporter = () => {
     }
 
     setImporting(false);
-    setImportResult({ inserted, errors });
+    setImportResult({ inserted, errors, skipped });
     setStep('done');
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    toast.success(`Importación finalizada: ${inserted} productos insertados`);
+    const skipMsg = skipped > 0 ? ` (${skipped} duplicados omitidos)` : '';
+    toast.success(`Importación finalizada: ${inserted} productos insertados${skipMsg}`);
   };
 
   const reset = () => {
@@ -485,6 +503,9 @@ const UniversalImporter = () => {
             <h3 className="font-black uppercase text-xl tracking-tighter">Importación Completa</h3>
             <p className="text-sm text-zinc-500 mt-2">
               <span className="font-black text-green-600">{importResult.inserted}</span> productos insertados
+              {importResult.skipped > 0 && (
+                <>, <span className="font-black text-yellow-600">{importResult.skipped}</span> duplicados omitidos</>
+              )}
               {importResult.errors > 0 && (
                 <>, <span className="font-black text-red-500">{importResult.errors}</span> errores</>
               )}

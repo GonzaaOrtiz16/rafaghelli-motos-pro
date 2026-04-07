@@ -183,12 +183,14 @@ const UniversalImporter = () => {
       const stockRaw = mappedCols['stock'] != null ? row[mappedCols['stock']] : null;
       const barcodeRaw = mappedCols['barcode'] != null ? String(row[mappedCols['barcode']] ?? '').trim() : '';
       const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
+      const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
       const { stock, available } = cleanStock(stockRaw);
       const barcode = barcodeRaw || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
+      const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
 
       return {
         barcode,
@@ -196,6 +198,7 @@ const UniversalImporter = () => {
         price: price ?? 0,
         public_price: pubPrice ?? price ?? 0,
         category,
+        color,
         stock,
         available,
         _generated: !barcodeRaw,

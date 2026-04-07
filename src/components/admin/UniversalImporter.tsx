@@ -269,7 +269,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null });
     setImportResult(null);
   };
 

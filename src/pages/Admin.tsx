@@ -42,6 +42,7 @@ const Admin = () => {
     { id: 'motos' as const, label: 'Motos', icon: Bike },
     { id: 'categorias' as const, label: 'Categorías', icon: LayoutGrid },
     { id: 'stock' as const, label: 'Stock', icon: ScanBarcode },
+    { id: 'importar' as const, label: 'Importar', icon: FileUp },
     { id: 'ajustes' as const, label: 'Ajustes', icon: Settings },
   ];
 

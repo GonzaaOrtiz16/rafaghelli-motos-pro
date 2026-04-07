@@ -136,7 +136,7 @@ const UniversalImporter = () => {
 
     // Auto-map by guessing column names
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -145,6 +145,7 @@ const UniversalImporter = () => {
       else if (/precio.*p[uú]b|p\.?v\.?p|venta|público|public/.test(hl) && autoMap.public_price === null) autoMap.public_price = i;
       else if (/precio|price|lista|costo|valor/.test(hl) && autoMap.price === null) autoMap.price = i;
       else if (/categ|rubro|familia|grupo|linea|l[ií]nea/.test(hl) && autoMap.category === null) autoMap.category = i;
+      else if (/color|colour/.test(hl) && autoMap.color === null) autoMap.color = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
     });
     setMapping(autoMap);

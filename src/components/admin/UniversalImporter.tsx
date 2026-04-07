@@ -281,7 +281,7 @@ const UniversalImporter = () => {
     }
 
     setImporting(false);
-    setImportResult({ inserted, errors });
+    setImportResult({ inserted, errors, skipped });
     setStep('done');
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
     const skipMsg = skipped > 0 ? ` (${skipped} duplicados omitidos)` : '';

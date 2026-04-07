@@ -78,6 +78,7 @@ const DB_FIELDS = [
   { key: 'price', label: 'Precio de Lista', required: true },
   { key: 'public_price', label: 'Precio Público', required: false },
   { key: 'category', label: 'Categoría', required: false },
+  { key: 'color', label: 'Color', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
 ] as const;
 
@@ -92,7 +93,7 @@ const UniversalImporter = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
   const [mapping, setMapping] = useState<Record<MappingKey, number | null>>({
-    barcode: null, name: null, price: null, public_price: null, category: null, stock: null,
+    barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
   });
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ inserted: number; errors: number } | null>(null);
@@ -108,8 +109,14 @@ const UniversalImporter = () => {
       const text = await file.text();
       const lines = text.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) { toast.error("El archivo está vacío"); return; }
-      parsedHeaders = lines[0].split(/[,;\t]/).map(h => h.trim().replace(/^"|"$/g, ''));
-      parsedRows = lines.slice(1).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')));
+      // Auto-detect delimiter: use the one that appears most in the header
+      const headerLine = lines[0];
+      const semicolons = (headerLine.match(/;/g) || []).length;
+      const commas = (headerLine.match(/,/g) || []).length;
+      const tabs = (headerLine.match(/\t/g) || []).length;
+      const delimiter = semicolons >= commas && semicolons >= tabs ? ';' : tabs > commas ? '\t' : ',';
+      parsedHeaders = headerLine.split(delimiter).map(h => h.trim().replace(/^"|"$/g, '').replace(/^\uFEFF/, ''));
+      parsedRows = lines.slice(1).map(l => l.split(delimiter).map(c => c.trim().replace(/^"|"$/g, '')));
     } else if (ext === 'xlsx' || ext === 'xls') {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: 'array' });
@@ -129,7 +136,7 @@ const UniversalImporter = () => {
 
     // Auto-map by guessing column names
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -138,6 +145,7 @@ const UniversalImporter = () => {
       else if (/precio.*p[uú]b|p\.?v\.?p|venta|público|public/.test(hl) && autoMap.public_price === null) autoMap.public_price = i;
       else if (/precio|price|lista|costo|valor/.test(hl) && autoMap.price === null) autoMap.price = i;
       else if (/categ|rubro|familia|grupo|linea|l[ií]nea/.test(hl) && autoMap.category === null) autoMap.category = i;
+      else if (/color|colour/.test(hl) && autoMap.color === null) autoMap.color = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
     });
     setMapping(autoMap);
@@ -175,12 +183,14 @@ const UniversalImporter = () => {
       const stockRaw = mappedCols['stock'] != null ? row[mappedCols['stock']] : null;
       const barcodeRaw = mappedCols['barcode'] != null ? String(row[mappedCols['barcode']] ?? '').trim() : '';
       const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
+      const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
       const { stock, available } = cleanStock(stockRaw);
       const barcode = barcodeRaw || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
+      const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
 
       return {
         barcode,
@@ -188,6 +198,7 @@ const UniversalImporter = () => {
         price: price ?? 0,
         public_price: pubPrice ?? price ?? 0,
         category,
+        color,
         stock,
         available,
         _generated: !barcodeRaw,
@@ -216,12 +227,14 @@ const UniversalImporter = () => {
       const stockRaw = mappedCols['stock'] != null ? row[mappedCols['stock']] : null;
       const barcodeRaw = mappedCols['barcode'] != null ? String(row[mappedCols['barcode']] ?? '').trim() : '';
       const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
+      const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
       const { stock } = cleanStock(stockRaw);
       const barcode = barcodeRaw || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
+      const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
       const slug = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
       batch.push({
@@ -233,6 +246,7 @@ const UniversalImporter = () => {
         category,
         brand: 'Importado',
         stock,
+        description: color ? `Color: ${color}` : null,
         images: [],
       });
     });
@@ -261,7 +275,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null });
     setImportResult(null);
   };
 
@@ -407,9 +421,9 @@ const UniversalImporter = () => {
                     <tr className="bg-zinc-100">
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Código</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Producto</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">P. Lista</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">P. Público</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Precio</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Categoría</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Color</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Stock</th>
                     </tr>
                   </thead>
@@ -423,11 +437,11 @@ const UniversalImporter = () => {
                           )}
                         </td>
                         <td className="px-3 py-2.5 font-bold text-zinc-800 max-w-[200px] truncate">{item.name}</td>
-                        <td className="px-3 py-2.5 font-bold text-zinc-600">{formatPrice(item.price)}</td>
-                        <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price)}</td>
+                        <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price || item.price)}</td>
                         <td className="px-3 py-2.5">
                           <span className="bg-zinc-100 text-zinc-600 text-[9px] font-black uppercase px-2 py-1 rounded-full">{item.category}</span>
                         </td>
+                        <td className="px-3 py-2.5 text-zinc-600 text-xs">{item.color || '—'}</td>
                         <td className="px-3 py-2.5">
                           {item.available ? (
                             <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1 w-fit">

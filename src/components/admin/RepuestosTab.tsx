@@ -42,8 +42,10 @@ const RepuestosTab = () => {
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
+    // Match category case-insensitively to categorias list
+    const matchedCat = categorias.find(c => c.nombre.toLowerCase().trim() === (product.category || '').toLowerCase().trim());
     setFormData({
-      title: product.title, price: product.price.toString(), category: product.category || '',
+      title: product.title, price: product.price.toString(), category: matchedCat ? matchedCat.nombre : (product.category || ''),
       description: product.description || '', brand: product.brand || '', stock: product.stock?.toString() || '10',
       original_price: product.original_price?.toString() || '', free_shipping: product.free_shipping || false,
       is_on_sale: !!product.is_on_sale, sizes: (product.sizes || []).join(', '), barcode: product.barcode || ''

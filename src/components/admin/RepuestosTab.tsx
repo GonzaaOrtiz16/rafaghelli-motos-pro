@@ -231,10 +231,7 @@ const RepuestosTab = () => {
                 <input className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Marca" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 <select className="bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
                   <option value="">Categoría...</option>
-                  {categorias.map(c => {
-                    const isSelected = formData.category.toLowerCase().trim() === c.nombre.toLowerCase().trim();
-                    return <option key={c.id} value={isSelected ? formData.category : c.nombre}>{c.nombre}</option>;
-                  })}
+                  {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
                 </select>
               </div>
               <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Código de barras / QR (opcional)" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} />

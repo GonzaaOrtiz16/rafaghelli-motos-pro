@@ -99,6 +99,7 @@ export type Database = {
           slug: string
           stock: number | null
           title: string
+          variants: Json | null
         }
         Insert: {
           barcode?: string | null
@@ -118,6 +119,7 @@ export type Database = {
           slug: string
           stock?: number | null
           title: string
+          variants?: Json | null
         }
         Update: {
           barcode?: string | null
@@ -137,6 +139,7 @@ export type Database = {
           slug?: string
           stock?: number | null
           title?: string
+          variants?: Json | null
         }
         Relationships: []
       }

@@ -1,6 +1,5 @@
-import { useState, useRef } from "react";
-import { X, ImagePlus, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
+import { X, ImagePlus, Loader2, ClipboardPaste } from "lucide-react";
 
 interface ImageUploadProps {
   onImagesSelected: (files: File[]) => void;
@@ -10,33 +9,58 @@ interface ImageUploadProps {
 const ImageUpload = ({ onImagesSelected, uploading = false }: ImageUploadProps) => {
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            // Rename pasted files with timestamp
+            const renamed = new File([file], `pasted-${Date.now()}-${i}.${file.type.split('/')[1]}`, { type: file.type });
+            imageFiles.push(renamed);
+          }
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        const newPreviews = imageFiles.map(file => URL.createObjectURL(file));
+        setPreviews(prev => [...prev, ...newPreviews]);
+        onImagesSelected(imageFiles);
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [onImagesSelected]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Generar las miniaturas para vista previa local
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setPreviews(prev => [...prev, ...newPreviews]);
-    
-    // Pasar los archivos al componente padre
     onImagesSelected(files);
   };
 
   const removeImage = (index: number) => {
     setPreviews(prev => {
       const newPreviews = prev.filter((_, i) => i !== index);
-      // Liberar memoria del navegador
       URL.revokeObjectURL(prev[index]);
       return newPreviews;
     });
-    // Aquí podrías agregar lógica para avisar al padre que se eliminó un archivo
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={containerRef}>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Render de las fotos seleccionadas */}
         {previews.map((src, index) => (
           <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-zinc-200 shadow-sm group">
             <img src={src} className="w-full h-full object-cover" alt="Vista previa" />
@@ -50,7 +74,7 @@ const ImageUpload = ({ onImagesSelected, uploading = false }: ImageUploadProps) 
           </div>
         ))}
 
-        {/* Botón para elegir fotos */}
+        {/* Botón elegir fotos */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -78,6 +102,11 @@ const ImageUpload = ({ onImagesSelected, uploading = false }: ImageUploadProps) 
         accept="image/*"
         className="hidden"
       />
+
+      <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase">
+        <ClipboardPaste size={14} />
+        <span>También podés pegar imágenes con Ctrl+V / Cmd+V</span>
+      </div>
       
       {previews.length > 0 && (
         <p className="text-[10px] font-bold text-orange-600 uppercase italic">

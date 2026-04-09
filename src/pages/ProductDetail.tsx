@@ -2,13 +2,18 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
+
+interface VariantColor {
+  color: string;
+  sizes: Record<string, number>;
+}
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -17,6 +22,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
   const { addItem } = useCart();
 
   useEffect(() => {
@@ -44,6 +50,50 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
+  // Parse variants
+  const variants: VariantColor[] = useMemo(() => {
+    if (!product) return [];
+    const raw = product.variants;
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    // Filter out "Único" only variants
+    const meaningful = raw.filter((v: any) => 
+      v.color !== 'Único' || Object.keys(v.sizes || {}).some(s => s !== 'Único')
+    );
+    return meaningful;
+  }, [product]);
+
+  const hasVariants = variants.length > 0;
+
+  // Available sizes for selected color
+  const availableSizes = useMemo(() => {
+    if (!hasVariants || !selectedColor) return [];
+    const variant = variants.find(v => v.color === selectedColor);
+    if (!variant) return [];
+    return Object.entries(variant.sizes).map(([size, stock]) => ({ size, stock }));
+  }, [hasVariants, selectedColor, variants]);
+
+  // Stock for current selection
+  const currentStock = useMemo(() => {
+    if (!hasVariants) return product?.stock ?? 0;
+    if (selectedColor && selectedSize) {
+      const variant = variants.find(v => v.color === selectedColor);
+      return variant?.sizes?.[selectedSize] ?? 0;
+    }
+    return product?.stock ?? 0;
+  }, [hasVariants, selectedColor, selectedSize, variants, product]);
+
+  // Auto-select first color
+  useEffect(() => {
+    if (hasVariants && !selectedColor) {
+      setSelectedColor(variants[0].color);
+    }
+  }, [hasVariants, variants, selectedColor]);
+
+  // Reset size when color changes
+  useEffect(() => {
+    setSelectedSize('');
+  }, [selectedColor]);
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-4">
@@ -62,18 +112,29 @@ const ProductDetail = () => {
     );
   }
 
-  const hasSizes = product.sizes && product.sizes.length > 0;
-  const outOfStock = (product.stock ?? 0) <= 0;
+  const hasSizes = hasVariants ? availableSizes.length > 0 : (product.sizes && product.sizes.length > 0);
+  const outOfStock = hasVariants
+    ? (selectedColor && selectedSize ? currentStock <= 0 : false)
+    : (product.stock ?? 0) <= 0;
 
   const handleAddToCart = () => {
-    if (outOfStock) {
-      toast.error("Este producto no tiene stock disponible");
-      return;
+    if (hasVariants) {
+      if (!selectedColor) { toast.error("Seleccioná un color"); return; }
+      if (availableSizes.length > 0 && availableSizes.some(s => s.size !== 'Único') && !selectedSize) {
+        toast.error("Seleccioná un talle antes de agregar al carrito"); return;
+      }
+      const variant = variants.find(v => v.color === selectedColor);
+      const sizeKey = selectedSize || Object.keys(variant?.sizes || {})[0] || '';
+      const stockForSelection = variant?.sizes?.[sizeKey] ?? 0;
+      if (stockForSelection <= 0) { toast.error("Sin stock para esta combinación"); return; }
+    } else {
+      if ((product.stock ?? 0) <= 0) { toast.error("Este producto no tiene stock disponible"); return; }
+      if (product.sizes?.length > 0 && !selectedSize) { toast.error("Seleccioná un talle antes de agregar al carrito"); return; }
     }
-    if (hasSizes && !selectedSize) {
-      toast.error("Seleccioná un talle antes de agregar al carrito");
-      return;
-    }
+
+    const sizeLabel = selectedSize || undefined;
+    const colorLabel = hasVariants ? selectedColor : undefined;
+
     addItem({
       id: product.id,
       title: product.title,
@@ -87,13 +148,12 @@ const ProductDetail = () => {
       description: product.description || '',
       stock: product.stock || 0,
       is_on_sale: product.is_on_sale,
-    }, selectedSize || undefined);
+    }, sizeLabel ? `${colorLabel ? colorLabel + ' - ' : ''}${sizeLabel}` : colorLabel);
     toast.success("¡Agregado al carrito!");
   };
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(`¡Hola Rafaghelli Motos! 👋 Me interesa este producto: ${product.title}. ¿Tienen stock disponible?`);
-    // Número de VENTAS actualizado: 1157074145
     window.open(`https://wa.me/5491157074145?text=${message}`, '_blank');
   };
 
@@ -165,7 +225,12 @@ const ProductDetail = () => {
             </div>
             <div className="flex items-center gap-2 text-zinc-500 font-bold text-sm">
               <Box size={18} className="text-orange-500" /> 
-              Stock disponible: <span className="text-zinc-900">{product.stock} unidades</span>
+              Stock disponible: <span className="text-zinc-900">
+                {hasVariants && selectedColor && selectedSize
+                  ? `${currentStock} unidades (${selectedColor} - ${selectedSize})`
+                  : `${product.stock} unidades`
+                }
+              </span>
             </div>
           </div>
 
@@ -188,8 +253,57 @@ const ProductDetail = () => {
             </div>
           </div>
 
+          {/* Selector de Color */}
+          {hasVariants && (
+            <div className="mb-6">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 block">Color</label>
+              <div className="flex flex-wrap gap-3">
+                {variants.map((v) => (
+                  <button
+                    key={v.color}
+                    onClick={() => setSelectedColor(v.color)}
+                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${
+                      selectedColor === v.color 
+                        ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                        : 'border-zinc-200 text-zinc-600 hover:border-orange-300'
+                    }`}
+                  >
+                    {v.color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Selector de Talles */}
-          {hasSizes && (
+          {hasVariants && availableSizes.length > 0 && availableSizes.some(s => s.size !== 'Único') ? (
+            <div className="mb-6">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 block">Talle</label>
+              <div className="flex flex-wrap gap-3">
+                {availableSizes.filter(s => s.size !== 'Único').map(({ size, stock }) => (
+                  <button
+                    key={size}
+                    onClick={() => stock > 0 && setSelectedSize(size)}
+                    disabled={stock <= 0}
+                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all relative ${
+                      selectedSize === size 
+                        ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                        : stock <= 0
+                          ? 'border-zinc-100 text-zinc-300 cursor-not-allowed line-through'
+                          : 'border-zinc-200 text-zinc-600 hover:border-orange-300'
+                    }`}
+                  >
+                    {size}
+                    {stock > 0 && stock <= 3 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                        {stock}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : !hasVariants && product.sizes && product.sizes.length > 0 ? (
             <div className="mb-6">
               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3 block">Seleccioná tu talle</label>
               <div className="flex flex-wrap gap-3">
@@ -204,7 +318,7 @@ const ProductDetail = () => {
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="flex flex-col gap-4">
             <Button
@@ -272,4 +386,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-

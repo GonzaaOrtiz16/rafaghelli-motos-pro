@@ -74,12 +74,10 @@ const RepuestosTab = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const uploadFiles = async (files: File[]) => {
     setUploadingImages(true);
     const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       try {
         const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
         const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
@@ -91,6 +89,39 @@ const RepuestosTab = () => {
     setTempImages(prev => [...prev, ...newUrls]);
     setUploadingImages(false);
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    await uploadFiles(files);
+  };
+
+  useEffect(() => {
+    if (!isAdding) return;
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            const renamed = new File([file], `pasted-${Date.now()}-${i}.${file.type.split('/')[1]}`, { type: file.type });
+            imageFiles.push(renamed);
+          }
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        toast.info("Subiendo imagen pegada...");
+        await uploadFiles(imageFiles);
+        toast.success("Imagen pegada subida correctamente");
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [isAdding]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

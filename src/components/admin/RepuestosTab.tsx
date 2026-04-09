@@ -1,8 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Upload, Copy, Loader2, Search, Tag, Truck } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Upload, Copy, Loader2, Search, Tag, Truck, ClipboardPaste } from "lucide-react";
 import { useCategorias } from './useCategorias';
 
 const RepuestosTab = () => {

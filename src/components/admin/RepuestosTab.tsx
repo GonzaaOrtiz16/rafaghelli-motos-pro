@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -334,7 +334,7 @@ const RepuestosTab = () => {
                 </button>
               </div>
               <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-              
+              <p className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase"><ClipboardPaste size={14} /> También podés pegar imágenes con Ctrl+V / Cmd+V</p>
               <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 sticky bottom-0">
                 {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Publicar Ahora"}
               </button>

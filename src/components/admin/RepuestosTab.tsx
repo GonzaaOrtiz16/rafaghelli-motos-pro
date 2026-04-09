@@ -1,8 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Upload, Copy, Loader2, Search, Tag, Truck } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Upload, Copy, Loader2, Search, Tag, Truck, ClipboardPaste } from "lucide-react";
 import { useCategorias } from './useCategorias';
 
 const RepuestosTab = () => {
@@ -74,12 +74,10 @@ const RepuestosTab = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const uploadFiles = async (files: File[]) => {
     setUploadingImages(true);
     const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       try {
         const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
         const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
@@ -91,6 +89,39 @@ const RepuestosTab = () => {
     setTempImages(prev => [...prev, ...newUrls]);
     setUploadingImages(false);
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    await uploadFiles(files);
+  };
+
+  useEffect(() => {
+    if (!isAdding) return;
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            const renamed = new File([file], `pasted-${Date.now()}-${i}.${file.type.split('/')[1]}`, { type: file.type });
+            imageFiles.push(renamed);
+          }
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        toast.info("Subiendo imagen pegada...");
+        await uploadFiles(imageFiles);
+        toast.success("Imagen pegada subida correctamente");
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [isAdding]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,7 +334,7 @@ const RepuestosTab = () => {
                 </button>
               </div>
               <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-              
+              <p className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase"><ClipboardPaste size={14} /> También podés pegar imágenes con Ctrl+V / Cmd+V</p>
               <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 sticky bottom-0">
                 {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Publicar Ahora"}
               </button>

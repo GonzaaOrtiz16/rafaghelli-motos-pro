@@ -14,19 +14,14 @@ const cleanPrice = (raw: any): number | null => {
   const lastComma = s.lastIndexOf(',');
   const lastDot = s.lastIndexOf('.');
   if (lastComma > lastDot) {
-    // 15.400,50 → comma is decimal, dots are thousands
     s = s.replace(/\./g, '').replace(',', '.');
   } else if (lastDot > lastComma && lastComma !== -1) {
-    // 15,400.50 → dot is decimal, commas are thousands
     s = s.replace(/,/g, '');
   } else if (lastDot !== -1 && lastComma === -1) {
-    // Only dots, no commas: e.g. 53.528 → Argentine thousands separator
-    // If digits after last dot are exactly 3, treat dot as thousands separator
     const afterDot = s.substring(lastDot + 1);
     if (afterDot.length === 3) {
       s = s.replace(/\./g, '');
     }
-    // else: e.g. 53.52 → treat dot as decimal (2 digits after)
   } else {
     s = s.replace(/,/g, '');
   }
@@ -57,7 +52,6 @@ const inferCategoryRows = (
   rows.forEach((row, i) => {
     const nonEmpty = row.filter((c, ci) => c != null && String(c).trim() !== '' && ci < headers.length);
     const firstVal = String(row[0] ?? '').trim();
-    // Row is a category separator if only 1-2 cells have content, no price-like value
     if (firstVal && nonEmpty.length <= 2 && (priceIdx === -1 || !row[priceIdx] || cleanPrice(row[priceIdx]) === null)) {
       const hasName = nameIdx !== -1 && row[nameIdx] && String(row[nameIdx]).trim();
       if (!hasName || nonEmpty.length === 1) {
@@ -79,10 +73,17 @@ const DB_FIELDS = [
   { key: 'public_price', label: 'Precio Público', required: false },
   { key: 'category', label: 'Categoría', required: false },
   { key: 'color', label: 'Color', required: false },
+  { key: 'size', label: 'Talle', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
 ] as const;
 
 type MappingKey = typeof DB_FIELDS[number]['key'];
+
+// Variant type
+interface VariantColor {
+  color: string;
+  sizes: Record<string, number>; // size → stock
+}
 
 const UniversalImporter = () => {
   const queryClient = useQueryClient();
@@ -93,10 +94,10 @@ const UniversalImporter = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
   const [mapping, setMapping] = useState<Record<MappingKey, number | null>>({
-    barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
+    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null,
   });
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number; grouped: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   // --- File reading ---
@@ -109,7 +110,6 @@ const UniversalImporter = () => {
       const text = await file.text();
       const lines = text.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) { toast.error("El archivo está vacío"); return; }
-      // Auto-detect delimiter: use the one that appears most in the header
       const headerLine = lines[0];
       const semicolons = (headerLine.match(/;/g) || []).length;
       const commas = (headerLine.match(/,/g) || []).length;
@@ -134,9 +134,9 @@ const UniversalImporter = () => {
     setHeaders(parsedHeaders);
     setRows(parsedRows);
 
-    // Auto-map by guessing column names
+    // Auto-map
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -146,6 +146,7 @@ const UniversalImporter = () => {
       else if (/precio|price|lista|costo|valor/.test(hl) && autoMap.price === null) autoMap.price = i;
       else if (/categ|rubro|familia|grupo|linea|l[ií]nea/.test(hl) && autoMap.category === null) autoMap.category = i;
       else if (/color|colour/.test(hl) && autoMap.color === null) autoMap.color = i;
+      else if (/talle|size|medida|talla/.test(hl) && autoMap.size === null) autoMap.size = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
     });
     setMapping(autoMap);
@@ -166,12 +167,10 @@ const UniversalImporter = () => {
     if (fileRef.current) fileRef.current.value = '';
   }, [readFile]);
 
-  // --- Preview data ---
-  const previewData = useMemo(() => {
-    if (step !== 'map' && step !== 'preview') return [];
+  // --- Parse all rows into flat items ---
+  const parseAllRows = useCallback(() => {
     const mappedCols: Record<string, number> = {};
     Object.entries(mapping).forEach(([k, v]) => { if (v !== null) mappedCols[k] = v; });
-
     const { inferredCategories } = inferCategoryRows(rows, headers, mappedCols);
 
     return rows.map((row, idx) => {
@@ -184,91 +183,125 @@ const UniversalImporter = () => {
       const barcodeRaw = mappedCols['barcode'] != null ? String(row[mappedCols['barcode']] ?? '').trim() : '';
       const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
       const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
+      const sizeRaw = mappedCols['size'] != null ? String(row[mappedCols['size']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
       const { stock, available } = cleanStock(stockRaw);
-      const barcode = barcodeRaw || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const barcode = barcodeRaw || '';
       const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
       const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
+      const size = sizeRaw && sizeRaw.toLowerCase() !== 'n/a' ? sizeRaw : '';
 
       return {
-        barcode,
-        name: nameVal,
-        price: price ?? 0,
-        public_price: pubPrice ?? price ?? 0,
-        category,
-        color,
-        stock,
-        available,
-        _generated: !barcodeRaw,
+        barcode, name: nameVal, price: price ?? 0, public_price: pubPrice ?? price ?? 0,
+        category, color, size, stock, available, _generated: !barcodeRaw,
       };
-    }).filter(Boolean);
-  }, [rows, headers, mapping, step]);
+    }).filter(Boolean) as any[];
+  }, [rows, headers, mapping]);
+
+  // --- Group items by product name to build variants ---
+  const groupedProducts = useMemo(() => {
+    if (step !== 'map' && step !== 'preview') return [];
+    const items = parseAllRows();
+    const hasColorOrSize = mapping.color !== null || mapping.size !== null;
+
+    if (!hasColorOrSize) {
+      // No variant columns mapped - return as-is
+      return items.map(item => ({ ...item, variants: [], _variantCount: 0 }));
+    }
+
+    // Group by normalized product name
+    const groups = new Map<string, any[]>();
+    items.forEach(item => {
+      const key = item.name.toLowerCase().trim();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(item);
+    });
+
+    return Array.from(groups.entries()).map(([, groupItems]) => {
+      const first = groupItems[0];
+      // Build variants: group by color, then aggregate sizes
+      const colorMap = new Map<string, Record<string, number>>();
+      let totalStock = 0;
+
+      groupItems.forEach(item => {
+        const color = item.color || 'Único';
+        if (!colorMap.has(color)) colorMap.set(color, {});
+        const sizes = colorMap.get(color)!;
+        const size = item.size || 'Único';
+        sizes[size] = (sizes[size] || 0) + item.stock;
+        totalStock += item.stock;
+      });
+
+      const variants: VariantColor[] = Array.from(colorMap.entries()).map(([color, sizes]) => ({
+        color, sizes,
+      }));
+
+      // Collect all unique sizes across all colors
+      const allSizes = [...new Set(groupItems.map(i => i.size).filter(Boolean))];
+
+      return {
+        ...first,
+        stock: totalStock,
+        available: totalStock > 0,
+        variants,
+        sizes: allSizes,
+        _variantCount: groupItems.length,
+      };
+    });
+  }, [step, parseAllRows, mapping.color, mapping.size]);
+
+  // --- Preview data ---
+  const previewData = groupedProducts;
 
   // --- Import to Supabase ---
   const handleImport = async () => {
     if (previewData.length === 0) { toast.error("No hay datos para importar"); return; }
     setImporting(true);
-    let inserted = 0, errors = 0, skipped = 0;
+    let inserted = 0, errors = 0, skipped = 0, grouped = 0;
 
-    // Fetch existing product titles from DB to detect duplicates
     const { data: existingProducts } = await supabase.from('products').select('title');
     const existingTitles = new Set(
       (existingProducts || []).map((p: any) => p.title?.toLowerCase().trim())
     );
 
-    // Build full dataset (not just preview slice)
-    const mappedCols: Record<string, number> = {};
-    Object.entries(mapping).forEach(([k, v]) => { if (v !== null) mappedCols[k] = v; });
-    const { inferredCategories } = inferCategoryRows(rows, headers, mappedCols);
-
     const batch: any[] = [];
     const seenInFile = new Set<string>();
 
-    rows.forEach((row, idx) => {
-      const nameVal = mappedCols['name'] != null ? String(row[mappedCols['name']] ?? '').trim() : '';
-      if (!nameVal) return;
+    previewData.forEach((item) => {
+      const normalizedName = item.name.toLowerCase().trim();
 
-      const normalizedName = nameVal.toLowerCase().trim();
-
-      // Skip duplicates: already in DB or already seen in this file
       if (existingTitles.has(normalizedName) || seenInFile.has(normalizedName)) {
         skipped++;
         return;
       }
       seenInFile.add(normalizedName);
 
-      const priceRaw = mappedCols['price'] != null ? row[mappedCols['price']] : null;
-      const pubPriceRaw = mappedCols['public_price'] != null ? row[mappedCols['public_price']] : null;
-      const stockRaw = mappedCols['stock'] != null ? row[mappedCols['stock']] : null;
-      const barcodeRaw = mappedCols['barcode'] != null ? String(row[mappedCols['barcode']] ?? '').trim() : '';
-      const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
-      const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
+      const slug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const barcode = item.barcode || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-      const price = cleanPrice(priceRaw);
-      const pubPrice = cleanPrice(pubPriceRaw);
-      const { stock } = cleanStock(stockRaw);
-      const barcode = barcodeRaw || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-      const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
-      const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
-      const slug = nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const hasVariants = item.variants && item.variants.length > 0 &&
+        !(item.variants.length === 1 && item.variants[0].color === 'Único' && Object.keys(item.variants[0].sizes).length <= 1 && Object.keys(item.variants[0].sizes)[0] === 'Único');
+
+      if (hasVariants && item._variantCount > 1) grouped++;
 
       batch.push({
-        title: nameVal,
+        title: item.name,
         slug: `${slug}-${barcode.slice(-5).toLowerCase()}`,
         barcode,
-        price: pubPrice ?? price ?? 0,
-        original_price: price ?? 0,
-        category,
+        price: item.public_price ?? item.price ?? 0,
+        original_price: item.price ?? 0,
+        category: item.category,
         brand: 'Importado',
-        stock,
-        description: color ? `Color: ${color}` : null,
+        stock: item.stock,
+        description: null,
         images: [],
+        sizes: item.sizes || [],
+        variants: hasVariants ? item.variants : [],
       });
     });
 
-    // Insert in chunks of 50
     for (let i = 0; i < batch.length; i += 50) {
       const chunk = batch.slice(i, i + 50);
       const { error } = await supabase.from('products').insert(chunk);
@@ -281,11 +314,12 @@ const UniversalImporter = () => {
     }
 
     setImporting(false);
-    setImportResult({ inserted, errors, skipped });
+    setImportResult({ inserted, errors, skipped, grouped });
     setStep('done');
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
     const skipMsg = skipped > 0 ? ` (${skipped} duplicados omitidos)` : '';
-    toast.success(`Importación finalizada: ${inserted} productos insertados${skipMsg}`);
+    const groupMsg = grouped > 0 ? ` (${grouped} con variantes agrupadas)` : '';
+    toast.success(`Importación finalizada: ${inserted} productos${skipMsg}${groupMsg}`);
   };
 
   const reset = () => {
@@ -293,7 +327,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null });
     setImportResult(null);
   };
 
@@ -354,6 +388,13 @@ const UniversalImporter = () => {
                 <p className="text-[10px] text-zinc-400 font-medium">{fileName} — {rows.length} filas detectadas</p>
               </div>
             </div>
+
+            {/* Variant hint */}
+            {(mapping.color !== null || mapping.size !== null) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700 font-bold">
+                💡 Si hay filas con el mismo nombre pero distinto color/talle, se agruparán automáticamente en un solo producto con variantes.
+              </div>
+            )}
 
             <div className="space-y-3">
               {DB_FIELDS.map(field => (
@@ -425,7 +466,7 @@ const UniversalImporter = () => {
                 <div className="flex items-center gap-3">
                   <Eye size={20} className="text-orange-500" />
                   <h3 className="font-black uppercase tracking-tighter text-sm">
-                    Vista Previa ({Math.min(5, previewData.length)} de {previewData.length} productos)
+                    Vista Previa ({Math.min(10, previewData.length)} de {previewData.length} productos)
                   </h3>
                 </div>
                 <button onClick={() => setStep('map')} className="text-[10px] font-black uppercase text-orange-500 hover:text-orange-600">
@@ -437,29 +478,45 @@ const UniversalImporter = () => {
                 <table className="w-full text-[11px]">
                   <thead>
                     <tr className="bg-zinc-100">
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Código</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Producto</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Precio</th>
                       <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Categoría</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Color</th>
-                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Stock</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Variantes</th>
+                      <th className="px-3 py-2.5 text-left font-black uppercase text-zinc-500">Stock Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {previewData.slice(0, 5).map((item: any, i: number) => (
+                    {previewData.slice(0, 10).map((item: any, i: number) => (
                       <tr key={i} className="border-t hover:bg-zinc-50">
-                        <td className="px-3 py-2.5 font-mono text-zinc-500">
-                          {item.barcode.length > 16 ? item.barcode.slice(0, 16) + '…' : item.barcode}
-                          {item._generated && (
-                            <span className="ml-1 bg-blue-100 text-blue-600 text-[9px] font-black px-1.5 py-0.5 rounded-full">AUTO</span>
+                        <td className="px-3 py-2.5 font-bold text-zinc-800 max-w-[200px]">
+                          <div className="truncate">{item.name}</div>
+                          {item._variantCount > 1 && (
+                            <span className="bg-purple-100 text-purple-600 text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                              {item._variantCount} filas agrupadas
+                            </span>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 font-bold text-zinc-800 max-w-[200px] truncate">{item.name}</td>
                         <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price || item.price)}</td>
                         <td className="px-3 py-2.5">
                           <span className="bg-zinc-100 text-zinc-600 text-[9px] font-black uppercase px-2 py-1 rounded-full">{item.category}</span>
                         </td>
-                        <td className="px-3 py-2.5 text-zinc-600 text-xs">{item.color || '—'}</td>
+                        <td className="px-3 py-2.5">
+                          {item.variants && item.variants.length > 0 ? (
+                            <div className="space-y-1">
+                              {item.variants.slice(0, 3).map((v: VariantColor, vi: number) => (
+                                <div key={vi} className="text-[10px]">
+                                  <span className="font-black text-zinc-700">{v.color}:</span>{' '}
+                                  <span className="text-zinc-500">{Object.keys(v.sizes).join(', ')}</span>
+                                </div>
+                              ))}
+                              {item.variants.length > 3 && (
+                                <span className="text-[9px] text-zinc-400">+{item.variants.length - 3} más</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-zinc-400">—</span>
+                          )}
+                        </td>
                         <td className="px-3 py-2.5">
                           {item.available ? (
                             <span className="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1 w-fit">
@@ -503,6 +560,9 @@ const UniversalImporter = () => {
             <h3 className="font-black uppercase text-xl tracking-tighter">Importación Completa</h3>
             <p className="text-sm text-zinc-500 mt-2">
               <span className="font-black text-green-600">{importResult.inserted}</span> productos insertados
+              {importResult.grouped > 0 && (
+                <>, <span className="font-black text-purple-600">{importResult.grouped}</span> con variantes agrupadas</>
+              )}
               {importResult.skipped > 0 && (
                 <>, <span className="font-black text-yellow-600">{importResult.skipped}</span> duplicados omitidos</>
               )}

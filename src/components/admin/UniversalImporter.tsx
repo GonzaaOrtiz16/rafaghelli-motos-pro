@@ -368,13 +368,13 @@ const UniversalImporter = () => {
       // Check if any item in the group has sizes
       const hasAnySizes = groupItems.some(i => i.size);
 
-      // Build variants: group by color, then aggregate sizes and moto_fit
-      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string> }>();
+      // Build variants: group by color, then aggregate sizes, moto_fit, and prices
+      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string>; prices: number[]; publicPrices: number[] }>();
       let totalStock = 0;
 
       groupItems.forEach(item => {
         const color = item.color || 'Único';
-        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set() });
+        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set(), prices: [], publicPrices: [] });
         const entry = colorMap.get(color)!;
         
         if (item.size) {
@@ -384,11 +384,19 @@ const UniversalImporter = () => {
         }
         totalStock += item.stock;
         
+        // Track prices for this variant
+        if (item.price) entry.prices.push(item.price);
+        if (item.public_price) entry.publicPrices.push(item.public_price);
+        
         // Parse moto_fit (comma or slash separated)
         if (item.motoFit) {
-          item.motoFit.split(/[,;\/]+/).map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => entry.motoFit.add(m));
+          item.motoFit.split(/[,;/]+/).map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => entry.motoFit.add(m));
         }
       });
+
+      // Base price = most common or first price
+      const basePrice = first.price;
+      const basePubPrice = first.public_price;
 
       const variants: VariantColor[] = Array.from(colorMap.entries()).map(([color, data]) => {
         const variant: VariantColor = { color, sizes: data.sizes };
@@ -397,6 +405,15 @@ const UniversalImporter = () => {
         }
         if (data.motoFit.size > 0) {
           variant.moto_fit = Array.from(data.motoFit);
+        }
+        // Set variant price if different from base
+        const variantPrice = data.prices.length > 0 ? data.prices[0] : null;
+        const variantPubPrice = data.publicPrices.length > 0 ? data.publicPrices[0] : null;
+        if (variantPrice && variantPrice !== basePrice) {
+          variant.price = variantPrice;
+        }
+        if (variantPubPrice && variantPubPrice !== basePubPrice) {
+          variant.public_price = variantPubPrice;
         }
         return variant;
       });

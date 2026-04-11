@@ -97,12 +97,35 @@ const capitalizeColor = (color: string): string => {
   return color.charAt(0).toUpperCase() + color.slice(1).toLowerCase();
 };
 
-// Detect and extract color from the end of a product name
-const extractColorFromName = (name: string): { baseName: string; detectedColor: string } => {
+// Known motorcycle brands for auto-detection in product names
+const MOTO_BRANDS = [
+  'honda', 'yamaha', 'suzuki', 'kawasaki', 'bajaj', 'tvs', 'royal enfield',
+  'benelli', 'cfmoto', 'voge', 'kymco', 'sym', 'zanella', 'motomel',
+  'corven', 'gilera', 'guerrero', 'mondial', 'jawa', 'beta', 'keller',
+  'keeway', 'lifan', 'siambretta', 'appia', 'brava', 'cerro', 'daelim',
+  'ktm', 'husqvarna', 'bmw', 'harley', 'ducati', 'triumph',
+];
+
+// Extract moto brand+model from product name
+const extractMotoFromName = (name: string): { nameWithoutMoto: string; detectedMoto: string } => {
+  const lower = name.toLowerCase().trim();
+  for (const brand of MOTO_BRANDS) {
+    const brandIdx = lower.indexOf(brand);
+    if (brandIdx > 0) {
+      const nameWithoutMoto = name.substring(0, brandIdx).trim().replace(/[\s\-_/]+$/, '');
+      const detectedMoto = name.substring(brandIdx).trim();
+      if (nameWithoutMoto.length > 2) {
+        return { nameWithoutMoto, detectedMoto };
+      }
+    }
+  }
+  return { nameWithoutMoto: name.trim(), detectedMoto: '' };
+};
+
+// Detect and extract color from the end of a name
+const extractColorFromEnd = (name: string): { baseName: string; detectedColor: string } => {
   const words = name.trim().split(/[\s\-_/]+/);
   const extracted: string[] = [];
-  
-  // Check last 1-2 words for color matches
   while (words.length > 1) {
     const lastWord = words[words.length - 1].toLowerCase();
     if (COLOR_WORDS.has(lastWord)) {
@@ -111,32 +134,46 @@ const extractColorFromName = (name: string): { baseName: string; detectedColor: 
       break;
     }
   }
-  
   if (extracted.length > 0) {
     const detectedColor = extracted.map(w => capitalizeColor(w)).join('/');
     return { baseName: words.join(' ').trim(), detectedColor };
   }
-  
   return { baseName: name.trim(), detectedColor: '' };
 };
 
-// Strip color (explicit or detected) from name to create grouping key
-const getGroupKey = (name: string, color: string): string => {
+// Full extraction: moto first (from full name), then color from what remains
+const extractFromName = (name: string): { baseName: string; detectedColor: string; detectedMoto: string } => {
+  const { nameWithoutMoto, detectedMoto } = extractMotoFromName(name);
+  const { baseName, detectedColor } = extractColorFromEnd(nameWithoutMoto);
+  return { baseName, detectedColor, detectedMoto };
+};
+
+// Create grouping key by stripping color and moto from name
+const getGroupKey = (name: string, color: string, moto: string): string => {
   let normalized = name.toLowerCase().trim();
-  
-  // Strip explicit color value from name
+
+  // Strip moto part
+  if (moto) {
+    const motoLower = moto.toLowerCase().trim();
+    const motoIdx = normalized.indexOf(motoLower);
+    if (motoIdx > 0) {
+      normalized = normalized.substring(0, motoIdx).trim().replace(/[\s\-_/]+$/, '');
+    }
+  }
+
+  // Strip explicit color
   if (color) {
     const colorLower = color.toLowerCase().trim();
     const endPattern = new RegExp(`[\\s\\-_/]*${colorLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
     normalized = normalized.replace(endPattern, '').trim();
   }
-  
+
   // Strip known color words from end
   const words = normalized.split(/[\s\-_/]+/);
   while (words.length > 1 && COLOR_WORDS.has(words[words.length - 1])) {
     words.pop();
   }
-  
+
   return words.join(' ').trim();
 };
 

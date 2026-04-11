@@ -704,6 +704,9 @@ const UniversalImporter = () => {
                                   {v.moto_fit && v.moto_fit.length > 0 && (
                                     <span className="text-blue-500 ml-1">🏍️ {v.moto_fit.length}</span>
                                   )}
+                                  {(v.price || v.public_price) && (
+                                    <span className="text-orange-500 ml-1">${v.public_price || v.price}</span>
+                                  )}
                                 </div>
                               ))}
                               {item.variants.length > 3 && (

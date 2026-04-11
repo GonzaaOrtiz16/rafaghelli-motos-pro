@@ -250,11 +250,11 @@ const UniversalImporter = () => {
       groups.get(key)!.push(item);
     });
 
-    return Array.from(groups.entries()).map(([groupKey, groupItems]) => {
+    return Array.from(groups.entries()).map(([_groupKey, groupItems]) => {
       const first = groupItems[0];
       // Use the cleaned name (without color) as the product title when multiple variants exist
       const cleanTitle = groupItems.length > 1
-        ? groupItems[0].name.replace(/[\s\-_/]*([\w/]+)\s*$/, (match: string, lastWord: string) => {
+        ? groupItems[0].name.replace(/[\s\-_/]*([\w/]+)\s*$/, (match: string, _lastWord: string) => {
             // Only strip if the last word is a color
             const words = first.name.split(/[\s\-_/]+/);
             const lastW = words[words.length - 1]?.toLowerCase();

@@ -65,6 +65,81 @@ const inferCategoryRows = (
   return { processedRows: rows, inferredCategories };
 };
 
+// --- Color dictionary for smart detection ---
+const COLOR_WORDS = new Set([
+  'red','blue','green','yellow','orange','black','white','grey','gray','pink','purple',
+  'brown','beige','navy','silver','gold','cyan','magenta','turquoise','violet','coral',
+  'maroon','olive','teal','lime','indigo','ivory','cream','charcoal','burgundy',
+  'rojo','azul','verde','amarillo','naranja','negro','blanco','gris','rosa','violeta',
+  'marrón','marron','dorado','plateado','celeste','bordo','bordó','crema','turquesa',
+  'fucsia','lila','beige','arena','natural','humo','acero','carbón','carbon',
+  'fluo','fluor','fluorescente','mate','brillante','transparente','oscuro','oscura',
+  'espejado','espejada','clear','dark','light','neon','matte','glossy',
+]);
+
+// Color translation map for display
+const COLOR_TRANSLATE: Record<string, string> = {
+  'red': 'Rojo', 'blue': 'Azul', 'green': 'Verde', 'yellow': 'Amarillo',
+  'orange': 'Naranja', 'black': 'Negro', 'white': 'Blanco', 'grey': 'Gris',
+  'gray': 'Gris', 'pink': 'Rosa', 'purple': 'Violeta', 'brown': 'Marrón',
+  'silver': 'Plateado', 'gold': 'Dorado', 'navy': 'Azul Marino',
+  'cyan': 'Celeste', 'magenta': 'Magenta', 'turquoise': 'Turquesa',
+  'violet': 'Violeta', 'coral': 'Coral', 'maroon': 'Bordó',
+  'olive': 'Oliva', 'teal': 'Verde Azulado', 'lime': 'Lima',
+  'ivory': 'Marfil', 'cream': 'Crema', 'charcoal': 'Carbón',
+  'burgundy': 'Bordó', 'dark': 'Oscuro', 'light': 'Claro',
+  'clear': 'Transparente', 'neon': 'Neón', 'matte': 'Mate', 'glossy': 'Brillante',
+};
+
+const capitalizeColor = (color: string): string => {
+  const lower = color.toLowerCase().trim();
+  if (COLOR_TRANSLATE[lower]) return COLOR_TRANSLATE[lower];
+  return color.charAt(0).toUpperCase() + color.slice(1).toLowerCase();
+};
+
+// Detect and extract color from the end of a product name
+const extractColorFromName = (name: string): { baseName: string; detectedColor: string } => {
+  const words = name.trim().split(/[\s\-_/]+/);
+  const extracted: string[] = [];
+  
+  // Check last 1-2 words for color matches
+  while (words.length > 1) {
+    const lastWord = words[words.length - 1].toLowerCase();
+    if (COLOR_WORDS.has(lastWord)) {
+      extracted.unshift(words.pop()!);
+    } else {
+      break;
+    }
+  }
+  
+  if (extracted.length > 0) {
+    const detectedColor = extracted.map(w => capitalizeColor(w)).join('/');
+    return { baseName: words.join(' ').trim(), detectedColor };
+  }
+  
+  return { baseName: name.trim(), detectedColor: '' };
+};
+
+// Strip color (explicit or detected) from name to create grouping key
+const getGroupKey = (name: string, color: string): string => {
+  let normalized = name.toLowerCase().trim();
+  
+  // Strip explicit color value from name
+  if (color) {
+    const colorLower = color.toLowerCase().trim();
+    const endPattern = new RegExp(`[\\s\\-_/]*${colorLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
+    normalized = normalized.replace(endPattern, '').trim();
+  }
+  
+  // Strip known color words from end
+  const words = normalized.split(/[\s\-_/]+/);
+  while (words.length > 1 && COLOR_WORDS.has(words[words.length - 1])) {
+    words.pop();
+  }
+  
+  return words.join(' ').trim();
+};
+
 // --- DB field definitions ---
 const DB_FIELDS = [
   { key: 'barcode', label: 'SKU / Código', required: false },
@@ -74,6 +149,7 @@ const DB_FIELDS = [
   { key: 'category', label: 'Categoría', required: false },
   { key: 'color', label: 'Color', required: false },
   { key: 'size', label: 'Talle', required: false },
+  { key: 'moto_fit', label: 'Moto que le va', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
 ] as const;
 
@@ -82,7 +158,9 @@ type MappingKey = typeof DB_FIELDS[number]['key'];
 // Variant type
 interface VariantColor {
   color: string;
-  sizes: Record<string, number>; // size → stock
+  sizes: Record<string, number>; // size → stock (when product has sizes)
+  stock?: number; // direct stock (when no sizes)
+  moto_fit?: string[]; // motorcycles this color variant fits
 }
 
 const UniversalImporter = () => {
@@ -94,7 +172,7 @@ const UniversalImporter = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
   const [mapping, setMapping] = useState<Record<MappingKey, number | null>>({
-    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null,
+    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
   });
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number; grouped: number } | null>(null);
@@ -136,7 +214,7 @@ const UniversalImporter = () => {
 
     // Auto-map
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -147,6 +225,7 @@ const UniversalImporter = () => {
       else if (/categ|rubro|familia|grupo|linea|l[ií]nea/.test(hl) && autoMap.category === null) autoMap.category = i;
       else if (/color|colour/.test(hl) && autoMap.color === null) autoMap.color = i;
       else if (/talle|size|medida|talla/.test(hl) && autoMap.size === null) autoMap.size = i;
+      else if (/moto|modelo|aplica|fit|compatible/.test(hl) && autoMap.moto_fit === null) autoMap.moto_fit = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
     });
     setMapping(autoMap);
@@ -184,114 +263,124 @@ const UniversalImporter = () => {
       const categoryRaw = mappedCols['category'] != null ? String(row[mappedCols['category']] ?? '').trim() : '';
       const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
       const sizeRaw = mappedCols['size'] != null ? String(row[mappedCols['size']] ?? '').trim() : '';
+      const motoFitRaw = mappedCols['moto_fit'] != null ? String(row[mappedCols['moto_fit']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
       const { stock, available } = cleanStock(stockRaw);
       const barcode = barcodeRaw || '';
       const category = categoryRaw || inferredCategories[idx] || 'Sin categoría';
-      const color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
+      
+      let color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
       const size = sizeRaw && sizeRaw.toLowerCase() !== 'n/a' ? sizeRaw : '';
+      const motoFit = motoFitRaw && motoFitRaw.toLowerCase() !== 'n/a' ? motoFitRaw : '';
+
+      // If no explicit color column, try to detect color from the product name
+      let detectedBaseName = nameVal;
+      if (!color && mappedCols['color'] == null) {
+        const extracted = extractColorFromName(nameVal);
+        if (extracted.detectedColor) {
+          color = extracted.detectedColor;
+          detectedBaseName = extracted.baseName;
+        }
+      }
 
       return {
-        barcode, name: nameVal, price: price ?? 0, public_price: pubPrice ?? price ?? 0,
-        category, color, size, stock, available, _generated: !barcodeRaw,
+        barcode, name: nameVal, detectedBaseName, price: price ?? 0, public_price: pubPrice ?? price ?? 0,
+        category, color, size, stock, available, motoFit, _generated: !barcodeRaw,
       };
     }).filter(Boolean) as any[];
   }, [rows, headers, mapping]);
-
-  // --- Color words to strip from names for smart grouping ---
-  const COLOR_WORDS = new Set([
-    // English
-    'red','blue','green','yellow','orange','black','white','grey','gray','pink','purple',
-    'brown','beige','navy','silver','gold','cyan','magenta','turquoise','violet','coral',
-    'maroon','olive','teal','lime','indigo','ivory','cream','charcoal','burgundy',
-    // Spanish
-    'rojo','azul','verde','amarillo','naranja','negro','blanco','gris','rosa','violeta',
-    'marrón','marron','dorado','plateado','celeste','bordo','bordó','crema','turquesa',
-    'fucsia','lila','beige','arena','natural','humo','acero','carbón','carbon',
-  ]);
-
-  const stripColorFromName = (name: string, color: string): string => {
-    let normalized = name.toLowerCase().trim();
-    // Strip the actual color value from the name
-    if (color) {
-      const colorLower = color.toLowerCase().trim();
-      // Try removing color at the end (with optional separator)
-      const endPattern = new RegExp(`[\\s\\-_/]*${colorLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
-      normalized = normalized.replace(endPattern, '').trim();
-    }
-    // Also strip known color words from the end of the name
-    const words = normalized.split(/[\s\-_/]+/);
-    while (words.length > 1 && COLOR_WORDS.has(words[words.length - 1])) {
-      words.pop();
-    }
-    return words.join(' ').trim();
-  };
 
   // --- Group items by product name to build variants ---
   const groupedProducts = useMemo(() => {
     if (step !== 'map' && step !== 'preview') return [];
     const items = parseAllRows();
-    const hasColorOrSize = mapping.color !== null || mapping.size !== null;
+    const hasExplicitColorOrSize = mapping.color !== null || mapping.size !== null;
 
-    if (!hasColorOrSize) {
-      // No variant columns mapped - return as-is
-      return items.map(item => ({ ...item, variants: [], _variantCount: 0 }));
-    }
-
-    // Group by normalized product name (stripping color from name)
+    // Always try to group — either by explicit color/size columns or by detected colors in names
     const groups = new Map<string, any[]>();
     items.forEach(item => {
-      const key = hasColorOrSize
-        ? stripColorFromName(item.name, item.color)
-        : item.name.toLowerCase().trim();
+      let key: string;
+      if (hasExplicitColorOrSize) {
+        key = getGroupKey(item.name, item.color);
+      } else if (item.color) {
+        // Color was detected from name
+        key = item.detectedBaseName.toLowerCase().trim();
+      } else {
+        // No color at all — standalone product
+        key = item.name.toLowerCase().trim();
+      }
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(item);
     });
 
     return Array.from(groups.entries()).map(([_groupKey, groupItems]) => {
       const first = groupItems[0];
-      // Use the cleaned name (without color) as the product title when multiple variants exist
-      const cleanTitle = groupItems.length > 1
-        ? groupItems[0].name.replace(/[\s\-_/]*([\w/]+)\s*$/, (match: string, _lastWord: string) => {
-            // Only strip if the last word is a color
-            const words = first.name.split(/[\s\-_/]+/);
-            const lastW = words[words.length - 1]?.toLowerCase();
-            if (COLOR_WORDS.has(lastW) || lastW === first.color?.toLowerCase()) {
-              return '';
-            }
-            return match;
-          }).trim()
+      const hasMultiple = groupItems.length > 1;
+      const hasAnyColor = groupItems.some(i => i.color);
+
+      // Use the clean base name when we have multiple items or detected colors
+      const productTitle = hasMultiple
+        ? first.detectedBaseName || getGroupKey(first.name, first.color) || first.name
         : first.name;
 
-      // Build variants: group by color, then aggregate sizes
-      const colorMap = new Map<string, Record<string, number>>();
+      // Check if any item in the group has sizes
+      const hasAnySizes = groupItems.some(i => i.size);
+
+      // Build variants: group by color, then aggregate sizes and moto_fit
+      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string> }>();
       let totalStock = 0;
 
       groupItems.forEach(item => {
         const color = item.color || 'Único';
-        if (!colorMap.has(color)) colorMap.set(color, {});
-        const sizes = colorMap.get(color)!;
-        const size = item.size || 'Único';
-        sizes[size] = (sizes[size] || 0) + item.stock;
+        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set() });
+        const entry = colorMap.get(color)!;
+        
+        if (item.size) {
+          entry.sizes[item.size] = (entry.sizes[item.size] || 0) + item.stock;
+        } else {
+          entry.stock += item.stock;
+        }
         totalStock += item.stock;
+        
+        // Parse moto_fit (comma or slash separated)
+        if (item.motoFit) {
+          item.motoFit.split(/[,;\/]+/).map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => entry.motoFit.add(m));
+        }
       });
 
-      const variants: VariantColor[] = Array.from(colorMap.entries()).map(([color, sizes]) => ({
-        color, sizes,
-      }));
+      const variants: VariantColor[] = Array.from(colorMap.entries()).map(([color, data]) => {
+        const variant: VariantColor = { color, sizes: data.sizes };
+        if (!hasAnySizes) {
+          variant.stock = data.stock;
+        }
+        if (data.motoFit.size > 0) {
+          variant.moto_fit = Array.from(data.motoFit);
+        }
+        return variant;
+      });
 
-      // Collect all unique sizes across all colors
-      const allSizes = [...new Set(groupItems.map(i => i.size).filter(Boolean))];
+      // Only keep variants if there's actual color/size differentiation
+      const isRealVariant = hasAnyColor || hasAnySizes;
+      const cleanVariants = isRealVariant ? variants.filter(v => v.color !== 'Único' || Object.keys(v.sizes).length > 0 || (v.stock ?? 0) > 0) : [];
+
+      // Collect all unique sizes
+      const allSizes = [...new Set(groupItems.map((i: any) => i.size).filter(Boolean))];
+      
+      // Collect all moto_fit
+      const allMotoFit = [...new Set(groupItems.flatMap((i: any) => 
+        i.motoFit ? i.motoFit.split(/[,;\/]+/).map((m: string) => m.trim()).filter(Boolean) : []
+      ))];
 
       return {
         ...first,
-        name: cleanTitle || first.name,
+        name: productTitle,
         stock: totalStock,
         available: totalStock > 0,
-        variants,
+        variants: cleanVariants.length > 0 ? (isRealVariant ? variants : []) : [],
         sizes: allSizes,
+        motoFit: allMotoFit,
         _variantCount: groupItems.length,
       };
     });
@@ -343,6 +432,7 @@ const UniversalImporter = () => {
         description: null,
         images: [],
         sizes: item.sizes || [],
+        moto_fit: item.motoFit || [],
         variants: hasVariants ? item.variants : [],
       });
     });
@@ -372,7 +462,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null });
     setImportResult(null);
   };
 
@@ -435,11 +525,11 @@ const UniversalImporter = () => {
             </div>
 
             {/* Variant hint */}
-            {(mapping.color !== null || mapping.size !== null) && (
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700 font-bold">
-                💡 Si hay filas con el mismo nombre pero distinto color/talle, se agruparán automáticamente en un solo producto con variantes.
-              </div>
-            )}
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700 font-bold space-y-1">
+              <p>💡 El sistema detecta colores automáticamente en los nombres de productos y los agrupa como variantes.</p>
+              <p>📐 Si mapeás "Talle", cada color tendrá sus propios talles con stock independiente.</p>
+              <p>🏍️ Si mapeás "Moto que le va", cada color tendrá las motos compatibles asociadas.</p>
+            </div>
 
             <div className="space-y-3">
               {DB_FIELDS.map(field => (
@@ -550,8 +640,13 @@ const UniversalImporter = () => {
                             <div className="space-y-1">
                               {item.variants.slice(0, 3).map((v: VariantColor, vi: number) => (
                                 <div key={vi} className="text-[10px]">
-                                  <span className="font-black text-zinc-700">{v.color}:</span>{' '}
-                                  <span className="text-zinc-500">{Object.keys(v.sizes).join(', ')}</span>
+                                  <span className="font-black text-zinc-700">{v.color}</span>
+                                  {Object.keys(v.sizes).length > 0 && Object.keys(v.sizes)[0] !== 'Único' && (
+                                    <span className="text-zinc-500">: {Object.keys(v.sizes).join(', ')}</span>
+                                  )}
+                                  {v.moto_fit && v.moto_fit.length > 0 && (
+                                    <span className="text-blue-500 ml-1">🏍️ {v.moto_fit.length}</span>
+                                  )}
                                 </div>
                               ))}
                               {item.variants.length > 3 && (

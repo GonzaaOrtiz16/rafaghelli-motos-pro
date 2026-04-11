@@ -198,6 +198,9 @@ interface VariantColor {
   sizes: Record<string, number>; // size → stock (when product has sizes)
   stock?: number; // direct stock (when no sizes)
   moto_fit?: string[]; // motorcycles this color variant fits
+  price?: number; // variant-specific price (if different from base)
+  public_price?: number; // variant-specific public price
+}
 }
 
 const UniversalImporter = () => {

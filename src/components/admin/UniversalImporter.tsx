@@ -344,12 +344,10 @@ const UniversalImporter = () => {
     items.forEach(item => {
       let key: string;
       if (hasExplicitColorOrSize) {
-        key = getGroupKey(item.name, item.color);
-      } else if (item.color) {
-        // Color was detected from name
+        key = getGroupKey(item.name, item.color, item.motoFit);
+      } else if (item.color || item.motoFit) {
         key = item.detectedBaseName.toLowerCase().trim();
       } else {
-        // No color at all — standalone product
         key = item.name.toLowerCase().trim();
       }
       if (!groups.has(key)) groups.set(key, []);
@@ -361,9 +359,8 @@ const UniversalImporter = () => {
       const hasMultiple = groupItems.length > 1;
       const hasAnyColor = groupItems.some(i => i.color);
 
-      // Use the clean base name when we have multiple items or detected colors
       const productTitle = hasMultiple
-        ? first.detectedBaseName || getGroupKey(first.name, first.color) || first.name
+        ? first.detectedBaseName || getGroupKey(first.name, first.color, first.motoFit) || first.name
         : first.name;
 
       // Check if any item in the group has sizes

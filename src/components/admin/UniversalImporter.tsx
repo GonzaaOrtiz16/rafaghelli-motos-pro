@@ -310,16 +310,20 @@ const UniversalImporter = () => {
       
       let color = colorRaw && colorRaw.toLowerCase() !== 'n/a' ? colorRaw : '';
       const size = sizeRaw && sizeRaw.toLowerCase() !== 'n/a' ? sizeRaw : '';
-      const motoFit = motoFitRaw && motoFitRaw.toLowerCase() !== 'n/a' ? motoFitRaw : '';
+      let motoFit = motoFitRaw && motoFitRaw.toLowerCase() !== 'n/a' ? motoFitRaw : '';
 
-      // If no explicit color column, try to detect color from the product name
+      // Auto-detect color and moto from name when not explicitly mapped
       let detectedBaseName = nameVal;
-      if (!color && mappedCols['color'] == null) {
-        const extracted = extractColorFromName(nameVal);
-        if (extracted.detectedColor) {
-          color = extracted.detectedColor;
-          detectedBaseName = extracted.baseName;
-        }
+      const extracted = extractFromName(nameVal);
+      
+      if (!color && mappedCols['color'] == null && extracted.detectedColor) {
+        color = extracted.detectedColor;
+      }
+      if (!motoFit && mappedCols['moto_fit'] == null && extracted.detectedMoto) {
+        motoFit = extracted.detectedMoto;
+      }
+      if (extracted.detectedColor || extracted.detectedMoto) {
+        detectedBaseName = extracted.baseName;
       }
 
       return {

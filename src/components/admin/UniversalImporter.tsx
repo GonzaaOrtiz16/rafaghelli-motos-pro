@@ -201,7 +201,6 @@ interface VariantColor {
   price?: number; // variant-specific price (if different from base)
   public_price?: number; // variant-specific public price
 }
-}
 
 const UniversalImporter = () => {
   const queryClient = useQueryClient();

@@ -198,6 +198,8 @@ interface VariantColor {
   sizes: Record<string, number>; // size → stock (when product has sizes)
   stock?: number; // direct stock (when no sizes)
   moto_fit?: string[]; // motorcycles this color variant fits
+  price?: number; // variant-specific price (if different from base)
+  public_price?: number; // variant-specific public price
 }
 
 const UniversalImporter = () => {
@@ -366,13 +368,13 @@ const UniversalImporter = () => {
       // Check if any item in the group has sizes
       const hasAnySizes = groupItems.some(i => i.size);
 
-      // Build variants: group by color, then aggregate sizes and moto_fit
-      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string> }>();
+      // Build variants: group by color, then aggregate sizes, moto_fit, and prices
+      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string>; prices: number[]; publicPrices: number[] }>();
       let totalStock = 0;
 
       groupItems.forEach(item => {
         const color = item.color || 'Único';
-        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set() });
+        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set(), prices: [], publicPrices: [] });
         const entry = colorMap.get(color)!;
         
         if (item.size) {
@@ -382,11 +384,19 @@ const UniversalImporter = () => {
         }
         totalStock += item.stock;
         
+        // Track prices for this variant
+        if (item.price) entry.prices.push(item.price);
+        if (item.public_price) entry.publicPrices.push(item.public_price);
+        
         // Parse moto_fit (comma or slash separated)
         if (item.motoFit) {
-          item.motoFit.split(/[,;\/]+/).map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => entry.motoFit.add(m));
+          item.motoFit.split(/[,;/]+/).map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => entry.motoFit.add(m));
         }
       });
+
+      // Base price = most common or first price
+      const basePrice = first.price;
+      const basePubPrice = first.public_price;
 
       const variants: VariantColor[] = Array.from(colorMap.entries()).map(([color, data]) => {
         const variant: VariantColor = { color, sizes: data.sizes };
@@ -395,6 +405,15 @@ const UniversalImporter = () => {
         }
         if (data.motoFit.size > 0) {
           variant.moto_fit = Array.from(data.motoFit);
+        }
+        // Set variant price if different from base
+        const variantPrice = data.prices.length > 0 ? data.prices[0] : null;
+        const variantPubPrice = data.publicPrices.length > 0 ? data.publicPrices[0] : null;
+        if (variantPrice && variantPrice !== basePrice) {
+          variant.price = variantPrice;
+        }
+        if (variantPubPrice && variantPubPrice !== basePubPrice) {
+          variant.public_price = variantPubPrice;
         }
         return variant;
       });
@@ -564,9 +583,10 @@ const UniversalImporter = () => {
 
             {/* Variant hint */}
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700 font-bold space-y-1">
-              <p>💡 El sistema detecta colores automáticamente en los nombres de productos y los agrupa como variantes.</p>
+              <p>💡 Detecta colores y marcas de moto automáticamente en los nombres y agrupa como variantes.</p>
               <p>📐 Si mapeás "Talle", cada color tendrá sus propios talles con stock independiente.</p>
-              <p>🏍️ Si mapeás "Moto que le va", cada color tendrá las motos compatibles asociadas.</p>
+              <p>🏍️ Detecta Honda, Yamaha, Suzuki, etc. en el nombre como "moto que le va".</p>
+              <p>💰 Si una variante tiene precio distinto, se guarda por separado.</p>
             </div>
 
             <div className="space-y-3">
@@ -684,6 +704,9 @@ const UniversalImporter = () => {
                                   )}
                                   {v.moto_fit && v.moto_fit.length > 0 && (
                                     <span className="text-blue-500 ml-1">🏍️ {v.moto_fit.length}</span>
+                                  )}
+                                  {(v.price || v.public_price) && (
+                                    <span className="text-orange-500 ml-1">${v.public_price || v.price}</span>
                                   )}
                                 </div>
                               ))}

@@ -200,6 +200,35 @@ const UniversalImporter = () => {
     }).filter(Boolean) as any[];
   }, [rows, headers, mapping]);
 
+  // --- Color words to strip from names for smart grouping ---
+  const COLOR_WORDS = new Set([
+    // English
+    'red','blue','green','yellow','orange','black','white','grey','gray','pink','purple',
+    'brown','beige','navy','silver','gold','cyan','magenta','turquoise','violet','coral',
+    'maroon','olive','teal','lime','indigo','ivory','cream','charcoal','burgundy',
+    // Spanish
+    'rojo','azul','verde','amarillo','naranja','negro','blanco','gris','rosa','violeta',
+    'marrón','marron','dorado','plateado','celeste','bordo','bordó','crema','turquesa',
+    'fucsia','lila','beige','arena','natural','humo','acero','carbón','carbon',
+  ]);
+
+  const stripColorFromName = (name: string, color: string): string => {
+    let normalized = name.toLowerCase().trim();
+    // Strip the actual color value from the name
+    if (color) {
+      const colorLower = color.toLowerCase().trim();
+      // Try removing color at the end (with optional separator)
+      const endPattern = new RegExp(`[\\s\\-_/]*${colorLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
+      normalized = normalized.replace(endPattern, '').trim();
+    }
+    // Also strip known color words from the end of the name
+    const words = normalized.split(/[\s\-_/]+/);
+    while (words.length > 1 && COLOR_WORDS.has(words[words.length - 1])) {
+      words.pop();
+    }
+    return words.join(' ').trim();
+  };
+
   // --- Group items by product name to build variants ---
   const groupedProducts = useMemo(() => {
     if (step !== 'map' && step !== 'preview') return [];
@@ -211,16 +240,31 @@ const UniversalImporter = () => {
       return items.map(item => ({ ...item, variants: [], _variantCount: 0 }));
     }
 
-    // Group by normalized product name
+    // Group by normalized product name (stripping color from name)
     const groups = new Map<string, any[]>();
     items.forEach(item => {
-      const key = item.name.toLowerCase().trim();
+      const key = hasColorOrSize
+        ? stripColorFromName(item.name, item.color)
+        : item.name.toLowerCase().trim();
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(item);
     });
 
-    return Array.from(groups.entries()).map(([, groupItems]) => {
+    return Array.from(groups.entries()).map(([groupKey, groupItems]) => {
       const first = groupItems[0];
+      // Use the cleaned name (without color) as the product title when multiple variants exist
+      const cleanTitle = groupItems.length > 1
+        ? groupItems[0].name.replace(/[\s\-_/]*([\w/]+)\s*$/, (match: string, lastWord: string) => {
+            // Only strip if the last word is a color
+            const words = first.name.split(/[\s\-_/]+/);
+            const lastW = words[words.length - 1]?.toLowerCase();
+            if (COLOR_WORDS.has(lastW) || lastW === first.color?.toLowerCase()) {
+              return '';
+            }
+            return match;
+          }).trim()
+        : first.name;
+
       // Build variants: group by color, then aggregate sizes
       const colorMap = new Map<string, Record<string, number>>();
       let totalStock = 0;
@@ -243,6 +287,7 @@ const UniversalImporter = () => {
 
       return {
         ...first,
+        name: cleanTitle || first.name,
         stock: totalStock,
         available: totalStock > 0,
         variants,

@@ -583,9 +583,10 @@ const UniversalImporter = () => {
 
             {/* Variant hint */}
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-700 font-bold space-y-1">
-              <p>💡 El sistema detecta colores automáticamente en los nombres de productos y los agrupa como variantes.</p>
+              <p>💡 Detecta colores y marcas de moto automáticamente en los nombres y agrupa como variantes.</p>
               <p>📐 Si mapeás "Talle", cada color tendrá sus propios talles con stock independiente.</p>
-              <p>🏍️ Si mapeás "Moto que le va", cada color tendrá las motos compatibles asociadas.</p>
+              <p>🏍️ Detecta Honda, Yamaha, Suzuki, etc. en el nombre como "moto que le va".</p>
+              <p>💰 Si una variante tiene precio distinto, se guarda por separado.</p>
             </div>
 
             <div className="space-y-3">

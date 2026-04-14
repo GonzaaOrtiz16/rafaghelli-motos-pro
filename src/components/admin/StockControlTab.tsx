@@ -147,44 +147,85 @@ const StockControlTab = () => {
   };
 
   const handleExportExcel = () => {
-    // Build a flat row per product with all relevant data
-    const rows = products.map(p => {
-      const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
-      const colors = variants.filter((v: any) => v.color && v.color !== 'Único').map((v: any) => {
-        const parts = [v.color];
-        if (v.price) parts.push(`$${v.price}`);
-        const sizes = v.sizes ? Object.entries(v.sizes).filter(([s]) => s !== 'Único').map(([s, qty]) => `${s}(${qty})`).join(',') : '';
-        if (sizes) parts.push(`T:${sizes}`);
-        if (v.stock != null) parts.push(`Stk:${v.stock}`);
-        if (v.moto_fit?.length) parts.push(`Moto:${v.moto_fit.join(',')}`);
-        return parts.join(' | ');
-      });
+    const rows: any[] = [];
 
-      return {
-        'ID': p.id,
-        'Código': p.barcode || '',
-        'Título': p.title,
-        'Marca': p.brand || '',
-        'Categoría': p.category || '',
-        'Precio Público': p.price,
-        'Precio Costo': p.original_price ?? '',
-        'Stock': p.stock ?? 0,
-        'Motos Compatibles': (p.moto_fit || []).join(', '),
-        'Talles': (p.sizes || []).join(', '),
-        'Variantes (Color)': colors.join(' // '),
-        'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
-        'En Oferta': p.is_on_sale ? 'Sí' : 'No',
-      };
+    products.forEach(p => {
+      const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
+      const hasVariants = variants.length > 0 && variants.some((v: any) => v.color && v.color !== 'Único');
+
+      if (hasVariants) {
+        variants.forEach((v: any) => {
+          const sizes = v.sizes ? Object.entries(v.sizes).filter(([s]) => s !== 'Único') : [];
+          const hasSizes = sizes.length > 0;
+
+          if (hasSizes) {
+            sizes.forEach(([size, qty]) => {
+              rows.push({
+                'ID': p.id,
+                'Código': p.barcode || '',
+                'Título': p.title,
+                'Color': v.color || '',
+                'Talle': size,
+                'Marca': p.brand || '',
+                'Categoría': p.category || '',
+                'Precio Público': v.price || p.price,
+                'Precio Costo': p.original_price ?? '',
+                'Stock Variante': qty ?? 0,
+                'Stock General': p.stock ?? 0,
+                'Motos Compatibles': [...(p.moto_fit || []), ...(v.moto_fit || [])].filter((m, i, a) => a.indexOf(m) === i).join(', '),
+                'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
+                'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+              });
+            });
+          } else {
+            rows.push({
+              'ID': p.id,
+              'Código': p.barcode || '',
+              'Título': p.title,
+              'Color': v.color || '',
+              'Talle': '',
+              'Marca': p.brand || '',
+              'Categoría': p.category || '',
+              'Precio Público': v.price || p.price,
+              'Precio Costo': p.original_price ?? '',
+              'Stock Variante': v.stock ?? 0,
+              'Stock General': p.stock ?? 0,
+              'Motos Compatibles': [...(p.moto_fit || []), ...(v.moto_fit || [])].filter((m, i, a) => a.indexOf(m) === i).join(', '),
+              'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
+              'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+            });
+          }
+        });
+      } else {
+        rows.push({
+          'ID': p.id,
+          'Código': p.barcode || '',
+          'Título': p.title,
+          'Color': '',
+          'Talle': '',
+          'Marca': p.brand || '',
+          'Categoría': p.category || '',
+          'Precio Público': p.price,
+          'Precio Costo': p.original_price ?? '',
+          'Stock Variante': '',
+          'Stock General': p.stock ?? 0,
+          'Motos Compatibles': (p.moto_fit || []).join(', '),
+          'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
+          'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+        });
+      }
     });
 
     const ws = XLSX.utils.json_to_sheet(rows);
 
     // Auto-width columns
-    const colWidths = Object.keys(rows[0] || {}).map(key => {
-      const maxLen = Math.max(key.length, ...rows.map(r => String((r as any)[key] ?? '').length));
-      return { wch: Math.min(maxLen + 2, 50) };
-    });
-    ws['!cols'] = colWidths;
+    if (rows.length > 0) {
+      const colWidths = Object.keys(rows[0]).map(key => {
+        const maxLen = Math.max(key.length, ...rows.map(r => String(r[key] ?? '').length));
+        return { wch: Math.min(maxLen + 2, 50) };
+      });
+      ws['!cols'] = colWidths;
+    }
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Inventario');

@@ -106,9 +106,91 @@ const MOTO_BRANDS = [
   'ktm', 'husqvarna', 'bmw', 'harley', 'ducati', 'triumph',
 ];
 
-// Extract moto brand+model from product name
+// Known motorcycle models mapped to their brand — detects models even without brand in name
+const MOTO_MODELS: Record<string, string> = {
+  // Honda
+  'cg': 'Honda', 'cg titan': 'Honda', 'cg 150': 'Honda', 'titan': 'Honda',
+  'cb': 'Honda', 'cb 125': 'Honda', 'cb 250': 'Honda', 'cb1': 'Honda',
+  'cbr': 'Honda', 'cbr 250': 'Honda', 'cbr 600': 'Honda', 'cbr 1000': 'Honda',
+  'cbx': 'Honda', 'cbx 250': 'Honda',
+  'xr': 'Honda', 'xr 125': 'Honda', 'xr 150': 'Honda', 'xr 250': 'Honda', 'xr 300': 'Honda',
+  'tornado': 'Honda', 'twister': 'Honda', 'storm': 'Honda', 'wave': 'Honda',
+  'biz': 'Honda', 'pop': 'Honda', 'elite': 'Honda', 'pcx': 'Honda',
+  'nx': 'Honda', 'nx 400': 'Honda', 'transalp': 'Honda', 'africa twin': 'Honda',
+  'gl': 'Honda', 'goldwing': 'Honda', 'shadow': 'Honda', 'rebel': 'Honda',
+  'invicta': 'Honda', 'cargo': 'Honda',
+  // Yamaha
+  'ybr': 'Yamaha', 'ybr 125': 'Yamaha', 'ybr 250': 'Yamaha',
+  'fz': 'Yamaha', 'fz 16': 'Yamaha', 'fz 25': 'Yamaha', 'fz fi': 'Yamaha',
+  'fazer': 'Yamaha', 'sz': 'Yamaha', 'sz 150': 'Yamaha', 'szr': 'Yamaha',
+  'xtz': 'Yamaha', 'xtz 125': 'Yamaha', 'xtz 250': 'Yamaha', 'tenere': 'Yamaha',
+  'mt': 'Yamaha', 'mt 03': 'Yamaha', 'mt 07': 'Yamaha', 'mt 09': 'Yamaha',
+  'r1': 'Yamaha', 'r3': 'Yamaha', 'r6': 'Yamaha', 'r15': 'Yamaha',
+  'crypton': 'Yamaha', 'ray': 'Yamaha', 'nmax': 'Yamaha', 'nmx': 'Yamaha',
+  'aerox': 'Yamaha', 'xt': 'Yamaha', 'xt 600': 'Yamaha',
+  // Suzuki
+  'gn': 'Suzuki', 'gn 125': 'Suzuki', 'en': 'Suzuki', 'en 125': 'Suzuki',
+  'gixxer': 'Suzuki', 'gsx': 'Suzuki', 'gsx 150': 'Suzuki', 'gsxr': 'Suzuki',
+  'ax': 'Suzuki', 'ax 100': 'Suzuki', 'ax100': 'Suzuki',
+  'v-strom': 'Suzuki', 'vstrom': 'Suzuki', 'dr': 'Suzuki', 'dr 650': 'Suzuki',
+  'intruder': 'Suzuki', 'boulevard': 'Suzuki', 'hayabusa': 'Suzuki',
+  // Kawasaki
+  'kx': 'Kawasaki', 'kx 85': 'Kawasaki', 'kx 250': 'Kawasaki', 'kx 450': 'Kawasaki',
+  'klr': 'Kawasaki', 'klr 650': 'Kawasaki', 'versys': 'Kawasaki',
+  'ninja': 'Kawasaki', 'ninja 300': 'Kawasaki', 'ninja 400': 'Kawasaki', 'ninja 650': 'Kawasaki',
+  'z400': 'Kawasaki', 'z650': 'Kawasaki', 'z900': 'Kawasaki',
+  'vulcan': 'Kawasaki', 'er6n': 'Kawasaki',
+  // Bajaj
+  'rouser': 'Bajaj', 'rouser 135': 'Bajaj', 'rouser 160': 'Bajaj', 'rouser 180': 'Bajaj',
+  'rouser 200': 'Bajaj', 'rouser 220': 'Bajaj', 'ns 200': 'Bajaj', 'rs 200': 'Bajaj',
+  'dominar': 'Bajaj', 'dominar 250': 'Bajaj', 'dominar 400': 'Bajaj',
+  'pulsar': 'Bajaj', 'boxer': 'Bajaj', 'avenger': 'Bajaj',
+  // Zanella
+  'zb': 'Zanella', 'zb 110': 'Zanella', 'rx': 'Zanella', 'rx 150': 'Zanella',
+  'rz': 'Zanella', 'rz3': 'Zanella', 'zr': 'Zanella', 'zr 150': 'Zanella', 'zr 250': 'Zanella',
+  'sapucai': 'Zanella', 'ceccato': 'Zanella', 'patagonian eagle': 'Zanella',
+  // Motomel
+  'skua': 'Motomel', 'skua 150': 'Motomel', 'skua 200': 'Motomel', 'skua 250': 'Motomel',
+  'sirius': 'Motomel', 'sirius 150': 'Motomel', 'sirius 190': 'Motomel', 'sirius 200': 'Motomel',
+  'blitz': 'Motomel', 'blitz 110': 'Motomel',
+  'dlx': 'Motomel', 'dlx 110': 'Motomel', 's2': 'Motomel', 's3': 'Motomel',
+  'strato': 'Motomel', 'cg 150 s2': 'Motomel',
+  // Corven
+  'triax': 'Corven', 'triax 150': 'Corven', 'triax 200': 'Corven', 'triax 250': 'Corven',
+  'mirage': 'Corven', 'mirage 110': 'Corven',
+  'energy': 'Corven', 'energy 110': 'Corven',
+  'txr': 'Corven', 'txr 250': 'Corven',
+  // Gilera
+  'smx': 'Gilera', 'smx 200': 'Gilera', 'smx 250': 'Gilera', 'smx 400': 'Gilera',
+  'vc': 'Gilera', 'vc 150': 'Gilera', 'vc 200': 'Gilera',
+  'sahel': 'Gilera', 'fuoco': 'Gilera',
+  // Guerrero
+  'trip': 'Guerrero', 'trip 110': 'Guerrero',
+  'grm': 'Guerrero', 'gxl': 'Guerrero', 'gxr': 'Guerrero',
+  // Mondial
+  'td': 'Mondial', 'td 150': 'Mondial', 'ld': 'Mondial', 'ld 110': 'Mondial',
+  'hd': 'Mondial', 'hd 254': 'Mondial', 'rd': 'Mondial', 'rd 150': 'Mondial',
+  // KTM
+  'duke': 'KTM', 'duke 200': 'KTM', 'duke 390': 'KTM', 'duke 690': 'KTM',
+  'exc': 'KTM', 'sx': 'KTM', 'adventure': 'KTM', 'enduro': 'KTM',
+  // Beta
+  'motard': 'Beta', 'tr': 'Beta', 'rr': 'Beta',
+  // Otras
+  'svartpilen': 'Husqvarna', 'vitpilen': 'Husqvarna',
+  'leoncino': 'Benelli', 'tnt': 'Benelli', 'trk': 'Benelli', 'imperiale': 'Benelli',
+};
+
+// Sort model keys longest-first so "cg titan" matches before "cg"
+const MOTO_MODEL_KEYS = Object.keys(MOTO_MODELS).sort((a, b) => b.length - a.length);
+
+// Detect year range patterns like "2001 a 2010", "2005-2015", "año 2010"
+const YEAR_RANGE_RE = /\b((?:año\s+)?\d{4}\s*(?:a|al|-|\/)\s*\d{4}|\b(?:año\s+)?\d{4})\b/gi;
+
+// Extract moto brand+model from product name (supports brand names AND model-only detection)
 const extractMotoFromName = (name: string): { nameWithoutMoto: string; detectedMoto: string } => {
   const lower = name.toLowerCase().trim();
+
+  // 1) Try brand-first detection (existing logic)
   for (const brand of MOTO_BRANDS) {
     const brandIdx = lower.indexOf(brand);
     if (brandIdx > 0) {
@@ -119,6 +201,28 @@ const extractMotoFromName = (name: string): { nameWithoutMoto: string; detectedM
       }
     }
   }
+
+  // 2) Try model-based detection (e.g. "CG Titan 150", "XR 150", "KX 85 2001 a 2010")
+  for (const modelKey of MOTO_MODEL_KEYS) {
+    const modelRe = new RegExp(`\\b${modelKey.replace(/\s+/g, '\\s+')}\\b`, 'i');
+    const match = lower.match(modelRe);
+    if (match && match.index != null && match.index > 0) {
+      const startIdx = match.index;
+      const brand = MOTO_MODELS[modelKey];
+      // Grab everything from the model match to the end (may include cc, year range, etc.)
+      let nameWithoutMoto = name.substring(0, startIdx).trim().replace(/[\s\-_/]+$/, '');
+      let motoInfo = name.substring(startIdx).trim();
+      if (nameWithoutMoto.length > 2) {
+        // Prefix with brand if not already there
+        const motoLower = motoInfo.toLowerCase();
+        if (!motoLower.startsWith(brand.toLowerCase())) {
+          motoInfo = `${brand} ${motoInfo}`;
+        }
+        return { nameWithoutMoto, detectedMoto: motoInfo };
+      }
+    }
+  }
+
   return { nameWithoutMoto: name.trim(), detectedMoto: '' };
 };
 

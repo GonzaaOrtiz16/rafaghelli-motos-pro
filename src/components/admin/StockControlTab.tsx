@@ -147,101 +147,83 @@ const StockControlTab = () => {
   };
 
   const handleExportExcel = () => {
-    const rows: any[] = [];
+    const variantRows: any[] = [];
+    const mainRows: any[] = [];
 
     products.forEach(p => {
       const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
       const validVariants = variants.filter((v: any) => v.color && v.color !== 'Único');
       const baseMotoFit = (p.moto_fit || []).join(', ');
 
-      if (validVariants.length > 0) {
-        // Calculate total stock from all variants
-        let totalVariantStock = 0;
-        const variantRows: any[] = [];
+      // Calculate total stock from variants
+      let totalVariantStock = 0;
 
+      if (validVariants.length > 0) {
+        const currentVariantRows: any[] = [];
         validVariants.forEach((v: any) => {
           const sizes = v.sizes ? Object.entries(v.sizes).filter(([s]) => s !== 'Único') : [];
-          const variantMotoFit = [...(p.moto_fit || []), ...(v.moto_fit || [])];
-          const uniqueMotoFit = [...new Set(variantMotoFit)].join(', ');
+          const variantMotoFit = [...new Set([...(p.moto_fit || []), ...(v.moto_fit || [])])].join(', ');
 
           if (sizes.length > 0) {
             sizes.forEach(([size, qty]) => {
               const q = Number(qty) || 0;
               totalVariantStock += q;
-              variantRows.push({
-                'ID': p.id,
-                'Código': p.barcode || '',
-                'Título': p.title,
-                'Marca': p.brand || '',
-                'Categoría': p.category || '',
-                'Color': v.color,
-                'Talle': size,
-                'Stock Variante': q,
-                'Stock General': 0, // placeholder, filled after
-                'Precio Público': v.price || p.price,
-                'Precio Costo': p.original_price ?? '',
-                'Motos Compatibles': uniqueMotoFit,
-                'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
-                'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+              currentVariantRows.push({
+                'ID': p.id, 'Código': p.barcode || '', 'Título': p.title,
+                'Marca': p.brand || '', 'Categoría': p.category || '',
+                'Color': v.color, 'Talle': size, 'Stock Variante': q,
+                'Precio Público': v.price || p.price, 'Precio Costo': p.original_price ?? '',
+                'Motos Compatibles': variantMotoFit,
               });
             });
           } else {
             const q = Number(v.stock) || 0;
             totalVariantStock += q;
-            variantRows.push({
-              'ID': p.id,
-              'Código': p.barcode || '',
-              'Título': p.title,
-              'Marca': p.brand || '',
-              'Categoría': p.category || '',
-              'Color': v.color,
-              'Talle': '',
-              'Stock Variante': q,
-              'Stock General': 0,
-              'Precio Público': v.price || p.price,
-              'Precio Costo': p.original_price ?? '',
-              'Motos Compatibles': uniqueMotoFit,
-              'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
-              'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+            currentVariantRows.push({
+              'ID': p.id, 'Código': p.barcode || '', 'Título': p.title,
+              'Marca': p.brand || '', 'Categoría': p.category || '',
+              'Color': v.color, 'Talle': '', 'Stock Variante': q,
+              'Precio Público': v.price || p.price, 'Precio Costo': p.original_price ?? '',
+              'Motos Compatibles': variantMotoFit,
             });
           }
         });
-
-        // Set stock general = sum of all variant stocks
-        variantRows.forEach(r => r['Stock General'] = totalVariantStock);
-        rows.push(...variantRows);
-      } else {
-        // Product without variants: single row
-        rows.push({
-          'ID': p.id,
-          'Código': p.barcode || '',
-          'Título': p.title,
-          'Marca': p.brand || '',
-          'Categoría': p.category || '',
-          'Color': '',
-          'Talle': '',
-          'Stock Variante': p.stock ?? 0,
-          'Stock General': p.stock ?? 0,
-          'Precio Público': p.price,
-          'Precio Costo': p.original_price ?? '',
-          'Motos Compatibles': baseMotoFit,
-          'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
-          'En Oferta': p.is_on_sale ? 'Sí' : 'No',
-        });
+        variantRows.push(...currentVariantRows);
       }
-    });
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const colWidths = Object.keys(rows[0] || {}).map(key => {
-      const maxLen = Math.max(key.length, ...rows.map(r => String((r as any)[key] ?? '').length));
-      return { wch: Math.min(maxLen + 2, 50) };
+      // Sheet 2: Main product row (always)
+      const stockGeneral = validVariants.length > 0 ? totalVariantStock : (p.stock ?? 0);
+      mainRows.push({
+        'ID': p.id, 'Código': p.barcode || '', 'Título': p.title,
+        'Marca': p.brand || '', 'Categoría': p.category || '',
+        'Stock General': stockGeneral,
+        'Precio Público': p.price, 'Precio Costo': p.original_price ?? '',
+        'Motos Compatibles': baseMotoFit,
+        'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
+        'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+      });
     });
-    ws['!cols'] = colWidths;
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+
+    // Sheet 1: Variantes
+    const ws1 = XLSX.utils.json_to_sheet(variantRows.length > 0 ? variantRows : [{ 'Info': 'No hay productos con variantes' }]);
+    if (variantRows.length > 0) {
+      ws1['!cols'] = Object.keys(variantRows[0]).map(key => ({
+        wch: Math.min(Math.max(key.length, ...variantRows.map(r => String(r[key] ?? '').length)) + 2, 50)
+      }));
+    }
+    XLSX.utils.book_append_sheet(wb, ws1, 'Variantes');
+
+    // Sheet 2: Productos
+    const ws2 = XLSX.utils.json_to_sheet(mainRows);
+    ws2['!cols'] = Object.keys(mainRows[0] || {}).map(key => ({
+      wch: Math.min(Math.max(key.length, ...mainRows.map(r => String(r[key] ?? '').length)) + 2, 50)
+    }));
+    XLSX.utils.book_append_sheet(wb, ws2, 'Productos');
+
     XLSX.writeFile(wb, `inventario_rafaghelli_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Excel exportado correctamente");
+    toast.success("Excel exportado con 2 hojas: Variantes y Productos");
   };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {

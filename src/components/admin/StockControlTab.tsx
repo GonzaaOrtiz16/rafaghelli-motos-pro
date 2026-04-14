@@ -409,20 +409,21 @@ const StockControlTab = () => {
           <h3 className="font-black uppercase tracking-tighter text-lg">Importar / Exportar</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button onClick={handleExportCSV} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
-            <Download size={20} /> Exportar CSV
+          <button onClick={handleExportExcel} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
+            <Download size={20} /> Exportar Excel
           </button>
           <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-orange-500 text-orange-500 py-5 rounded-2xl font-black uppercase text-sm hover:bg-orange-50 transition-all disabled:opacity-50">
             {importing ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-            {importing ? 'Importando...' : 'Importar CSV'}
+            {importing ? 'Importando...' : 'Importar Excel/CSV'}
           </button>
-          <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleImportCSV} />
+          <input type="file" accept=".csv,.xlsx,.xls" className="hidden" ref={fileInputRef} onChange={handleImportFile} />
         </div>
         <div className="bg-zinc-50 rounded-2xl p-4 text-[11px] text-zinc-500 font-medium space-y-1">
-          <p className="font-black uppercase text-zinc-700 text-xs mb-2">Formato del CSV:</p>
-          <p>• Columnas obligatorias: <strong>ID, Stock</strong></p>
-          <p>• Columnas opcionales: Título, Código de Barras, Precio, Categoría, Marca</p>
-          <p>• Podés exportar primero para obtener la plantilla con los IDs correctos</p>
+          <p className="font-black uppercase text-zinc-700 text-xs mb-2">¿Cómo funciona?</p>
+          <p>1. <strong>Exportá</strong> el Excel con todos tus productos</p>
+          <p>2. Modificá solo la columna <strong>Stock</strong> (o Precio Público / Precio Costo)</p>
+          <p>3. <strong>Importá</strong> el archivo modificado — se actualizan automáticamente</p>
+          <p className="text-zinc-400 mt-1">• Coincide por ID, Código de barras o Título</p>
         </div>
         <div>
           <h4 className="font-black uppercase text-xs tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Package size={14} /> Resumen de Stock</h4>

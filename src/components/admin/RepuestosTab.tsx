@@ -322,7 +322,12 @@ const RepuestosTab = () => {
         </table>
       </div>
 
-      {isAdding && (
+      {isAdding && (() => {
+        const editingProduct = editingId ? products?.find(p => p.id === editingId) : null;
+        const editVariants = editingProduct ? (Array.isArray(editingProduct.variants) ? editingProduct.variants as any[] : []) : [];
+        const editColors = editVariants.filter((v: any) => v.color && v.color !== 'Único');
+        const editMotoFit = editingProduct?.moto_fit || [];
+        return (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 md:px-10 md:py-6 border-b flex justify-between items-center">
@@ -340,6 +345,61 @@ const RepuestosTab = () => {
               </div>
               <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold" placeholder="Código de barras / QR (opcional)" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} />
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+
+              {/* Variants section */}
+              {editingId && (editColors.length > 0 || editMotoFit.length > 0) && (
+                <div className="bg-zinc-50 rounded-2xl p-5 space-y-3 border">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+                    <Palette size={12} /> Variantes del producto
+                  </p>
+                  {editColors.length > 0 && (
+                    <div className="space-y-2">
+                      {editColors.map((v: any, i: number) => (
+                        <div key={i} className="bg-white rounded-xl p-3 border space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-black uppercase bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{v.color}</span>
+                            {v.price && <span className="text-[10px] font-bold text-orange-600">${Number(v.price).toLocaleString('es-AR')}</span>}
+                            {v.stock != null && v.stock !== undefined && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${v.stock > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                                Stock: {v.stock}
+                              </span>
+                            )}
+                          </div>
+                          {v.sizes && Object.keys(v.sizes).filter((s: string) => s !== 'Único').length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              <span className="text-[9px] text-zinc-400 font-bold">Talles:</span>
+                              {Object.entries(v.sizes).filter(([s]) => s !== 'Único').map(([size, stock]: [string, any]) => (
+                                <span key={size} className="text-[9px] bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded font-bold">
+                                  {size} <span className="text-zinc-400">({stock})</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {v.moto_fit?.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              <span className="text-[9px] text-zinc-400 font-bold">Motos:</span>
+                              {v.moto_fit.map((m: string, j: number) => (
+                                <span key={j} className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
+                                  <Bike size={8} /> {m}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {editColors.length === 0 && editMotoFit.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {editMotoFit.map((m: string, i: number) => (
+                        <span key={i} className="text-[9px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-full flex items-center gap-0.5">
+                          <Bike size={9} /> {m}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

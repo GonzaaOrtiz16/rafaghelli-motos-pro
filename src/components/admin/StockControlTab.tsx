@@ -151,65 +151,80 @@ const StockControlTab = () => {
 
     products.forEach(p => {
       const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
-      const hasVariants = variants.length > 0 && variants.some((v: any) => v.color && v.color !== 'Único');
+      const validVariants = variants.filter((v: any) => v.color && v.color !== 'Único');
+      const baseMotoFit = (p.moto_fit || []).join(', ');
 
-      if (hasVariants) {
-        variants.forEach((v: any) => {
+      if (validVariants.length > 0) {
+        // Calculate total stock from all variants
+        let totalVariantStock = 0;
+        const variantRows: any[] = [];
+
+        validVariants.forEach((v: any) => {
           const sizes = v.sizes ? Object.entries(v.sizes).filter(([s]) => s !== 'Único') : [];
-          const hasSizes = sizes.length > 0;
+          const variantMotoFit = [...(p.moto_fit || []), ...(v.moto_fit || [])];
+          const uniqueMotoFit = [...new Set(variantMotoFit)].join(', ');
 
-          if (hasSizes) {
+          if (sizes.length > 0) {
             sizes.forEach(([size, qty]) => {
-              rows.push({
+              const q = Number(qty) || 0;
+              totalVariantStock += q;
+              variantRows.push({
                 'ID': p.id,
                 'Código': p.barcode || '',
                 'Título': p.title,
-                'Color': v.color || '',
-                'Talle': size,
                 'Marca': p.brand || '',
                 'Categoría': p.category || '',
+                'Color': v.color,
+                'Talle': size,
+                'Stock Variante': q,
+                'Stock General': 0, // placeholder, filled after
                 'Precio Público': v.price || p.price,
                 'Precio Costo': p.original_price ?? '',
-                'Stock Variante': qty ?? 0,
-                'Stock General': p.stock ?? 0,
-                'Motos Compatibles': [...(p.moto_fit || []), ...(v.moto_fit || [])].filter((m, i, a) => a.indexOf(m) === i).join(', '),
+                'Motos Compatibles': uniqueMotoFit,
                 'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
                 'En Oferta': p.is_on_sale ? 'Sí' : 'No',
               });
             });
           } else {
-            rows.push({
+            const q = Number(v.stock) || 0;
+            totalVariantStock += q;
+            variantRows.push({
               'ID': p.id,
               'Código': p.barcode || '',
               'Título': p.title,
-              'Color': v.color || '',
-              'Talle': '',
               'Marca': p.brand || '',
               'Categoría': p.category || '',
+              'Color': v.color,
+              'Talle': '',
+              'Stock Variante': q,
+              'Stock General': 0,
               'Precio Público': v.price || p.price,
               'Precio Costo': p.original_price ?? '',
-              'Stock Variante': v.stock ?? 0,
-              'Stock General': p.stock ?? 0,
-              'Motos Compatibles': [...(p.moto_fit || []), ...(v.moto_fit || [])].filter((m, i, a) => a.indexOf(m) === i).join(', '),
+              'Motos Compatibles': uniqueMotoFit,
               'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
               'En Oferta': p.is_on_sale ? 'Sí' : 'No',
             });
           }
         });
+
+        // Set stock general = sum of all variant stocks
+        variantRows.forEach(r => r['Stock General'] = totalVariantStock);
+        rows.push(...variantRows);
       } else {
+        // Product without variants: single row
         rows.push({
           'ID': p.id,
           'Código': p.barcode || '',
           'Título': p.title,
-          'Color': '',
-          'Talle': '',
           'Marca': p.brand || '',
           'Categoría': p.category || '',
+          'Color': '',
+          'Talle': '',
+          'Stock Variante': p.stock ?? 0,
+          'Stock General': p.stock ?? 0,
           'Precio Público': p.price,
           'Precio Costo': p.original_price ?? '',
-          'Stock Variante': '',
-          'Stock General': p.stock ?? 0,
-          'Motos Compatibles': (p.moto_fit || []).join(', '),
+          'Motos Compatibles': baseMotoFit,
           'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
           'En Oferta': p.is_on_sale ? 'Sí' : 'No',
         });
@@ -217,15 +232,11 @@ const StockControlTab = () => {
     });
 
     const ws = XLSX.utils.json_to_sheet(rows);
-
-    // Auto-width columns
-    if (rows.length > 0) {
-      const colWidths = Object.keys(rows[0]).map(key => {
-        const maxLen = Math.max(key.length, ...rows.map(r => String(r[key] ?? '').length));
-        return { wch: Math.min(maxLen + 2, 50) };
-      });
-      ws['!cols'] = colWidths;
-    }
+    const colWidths = Object.keys(rows[0] || {}).map(key => {
+      const maxLen = Math.max(key.length, ...rows.map(r => String((r as any)[key] ?? '').length));
+      return { wch: Math.min(maxLen + 2, 50) };
+    });
+    ws['!cols'] = colWidths;
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Inventario');

@@ -474,7 +474,9 @@ const RepuestosTab = () => {
             </form>
           </div>
         </div>
-      )}
+        );
+      })()}
+
     </>
   );
 };

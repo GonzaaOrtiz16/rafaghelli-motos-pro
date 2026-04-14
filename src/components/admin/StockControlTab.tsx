@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import ProductQRModal from "@/components/ProductQRModal";
+import * as XLSX from 'xlsx';
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -145,65 +146,134 @@ const StockControlTab = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = ['ID', 'Título', 'Código de Barras', 'Stock', 'Precio', 'Categoría', 'Marca'];
-    const rows = products.map(p => [
-      p.id,
-      `"${p.title.replace(/"/g, '""')}"`,
-      p.barcode || '',
-      p.stock ?? 0,
-      p.price,
-      `"${p.category}"`,
-      `"${p.brand}"`
-    ]);
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `inventario_rafaghelli_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("CSV exportado correctamente");
+  const handleExportExcel = () => {
+    // Build a flat row per product with all relevant data
+    const rows = products.map(p => {
+      const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
+      const colors = variants.filter((v: any) => v.color && v.color !== 'Único').map((v: any) => {
+        const parts = [v.color];
+        if (v.price) parts.push(`$${v.price}`);
+        const sizes = v.sizes ? Object.entries(v.sizes).filter(([s]) => s !== 'Único').map(([s, qty]) => `${s}(${qty})`).join(',') : '';
+        if (sizes) parts.push(`T:${sizes}`);
+        if (v.stock != null) parts.push(`Stk:${v.stock}`);
+        if (v.moto_fit?.length) parts.push(`Moto:${v.moto_fit.join(',')}`);
+        return parts.join(' | ');
+      });
+
+      return {
+        'ID': p.id,
+        'Código': p.barcode || '',
+        'Título': p.title,
+        'Marca': p.brand || '',
+        'Categoría': p.category || '',
+        'Precio Público': p.price,
+        'Precio Costo': p.original_price ?? '',
+        'Stock': p.stock ?? 0,
+        'Motos Compatibles': (p.moto_fit || []).join(', '),
+        'Talles': (p.sizes || []).join(', '),
+        'Variantes (Color)': colors.join(' // '),
+        'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
+        'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+
+    // Auto-width columns
+    const colWidths = Object.keys(rows[0] || {}).map(key => {
+      const maxLen = Math.max(key.length, ...rows.map(r => String((r as any)[key] ?? '').length));
+      return { wch: Math.min(maxLen + 2, 50) };
+    });
+    ws['!cols'] = colWidths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    XLSX.writeFile(wb, `inventario_rafaghelli_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success("Excel exportado correctamente");
   };
 
-  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
-    const text = await file.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { toast.error("El CSV está vacío"); setImporting(false); return; }
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const idIdx = headers.findIndex(h => h === 'id');
-    const stockIdx = headers.findIndex(h => h === 'stock');
-    const barcodeIdx = headers.findIndex(h => h.includes('barr') || h.includes('barcode') || h.includes('código'));
-    if (idIdx === -1 || stockIdx === -1) {
-      toast.error("El CSV debe tener columnas 'ID' y 'Stock'");
-      setImporting(false);
-      return;
-    }
-    let updated = 0, errors = 0, generated = 0;
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-      const id = cols[idIdx];
-      const stock = parseInt(cols[stockIdx]);
-      if (!id || isNaN(stock)) continue;
-      const updateData: any = { stock };
-      const csvBarcode = barcodeIdx !== -1 ? cols[barcodeIdx] : '';
-      if (csvBarcode) {
-        updateData.barcode = csvBarcode;
-      } else {
-        // Auto-generate barcode if empty
-        updateData.barcode = `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-        generated++;
+
+    try {
+      const data = new Uint8Array(await file.arrayBuffer());
+      const wb = XLSX.read(data, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const json: any[] = XLSX.utils.sheet_to_json(sheet);
+
+      if (json.length === 0) { toast.error("El archivo está vacío"); setImporting(false); return; }
+
+      // Detect columns (flexible naming)
+      const firstRow = json[0];
+      const keys = Object.keys(firstRow);
+      const findCol = (patterns: string[]) => keys.find(k => patterns.some(p => k.toLowerCase().includes(p))) || null;
+
+      const idCol = findCol(['id']);
+      const stockCol = findCol(['stock', 'cant', 'existencia']);
+      const priceCol = findCol(['precio pub', 'pvp', 'precio público', 'precio venta', 'p. pub']);
+      const costCol = findCol(['precio cost', 'costo', 'precio lista', 'p. cost']);
+      const titleCol = findCol(['titulo', 'título', 'nombre', 'producto']);
+      const barcodeCol = findCol(['codigo', 'código', 'barr', 'ean', 'sku']);
+
+      if (!stockCol && !priceCol && !costCol) {
+        toast.error("No se encontró columna de Stock ni de Precio para actualizar");
+        setImporting(false);
+        return;
       }
-      const { error } = await supabase.from('products').update(updateData).eq('id', id);
-      if (error) errors++; else updated++;
+
+      // Build lookup maps for matching
+      const titleMap = new Map<string, any>();
+      const barcodeMap = new Map<string, any>();
+      const idMap = new Map<string, any>();
+      products.forEach(p => {
+        idMap.set(p.id, p);
+        titleMap.set(p.title.toLowerCase().trim(), p);
+        if (p.barcode) barcodeMap.set(p.barcode.toLowerCase().trim(), p);
+      });
+
+      let updated = 0, notFound = 0, errors = 0;
+
+      for (const row of json) {
+        // Try to match: by ID, then barcode, then title
+        let match: any = null;
+        if (idCol && row[idCol]) match = idMap.get(String(row[idCol]).trim());
+        if (!match && barcodeCol && row[barcodeCol]) match = barcodeMap.get(String(row[barcodeCol]).toLowerCase().trim());
+        if (!match && titleCol && row[titleCol]) match = titleMap.get(String(row[titleCol]).toLowerCase().trim());
+
+        if (!match) { notFound++; continue; }
+
+        const updateData: any = {};
+        if (stockCol && row[stockCol] != null) {
+          const val = parseInt(String(row[stockCol]));
+          if (!isNaN(val)) updateData.stock = val;
+        }
+        if (priceCol && row[priceCol] != null) {
+          const val = parseFloat(String(row[priceCol]).replace(/[^0-9.,]/g, '').replace(',', '.'));
+          if (!isNaN(val)) updateData.price = val;
+        }
+        if (costCol && row[costCol] != null) {
+          const val = parseFloat(String(row[costCol]).replace(/[^0-9.,]/g, '').replace(',', '.'));
+          if (!isNaN(val)) updateData.original_price = val;
+        }
+
+        if (Object.keys(updateData).length === 0) continue;
+
+        const { error } = await supabase.from('products').update(updateData).eq('id', match.id);
+        if (error) errors++; else updated++;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      const msg = [`${updated} actualizados`];
+      if (notFound) msg.push(`${notFound} no encontrados`);
+      if (errors) msg.push(`${errors} errores`);
+      toast.success(`Importación: ${msg.join(', ')}`);
+    } catch {
+      toast.error("Error al leer el archivo");
     }
+
     setImporting(false);
-    queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    toast.success(`Importación completada: ${updated} actualizados, ${generated} códigos generados, ${errors} errores`);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -339,20 +409,21 @@ const StockControlTab = () => {
           <h3 className="font-black uppercase tracking-tighter text-lg">Importar / Exportar</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button onClick={handleExportCSV} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
-            <Download size={20} /> Exportar CSV
+          <button onClick={handleExportExcel} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
+            <Download size={20} /> Exportar Excel
           </button>
           <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-orange-500 text-orange-500 py-5 rounded-2xl font-black uppercase text-sm hover:bg-orange-50 transition-all disabled:opacity-50">
             {importing ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-            {importing ? 'Importando...' : 'Importar CSV'}
+            {importing ? 'Importando...' : 'Importar Excel/CSV'}
           </button>
-          <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleImportCSV} />
+          <input type="file" accept=".csv,.xlsx,.xls" className="hidden" ref={fileInputRef} onChange={handleImportFile} />
         </div>
         <div className="bg-zinc-50 rounded-2xl p-4 text-[11px] text-zinc-500 font-medium space-y-1">
-          <p className="font-black uppercase text-zinc-700 text-xs mb-2">Formato del CSV:</p>
-          <p>• Columnas obligatorias: <strong>ID, Stock</strong></p>
-          <p>• Columnas opcionales: Título, Código de Barras, Precio, Categoría, Marca</p>
-          <p>• Podés exportar primero para obtener la plantilla con los IDs correctos</p>
+          <p className="font-black uppercase text-zinc-700 text-xs mb-2">¿Cómo funciona?</p>
+          <p>1. <strong>Exportá</strong> el Excel con todos tus productos</p>
+          <p>2. Modificá solo la columna <strong>Stock</strong> (o Precio Público / Precio Costo)</p>
+          <p>3. <strong>Importá</strong> el archivo modificado — se actualizan automáticamente</p>
+          <p className="text-zinc-400 mt-1">• Coincide por ID, Código de barras o Título</p>
         </div>
         <div>
           <h4 className="font-black uppercase text-xs tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Package size={14} /> Resumen de Stock</h4>

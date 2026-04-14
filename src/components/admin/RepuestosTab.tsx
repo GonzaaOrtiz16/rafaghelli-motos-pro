@@ -42,7 +42,6 @@ const RepuestosTab = () => {
 
   const handleEdit = (product: any) => {
     setEditingId(product.id);
-    // Match category case-insensitively to categorias list
     const matchedCat = categorias.find(c => c.nombre.toLowerCase().trim() === (product.category || '').toLowerCase().trim());
     setFormData({
       title: product.title, price: product.price.toString(), category: matchedCat ? matchedCat.nombre : (product.category || ''),
@@ -180,71 +179,145 @@ const RepuestosTab = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:hidden">
-        {filteredProducts?.map((p) => (
-          <div key={p.id} className="bg-white rounded-3xl border shadow-sm p-4 flex gap-4 relative overflow-hidden">
-            <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-              {p.is_on_sale && <div className="bg-orange-500 text-white p-1 rounded-lg shadow-lg"><Tag size={12} fill="currentColor" /></div>}
-              {p.free_shipping && <div className="bg-green-500 text-white p-1 rounded-lg shadow-lg"><Truck size={12} fill="currentColor" /></div>}
-            </div>
-            <img src={p.images?.[0]} className="w-24 h-24 rounded-2xl object-cover shrink-0 bg-zinc-100" />
-            <div className="flex-1 min-w-0 flex flex-col justify-between">
-              <div>
-                <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
-                <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <p className="font-black text-sm text-zinc-900">${p.price.toLocaleString('es-AR')}</p>
+        {filteredProducts?.map((p) => {
+          const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
+          const colorCount = variants.filter((v: any) => v.color && v.color !== 'Único').length;
+          const motoFitList = p.moto_fit || [];
+          return (
+            <div key={p.id} className="bg-white rounded-3xl border shadow-sm p-4 flex gap-4 relative overflow-hidden">
+              <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                {p.is_on_sale && <div className="bg-orange-500 text-white p-1 rounded-lg shadow-lg"><Tag size={12} fill="currentColor" /></div>}
+                {p.free_shipping && <div className="bg-green-500 text-white p-1 rounded-lg shadow-lg"><Truck size={12} fill="currentColor" /></div>}
+              </div>
+              <img src={p.images?.[0] || '/placeholder.svg'} className="w-24 h-24 rounded-2xl object-cover shrink-0 bg-zinc-100" />
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
+                  <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <p className="font-black text-sm text-zinc-900">${p.price.toLocaleString('es-AR')}</p>
+                    {p.original_price && Number(p.original_price) !== Number(p.price) && (
+                      <p className="text-[10px] text-zinc-400 line-through">${Number(p.original_price).toLocaleString('es-AR')}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {colorCount > 0 && (
+                      <span className="flex items-center gap-0.5 text-[8px] font-bold bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">
+                        <Palette size={8} /> {colorCount} {colorCount === 1 ? 'color' : 'colores'}
+                      </span>
+                    )}
+                    {motoFitList.length > 0 && (
+                      <span className="flex items-center gap-0.5 text-[8px] font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">
+                        <Bike size={8} /> {motoFitList.length} {motoFitList.length === 1 ? 'moto' : 'motos'}
+                      </span>
+                    )}
+                    {p.stock != null && (
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${p.stock > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                        Stock: {p.stock}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
+                  <button onClick={() => handleDuplicate(p)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
+                  <button onClick={() => handleDelete(p.id)} className="p-2 bg-red-50 rounded-xl text-red-500"><Trash2 size={14}/></button>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
-                <button onClick={() => handleDuplicate(p)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
-                <button onClick={() => handleDelete(p.id)} className="p-2 bg-red-50 rounded-xl text-red-500"><Trash2 size={14}/></button>
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="hidden md:block bg-white border rounded-[32px] overflow-hidden shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400 font-black">
             <tr>
-              <th className="px-8 py-6">Producto</th>
-              <th className="px-8 py-6">Estado</th>
-              <th className="px-8 py-6">Categoría</th>
-              <th className="px-8 py-6 text-right">Precio</th>
-              <th className="px-8 py-6 text-center">Acciones</th>
+              <th className="px-6 py-5">Producto</th>
+              <th className="px-4 py-5">Variantes</th>
+              <th className="px-4 py-5">Estado</th>
+              <th className="px-4 py-5">Categoría</th>
+              <th className="px-4 py-5 text-right">Precio</th>
+              <th className="px-4 py-5 text-center">Stock</th>
+              <th className="px-4 py-5 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {filteredProducts?.map((p) => (
-              <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-8 py-4 flex items-center gap-4">
-                  <img src={p.images?.[0]} className="w-12 h-12 rounded-xl object-cover" />
-                  <div>
-                    <div className="font-black text-sm uppercase">{p.title}</div>
-                    <div className="text-[10px] text-gray-400 font-bold uppercase">{p.brand}</div>
-                  </div>
-                </td>
-                <td className="px-8 py-4">
-                  <div className="flex gap-2">
-                    {p.is_on_sale && <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
-                    {p.free_shipping && <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Truck size={10} fill="currentColor" /> Envío Gratis</span>}
-                  </div>
-                </td>
-                <td className="px-8 py-4"><span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span></td>
-                <td className="px-8 py-4 text-right">
-                  <div className="font-black text-lg text-orange-600">${p.price.toLocaleString('es-AR')}</div>
-                </td>
-                <td className="px-8 py-4 text-center">
-                  <div className="flex justify-center gap-1">
-                    <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
-                    <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
-                    <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {filteredProducts?.map((p) => {
+              const variants = Array.isArray(p.variants) ? p.variants as any[] : [];
+              const colors = variants.filter((v: any) => v.color && v.color !== 'Único');
+              const motoFitList = p.moto_fit || [];
+              return (
+                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <img src={p.images?.[0] || '/placeholder.svg'} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                      <div className="min-w-0">
+                        <div className="font-black text-sm uppercase truncate max-w-[220px]">{p.title}</div>
+                        <div className="text-[10px] text-gray-400 font-bold uppercase">{p.brand}</div>
+                        {p.barcode && <div className="text-[9px] text-zinc-300 font-mono mt-0.5">{p.barcode}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col gap-1 max-w-[220px]">
+                      {colors.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {colors.slice(0, 4).map((v: any, i: number) => (
+                            <span key={i} className="text-[8px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
+                              <Palette size={7} /> {v.color}
+                              {v.moto_fit?.length > 0 && <span className="text-purple-400"> 🏍️{v.moto_fit.length}</span>}
+                              {Object.keys(v.sizes || {}).filter((s: string) => s !== 'Único').length > 0 && (
+                                <span className="text-purple-400"> ({Object.keys(v.sizes).filter((s: string) => s !== 'Único').join(',')})</span>
+                              )}
+                            </span>
+                          ))}
+                          {colors.length > 4 && <span className="text-[8px] text-zinc-400 font-bold">+{colors.length - 4} más</span>}
+                        </div>
+                      )}
+                      {motoFitList.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {motoFitList.slice(0, 3).map((m: string, i: number) => (
+                            <span key={i} className="text-[8px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 whitespace-nowrap">
+                              <Bike size={7} /> {m}
+                            </span>
+                          ))}
+                          {motoFitList.length > 3 && <span className="text-[8px] text-zinc-400 font-bold">+{motoFitList.length - 3}</span>}
+                        </div>
+                      )}
+                      {colors.length === 0 && motoFitList.length === 0 && (
+                        <span className="text-[9px] text-zinc-300 italic">Sin variantes</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {p.is_on_sale && <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
+                      {p.free_shipping && <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Truck size={10} fill="currentColor" /> Envío</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4"><span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span></td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="font-black text-lg text-orange-600">${p.price.toLocaleString('es-AR')}</div>
+                    {p.original_price && Number(p.original_price) !== Number(p.price) && (
+                      <div className="text-[10px] text-zinc-400 line-through">${Number(p.original_price).toLocaleString('es-AR')}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    <span className={`text-sm font-black ${(p.stock ?? 0) > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {p.stock ?? 0}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    <div className="flex justify-center gap-1">
+                      <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
+                      <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
+                      <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

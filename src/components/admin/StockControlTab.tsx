@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Camera, X, Plus, Minus, Download, Upload, Search, Package, FileSpreadsheet, Loader2, DollarSign, Users, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import ProductQRModal from "@/components/ProductQRModal";
+import * as XLSX from 'xlsx';
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);

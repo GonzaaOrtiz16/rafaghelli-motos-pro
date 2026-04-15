@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Search, Truck, Shield, CreditCard, ArrowRight, Bike, Zap, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { Search, Truck, Shield, CreditCard, ArrowRight, Zap, ChevronRight, Volume2, VolumeX, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -59,7 +59,7 @@ const Home = () => {
   const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale, is_featured').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -86,6 +86,7 @@ const Home = () => {
     staleTime: 1000 * 60 * 10,
   });
 
+  const featuredProducts = products.filter(p => (p as any).is_featured === true);
   const featured = products.filter(p => p.is_on_sale === true);
   const freeShipping = products.filter(p => p.free_shipping === true);
 
@@ -237,6 +238,26 @@ const Home = () => {
           </div>
         </motion.div>
       </section>
+
+      {/* PRODUCTOS DESTACADOS */}
+      {featuredProducts.length > 0 && (
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="container py-24 px-4 md:px-6">
+          <div className="flex items-center justify-between mb-12 px-2">
+            <div className="flex items-center gap-4">
+              <Star className="h-8 w-8 text-yellow-500" fill="currentColor" />
+              <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Destacados</h3>
+            </div>
+            <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            {featuredProducts.slice(0, 4).map((p) => (
+              <div key={p.id} className="w-full">
+                <ProductCard product={p as any} />
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
 
       {/* SUPER OFERTAS */}
       <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-4 md:px-6 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">

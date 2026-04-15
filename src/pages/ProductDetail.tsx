@@ -82,12 +82,29 @@ const ProductDetail = () => {
     return product?.stock ?? 0;
   }, [hasVariants, selectedColor, selectedSize, variants, product]);
 
+  // Active image based on variant selection
+  const variantImage = useMemo(() => {
+    if (!hasVariants || !selectedColor) return null;
+    const variant = variants.find(v => v.color === selectedColor);
+    return (variant as any)?.image || null;
+  }, [hasVariants, selectedColor, variants]);
+
   // Auto-select first color
   useEffect(() => {
     if (hasVariants && !selectedColor) {
       setSelectedColor(variants[0].color);
     }
   }, [hasVariants, variants, selectedColor]);
+
+  // Switch to variant image when color changes
+  useEffect(() => {
+    if (variantImage && product?.images) {
+      const idx = product.images.indexOf(variantImage);
+      if (idx >= 0) {
+        setActiveImage(idx);
+      }
+    }
+  }, [variantImage, product?.images]);
 
   // Reset size when color changes
   useEffect(() => {
@@ -179,7 +196,7 @@ const ProductDetail = () => {
         <div className="sticky top-24">
           <div className="aspect-square bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative">
             <img
-              src={product.images[activeImage]}
+              src={variantImage || product.images[activeImage]}
               alt={product.title}
               className="w-full h-full object-cover"
             />

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, GripVertical } from "lucide-react";
+import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, GripVertical, ImagePlus } from "lucide-react";
 import { useCategorias } from './useCategorias';
 
 interface Variant {

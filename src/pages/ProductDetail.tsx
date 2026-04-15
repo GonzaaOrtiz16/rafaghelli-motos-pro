@@ -194,11 +194,11 @@ const ProductDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Galería de Imágenes */}
         <div className="sticky top-24">
-          <div className="aspect-square bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative">
+          <div className="aspect-square bg-white rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative p-6">
             <img
               src={variantImage || product.images[activeImage]}
               alt={product.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
             {hasDiscount && (
               <div className="absolute top-6 left-6 bg-orange-500 text-white font-black px-4 py-2 rounded-2xl italic text-lg shadow-lg">

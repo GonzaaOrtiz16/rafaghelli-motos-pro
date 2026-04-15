@@ -352,8 +352,26 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                 return (
                   <div key={vi} className="bg-zinc-50 border rounded-2xl overflow-hidden">
                     {/* Variant header */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-zinc-100/50">
-                      <GripVertical size={14} className="text-zinc-300" />
+                    <div className="flex items-start gap-3 px-4 py-3 bg-zinc-100/50">
+                      {/* Variant image */}
+                      <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-orange-500 cursor-pointer flex items-center justify-center overflow-hidden shrink-0 transition-colors group">
+                        {variant.image ? (
+                          <>
+                            <img src={variant.image} className="w-full h-full object-cover" />
+                            <button type="button" onClick={(e) => { e.preventDefault(); updateVariant(vi, 'image', null); }}
+                              className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X size={14} className="text-white" />
+                            </button>
+                          </>
+                        ) : (
+                          <ImagePlus size={16} className="text-zinc-400 group-hover:text-orange-500 transition-colors" />
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadVariantImage(vi, file);
+                          e.target.value = '';
+                        }} />
+                      </label>
                       <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2">
                         <input
                           className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
@@ -384,7 +402,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                           />
                         )}
                       </div>
-                      <button type="button" onClick={() => removeVariant(vi)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <button type="button" onClick={() => removeVariant(vi)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors mt-1">
                         <Trash2 size={14} />
                       </button>
                     </div>

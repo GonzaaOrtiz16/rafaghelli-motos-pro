@@ -23,6 +23,7 @@ const ProductDetail = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [manualGallery, setManualGallery] = useState(false);
   const { addItem } = useCart();
 
   useEffect(() => {

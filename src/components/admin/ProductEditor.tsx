@@ -11,6 +11,7 @@ interface Variant {
   stock?: number | null;
   sizes: Record<string, number>;
   moto_fit?: string[];
+  image?: string | null;
 }
 
 interface ProductEditorProps {

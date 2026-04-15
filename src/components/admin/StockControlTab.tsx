@@ -197,6 +197,7 @@ const StockControlTab = () => {
         'Precio Público': p.price, 'Precio Costo': p.original_price ?? '',
         'Motos Compatibles': baseMotoFit, 'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
         'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+        'Fotos (NO EDITAR)': (p.images || []).join(' | '),
       });
     });
 

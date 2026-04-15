@@ -165,6 +165,31 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     } catch { toast.error("Error al subir imagen de variante"); }
   };
 
+  const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
+
+  // Paste handler for variant images
+  useEffect(() => {
+    if (pasteTargetVariant === null) return;
+    const handleVariantPaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            toast.info(`Subiendo imagen para variante...`);
+            await uploadVariantImage(pasteTargetVariant, new File([file], `variant-paste-${Date.now()}.${file.type.split('/')[1]}`, { type: file.type }));
+            setPasteTargetVariant(null);
+            return;
+          }
+        }
+      }
+    };
+    document.addEventListener("paste", handleVariantPaste);
+    return () => document.removeEventListener("paste", handleVariantPaste);
+  }, [pasteTargetVariant]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (tempImages.length === 0) return toast.error("Subí al menos una foto");

@@ -29,10 +29,17 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   const [tempImages, setTempImages] = useState<string[]>(product?.images || []);
   const [activeSection, setActiveSection] = useState<'info' | 'variants' | 'media'>('info');
 
+  // Match category case-insensitively against categorias list
+  const matchCategory = (cat: string) => {
+    if (!cat) return '';
+    const found = categorias.find(c => c.nombre.toLowerCase() === cat.toLowerCase());
+    return found ? found.nombre : cat;
+  };
+
   const [formData, setFormData] = useState({
     title: product?.title || '',
     price: product?.price?.toString() || '',
-    category: product?.category || '',
+    category: '',
     description: product?.description || '',
     brand: product?.brand || '',
     stock: product?.stock?.toString() || '10',
@@ -60,6 +67,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
   const [variants, setVariants] = useState<Variant[]>(parseVariants());
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
+
+  // Auto-match category when categorias load
+  useEffect(() => {
+    if (categorias.length > 0 && product?.category && !formData.category) {
+      setFormData(prev => ({ ...prev, category: matchCategory(product.category) }));
+    }
+  }, [categorias]);
 
   // Paste images
   useEffect(() => {

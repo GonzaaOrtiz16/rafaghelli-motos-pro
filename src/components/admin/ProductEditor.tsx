@@ -68,6 +68,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   const [variants, setVariants] = useState<Variant[]>(parseVariants());
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
 
+  // Auto-match category when categorias load
+  useEffect(() => {
+    if (categorias.length > 0 && product?.category && !formData.category) {
+      setFormData(prev => ({ ...prev, category: matchCategory(product.category) }));
+    }
+  }, [categorias]);
+
   // Paste images
   useEffect(() => {
     const handlePaste = async (e: ClipboardEvent) => {

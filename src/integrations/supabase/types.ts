@@ -91,6 +91,7 @@ export type Database = {
           free_shipping: boolean | null
           id: string
           images: string[] | null
+          is_featured: boolean | null
           is_on_sale: boolean | null
           moto_fit: string[] | null
           original_price: number | null
@@ -111,6 +112,7 @@ export type Database = {
           free_shipping?: boolean | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
           is_on_sale?: boolean | null
           moto_fit?: string[] | null
           original_price?: number | null
@@ -131,6 +133,7 @@ export type Database = {
           free_shipping?: boolean | null
           id?: string
           images?: string[] | null
+          is_featured?: boolean | null
           is_on_sale?: boolean | null
           moto_fit?: string[] | null
           original_price?: number | null

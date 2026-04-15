@@ -167,7 +167,6 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     } catch { toast.error("Error al subir imagen de variante"); }
   };
 
-  const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
 
   // Paste handler for variant images
   useEffect(() => {

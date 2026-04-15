@@ -92,10 +92,10 @@ const ProductDetail = () => {
 
   // Auto-select first color
   useEffect(() => {
-    if (hasVariants && !selectedColor) {
+    if (hasVariants && !selectedColor && !manualGallery) {
       setSelectedColor(variants[0].color);
     }
-  }, [hasVariants, variants, selectedColor]);
+  }, [hasVariants, variants, selectedColor, manualGallery]);
 
   // Switch to variant image when color changes
   useEffect(() => {
@@ -216,6 +216,7 @@ const ProductDetail = () => {
                     setActiveImage(i);
                     setSelectedColor('');
                     setSelectedSize('');
+                    setManualGallery(true);
                   }}
                   className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage && !variantImage ? "border-orange-500 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
                 >
@@ -283,7 +284,7 @@ const ProductDetail = () => {
                 {variants.map((v) => (
                   <button
                     key={v.color}
-                    onClick={() => setSelectedColor(v.color)}
+                    onClick={() => { setSelectedColor(v.color); setManualGallery(false); }}
                     className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${
                       selectedColor === v.color 
                         ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' 

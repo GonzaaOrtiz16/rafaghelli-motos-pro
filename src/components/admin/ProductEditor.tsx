@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, GripVertical } from "lucide-react";
+import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, ImagePlus } from "lucide-react";
 import { useCategorias } from './useCategorias';
 
 interface Variant {
@@ -11,6 +11,7 @@ interface Variant {
   stock?: number | null;
   sizes: Record<string, number>;
   moto_fit?: string[];
+  image?: string | null;
 }
 
 interface ProductEditorProps {
@@ -53,6 +54,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       stock: v.stock ?? null,
       sizes: v.sizes || {},
       moto_fit: v.moto_fit || [],
+      image: v.image || null,
     }));
   };
 
@@ -99,7 +101,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   };
 
   const addVariant = () => {
-    setVariants(prev => [...prev, { color: '', price: null, stock: null, sizes: {}, moto_fit: [] }]);
+    setVariants(prev => [...prev, { color: '', price: null, stock: null, sizes: {}, moto_fit: [], image: null }]);
     setActiveSection('variants');
   };
 
@@ -136,6 +138,19 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     }));
   };
 
+  const uploadVariantImage = async (variantIndex: number, file: File) => {
+    try {
+      const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+      const { error } = await supabase.storage.from('product-images').upload(fileName, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      if (data?.publicUrl) {
+        updateVariant(variantIndex, 'image', data.publicUrl);
+        toast.success("Imagen de variante subida");
+      }
+    } catch { toast.error("Error al subir imagen de variante"); }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (tempImages.length === 0) return toast.error("Subí al menos una foto");
@@ -159,6 +174,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       stock: Object.values(v.sizes).reduce((s, q) => s + (Number(q) || 0), 0) || (Number(v.stock) || 0),
       sizes: v.sizes,
       moto_fit: v.moto_fit || [],
+      image: v.image || null,
     }));
 
     const motoFitArr = formData.moto_fit.trim() ? formData.moto_fit.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -336,8 +352,26 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                 return (
                   <div key={vi} className="bg-zinc-50 border rounded-2xl overflow-hidden">
                     {/* Variant header */}
-                    <div className="flex items-center gap-3 px-4 py-3 bg-zinc-100/50">
-                      <GripVertical size={14} className="text-zinc-300" />
+                    <div className="flex items-start gap-3 px-4 py-3 bg-zinc-100/50">
+                      {/* Variant image */}
+                      <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-orange-500 cursor-pointer flex items-center justify-center overflow-hidden shrink-0 transition-colors group">
+                        {variant.image ? (
+                          <>
+                            <img src={variant.image} className="w-full h-full object-cover" />
+                            <button type="button" onClick={(e) => { e.preventDefault(); updateVariant(vi, 'image', null); }}
+                              className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X size={14} className="text-white" />
+                            </button>
+                          </>
+                        ) : (
+                          <ImagePlus size={16} className="text-zinc-400 group-hover:text-orange-500 transition-colors" />
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadVariantImage(vi, file);
+                          e.target.value = '';
+                        }} />
+                      </label>
                       <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2">
                         <input
                           className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
@@ -368,7 +402,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                           />
                         )}
                       </div>
-                      <button type="button" onClick={() => removeVariant(vi)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <button type="button" onClick={() => removeVariant(vi)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors mt-1">
                         <Trash2 size={14} />
                       </button>
                     </div>

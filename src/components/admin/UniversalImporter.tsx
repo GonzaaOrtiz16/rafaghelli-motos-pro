@@ -556,22 +556,44 @@ const UniversalImporter = () => {
     setImporting(true);
     let inserted = 0, errors = 0, skipped = 0, grouped = 0;
 
-    const { data: existingProducts } = await supabase.from('products').select('title');
-    const existingTitles = new Set(
-      (existingProducts || []).map((p: any) => p.title?.toLowerCase().trim())
-    );
+    // Fetch existing products to avoid overwriting images
+    const { data: existingProducts } = await supabase.from('products').select('id, title, images');
+    const existingMap = new Map<string, any>();
+    (existingProducts || []).forEach((p: any) => {
+      existingMap.set(p.title?.toLowerCase().trim(), p);
+    });
 
     const batch: any[] = [];
+    const updateBatch: { id: string; data: Record<string, any> }[] = [];
     const seenInFile = new Set<string>();
+    let updatedExisting = 0;
 
     previewData.forEach((item) => {
       const normalizedName = item.name.toLowerCase().trim();
 
-      if (existingTitles.has(normalizedName) || seenInFile.has(normalizedName)) {
+      if (seenInFile.has(normalizedName)) {
         skipped++;
         return;
       }
       seenInFile.add(normalizedName);
+
+      const existing = existingMap.get(normalizedName);
+      if (existing) {
+        // PROTECCIÓN DE FOTOS: solo actualizar precio/stock/category, NUNCA tocar images
+        const updateData: Record<string, any> = {};
+        const newPrice = item.public_price ?? item.price;
+        if (newPrice && newPrice !== existing.price) updateData.price = newPrice;
+        if (item.price && item.price !== existing.original_price) updateData.original_price = item.price;
+        if (item.stock != null) updateData.stock = item.stock;
+        if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
+        
+        if (Object.keys(updateData).length > 0) {
+          updateBatch.push({ id: existing.id, data: updateData });
+        } else {
+          skipped++;
+        }
+        return;
+      }
 
       const slug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const barcode = item.barcode || `RFM-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -598,6 +620,13 @@ const UniversalImporter = () => {
       });
     });
 
+    // Update existing products (preserving images)
+    for (const { id, data } of updateBatch) {
+      const { error } = await supabase.from('products').update(data).eq('id', id);
+      if (error) { errors++; } else { updatedExisting++; }
+    }
+
+    // Insert new products
     for (let i = 0; i < batch.length; i += 50) {
       const chunk = batch.slice(i, i + 50);
       const { error } = await supabase.from('products').insert(chunk);
@@ -613,9 +642,10 @@ const UniversalImporter = () => {
     setImportResult({ inserted, errors, skipped, grouped });
     setStep('done');
     queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-    const skipMsg = skipped > 0 ? ` (${skipped} duplicados omitidos)` : '';
+    const skipMsg = skipped > 0 ? ` (${skipped} sin cambios)` : '';
     const groupMsg = grouped > 0 ? ` (${grouped} con variantes agrupadas)` : '';
-    toast.success(`Importación finalizada: ${inserted} productos${skipMsg}${groupMsg}`);
+    const updateMsg = updatedExisting > 0 ? `, ${updatedExisting} actualizados (fotos preservadas)` : '';
+    toast.success(`Importación: ${inserted} nuevos${updateMsg}${skipMsg}${groupMsg}`);
   };
 
   const reset = () => {
@@ -668,6 +698,9 @@ const UniversalImporter = () => {
           <div className="text-center">
             <p className="font-black uppercase text-sm text-zinc-700">Arrastrá tu archivo acá</p>
             <p className="text-xs text-zinc-400 mt-1">CSV o Excel (.xlsx) — Listas de precios de cualquier proveedor</p>
+            <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full">
+              <span>🛡️</span> Si el producto ya existe, se actualizan precios/stock sin tocar las fotos
+            </div>
           </div>
           <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileInput} />
         </div>

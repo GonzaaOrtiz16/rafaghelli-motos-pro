@@ -197,6 +197,7 @@ const StockControlTab = () => {
         'Precio Público': p.price, 'Precio Costo': p.original_price ?? '',
         'Motos Compatibles': baseMotoFit, 'Envío Gratis': p.free_shipping ? 'Sí' : 'No',
         'En Oferta': p.is_on_sale ? 'Sí' : 'No',
+        'Fotos (NO EDITAR)': (p.images || []).join(' | '),
       });
     });
 
@@ -465,6 +466,7 @@ const StockControlTab = () => {
           <p>2. Modificá solo la columna <strong>Stock</strong> (o Precio Público / Precio Costo)</p>
           <p>3. <strong>Importá</strong> el archivo modificado — se actualizan automáticamente</p>
           <p className="text-zinc-400 mt-1">• Coincide por ID, Código de barras o Título</p>
+          <p className="text-emerald-600 font-black mt-2 flex items-center gap-1">🛡️ Las fotos nunca se modifican en importaciones</p>
         </div>
         <div>
           <h4 className="font-black uppercase text-xs tracking-widest text-zinc-500 mb-4 flex items-center gap-2"><Package size={14} /> Resumen de Stock</h4>

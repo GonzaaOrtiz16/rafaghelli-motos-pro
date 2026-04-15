@@ -75,9 +75,10 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     }
   }, [categorias]);
 
-  // Paste images
+  // Paste images (global — for product gallery, disabled when variant paste is active)
   useEffect(() => {
     const handlePaste = async (e: ClipboardEvent) => {
+      if (pasteTargetVariant !== null) return; // variant paste takes priority
       const items = e.clipboardData?.items;
       if (!items) return;
       const imageFiles: File[] = [];
@@ -96,7 +97,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     };
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
-  }, []);
+  }, [pasteTargetVariant]);
 
   const uploadFiles = async (files: File[]) => {
     setUploadingImages(true);

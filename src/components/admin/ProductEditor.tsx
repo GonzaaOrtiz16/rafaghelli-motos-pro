@@ -67,6 +67,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
   const [variants, setVariants] = useState<Variant[]>(parseVariants());
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
+  const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
 
   // Auto-match category when categorias load
   useEffect(() => {
@@ -75,9 +76,10 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     }
   }, [categorias]);
 
-  // Paste images
+  // Paste images (global — for product gallery, disabled when variant paste is active)
   useEffect(() => {
     const handlePaste = async (e: ClipboardEvent) => {
+      if (pasteTargetVariant !== null) return; // variant paste takes priority
       const items = e.clipboardData?.items;
       if (!items) return;
       const imageFiles: File[] = [];
@@ -96,7 +98,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     };
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
-  }, []);
+  }, [pasteTargetVariant]);
 
   const uploadFiles = async (files: File[]) => {
     setUploadingImages(true);
@@ -164,6 +166,30 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       }
     } catch { toast.error("Error al subir imagen de variante"); }
   };
+
+
+  // Paste handler for variant images
+  useEffect(() => {
+    if (pasteTargetVariant === null) return;
+    const handleVariantPaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            toast.info(`Subiendo imagen para variante...`);
+            await uploadVariantImage(pasteTargetVariant, new File([file], `variant-paste-${Date.now()}.${file.type.split('/')[1]}`, { type: file.type }));
+            setPasteTargetVariant(null);
+            return;
+          }
+        }
+      }
+    };
+    document.addEventListener("paste", handleVariantPaste);
+    return () => document.removeEventListener("paste", handleVariantPaste);
+  }, [pasteTargetVariant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,24 +394,38 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                     {/* Variant header */}
                     <div className="flex items-start gap-3 px-4 py-3 bg-zinc-100/50">
                       {/* Variant image */}
-                      <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-orange-500 cursor-pointer flex items-center justify-center overflow-hidden shrink-0 transition-colors group">
-                        {variant.image ? (
-                          <>
-                            <img src={variant.image} className="w-full h-full object-cover" />
-                            <button type="button" onClick={(e) => { e.preventDefault(); updateVariant(vi, 'image', null); }}
-                              className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <X size={14} className="text-white" />
-                            </button>
-                          </>
-                        ) : (
-                          <ImagePlus size={16} className="text-zinc-400 group-hover:text-orange-500 transition-colors" />
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-orange-500 cursor-pointer flex items-center justify-center overflow-hidden transition-colors group">
+                          {variant.image ? (
+                            <>
+                              <img src={variant.image} className="w-full h-full object-cover" />
+                              <button type="button" onClick={(e) => { e.preventDefault(); updateVariant(vi, 'image', null); }}
+                                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <X size={14} className="text-white" />
+                              </button>
+                            </>
+                          ) : (
+                            <ImagePlus size={16} className="text-zinc-400 group-hover:text-orange-500 transition-colors" />
+                          )}
+                          <input type="file" accept="image/*" className="hidden" onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) uploadVariantImage(vi, file);
+                            e.target.value = '';
+                          }} />
+                        </label>
+                        {!variant.image && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPasteTargetVariant(vi);
+                              toast.info("Ahora pegá la imagen (Ctrl+V)");
+                            }}
+                            className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded transition-colors ${pasteTargetVariant === vi ? 'bg-orange-500 text-white animate-pulse' : 'bg-zinc-200 text-zinc-500 hover:bg-orange-100 hover:text-orange-600'}`}
+                          >
+                            {pasteTargetVariant === vi ? '⌨ Pegá' : '📋 Pegar'}
+                          </button>
                         )}
-                        <input type="file" accept="image/*" className="hidden" onChange={e => {
-                          const file = e.target.files?.[0];
-                          if (file) uploadVariantImage(vi, file);
-                          e.target.value = '';
-                        }} />
-                      </label>
+                      </div>
                       <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2">
                         <input
                           className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Copy, Search, Tag, Truck, Palette, Bike } from "lucide-react";
+import { Plus, Pencil, Trash2, Copy, Search, Tag, Truck, Palette, Bike, Star } from "lucide-react";
 import ProductEditor from './ProductEditor';
 
 const RepuestosTab = () => {
@@ -48,6 +48,15 @@ const RepuestosTab = () => {
     });
     setShowEditor(true);
     toast.info("Copiado. Editá lo que necesites.");
+  };
+
+  const handleToggleFeatured = async (id: string, current: boolean) => {
+    const { error } = await supabase.from('products').update({ is_featured: !current } as any).eq('id', id);
+    if (!error) {
+      toast.success(!current ? "Producto destacado" : "Producto sin destacar");
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['public-products'] });
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -109,6 +118,7 @@ const RepuestosTab = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-2">
+                  <button onClick={(e) => { e.stopPropagation(); handleToggleFeatured(p.id, !!(p as any).is_featured); }} className={`p-2 rounded-xl ${(p as any).is_featured ? 'bg-yellow-100 text-yellow-500' : 'bg-zinc-100 text-zinc-400'}`}><Star size={14} fill={(p as any).is_featured ? 'currentColor' : 'none'}/></button>
                   <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
                   <button onClick={() => handleDuplicate(p)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
                   <button onClick={() => handleDelete(p.id)} className="p-2 bg-red-50 rounded-xl text-red-500"><Trash2 size={14}/></button>
@@ -180,6 +190,7 @@ const RepuestosTab = () => {
                   </td>
                   <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
                     <div className="flex flex-wrap gap-1">
+                      {(p as any).is_featured && <span className="flex items-center gap-1 bg-yellow-100 text-yellow-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Star size={10} fill="currentColor" /> Destacado</span>}
                       {p.is_on_sale && <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
                       {p.free_shipping && <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Truck size={10} fill="currentColor" /> Envío</span>}
                     </div>
@@ -195,6 +206,7 @@ const RepuestosTab = () => {
                   </td>
                   <td className="px-4 py-4 text-center" onClick={e => e.stopPropagation()}>
                     <div className="flex justify-center gap-1">
+                      <button onClick={() => handleToggleFeatured(p.id, !!(p as any).is_featured)} className={`p-2 ${(p as any).is_featured ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}`}><Star size={18} fill={(p as any).is_featured ? 'currentColor' : 'none'}/></button>
                       <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
                       <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
                       <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>

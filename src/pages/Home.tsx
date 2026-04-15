@@ -239,22 +239,28 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* PRODUCTOS DESTACADOS */}
+      {/* PRODUCTOS DESTACADOS - Carrusel infinito */}
       {featuredProducts.length > 0 && (
-        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="container py-24 px-4 md:px-6">
-          <div className="flex items-center justify-between mb-12 px-2">
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="py-24">
+          <div className="container px-4 md:px-6 flex items-center justify-between mb-12">
             <div className="flex items-center gap-4">
               <Star className="h-8 w-8 text-yellow-500" fill="currentColor" />
               <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Destacados</h3>
             </div>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-            {featuredProducts.slice(0, 4).map((p) => (
-              <div key={p.id} className="w-full">
-                <ProductCard product={p as any} />
-              </div>
-            ))}
+          <div className="relative overflow-hidden">
+            <motion.div
+              className="flex gap-4 md:gap-8 w-max"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: featuredProducts.length * 5, repeat: Infinity, ease: "linear" }}
+            >
+              {[...featuredProducts, ...featuredProducts].map((p, i) => (
+                <div key={`${p.id}-${i}`} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+                  <ProductCard product={p as any} />
+                </div>
+              ))}
+            </motion.div>
           </div>
         </motion.section>
       )}

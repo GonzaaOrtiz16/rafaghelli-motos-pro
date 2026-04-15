@@ -67,6 +67,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
   const [variants, setVariants] = useState<Variant[]>(parseVariants());
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
+  const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
 
   // Auto-match category when categorias load
   useEffect(() => {

@@ -54,6 +54,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       stock: v.stock ?? null,
       sizes: v.sizes || {},
       moto_fit: v.moto_fit || [],
+      image: v.image || null,
     }));
   };
 

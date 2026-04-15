@@ -161,6 +161,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       stock: Object.values(v.sizes).reduce((s, q) => s + (Number(q) || 0), 0) || (Number(v.stock) || 0),
       sizes: v.sizes,
       moto_fit: v.moto_fit || [],
+      image: v.image || null,
     }));
 
     const motoFitArr = formData.moto_fit.trim() ? formData.moto_fit.split(',').map(s => s.trim()).filter(Boolean) : [];

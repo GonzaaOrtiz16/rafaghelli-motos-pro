@@ -138,6 +138,19 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     }));
   };
 
+  const uploadVariantImage = async (variantIndex: number, file: File) => {
+    try {
+      const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+      const { error } = await supabase.storage.from('product-images').upload(fileName, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      if (data?.publicUrl) {
+        updateVariant(variantIndex, 'image', data.publicUrl);
+        toast.success("Imagen de variante subida");
+      }
+    } catch { toast.error("Error al subir imagen de variante"); }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (tempImages.length === 0) return toast.error("Subí al menos una foto");

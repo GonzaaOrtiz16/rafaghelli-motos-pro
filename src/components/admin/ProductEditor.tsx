@@ -101,7 +101,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   };
 
   const addVariant = () => {
-    setVariants(prev => [...prev, { color: '', price: null, stock: null, sizes: {}, moto_fit: [] }]);
+    setVariants(prev => [...prev, { color: '', price: null, stock: null, sizes: {}, moto_fit: [], image: null }]);
     setActiveSection('variants');
   };
 

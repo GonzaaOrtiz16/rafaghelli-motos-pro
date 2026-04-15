@@ -196,7 +196,7 @@ const ProductDetail = () => {
         <div className="sticky top-24">
           <div className="aspect-square bg-zinc-50 rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative">
             <img
-              src={product.images[activeImage]}
+              src={variantImage || product.images[activeImage]}
               alt={product.title}
               className="w-full h-full object-cover"
             />

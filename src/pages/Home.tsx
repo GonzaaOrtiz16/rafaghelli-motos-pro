@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { Search, Truck, Shield, CreditCard, ArrowRight, Zap, ChevronRight, Volume2, VolumeX, Star } from "lucide-react";
+import { Search, Truck, Shield, CreditCard, ArrowRight, Zap, ChevronRight, ChevronLeft, Volume2, VolumeX, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import CategoryGrid from "@/components/CategoryGrid";

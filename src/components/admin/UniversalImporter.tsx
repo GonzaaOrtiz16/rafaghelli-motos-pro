@@ -698,6 +698,9 @@ const UniversalImporter = () => {
           <div className="text-center">
             <p className="font-black uppercase text-sm text-zinc-700">Arrastrá tu archivo acá</p>
             <p className="text-xs text-zinc-400 mt-1">CSV o Excel (.xlsx) — Listas de precios de cualquier proveedor</p>
+            <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full">
+              <span>🛡️</span> Si el producto ya existe, se actualizan precios/stock sin tocar las fotos
+            </div>
           </div>
           <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileInput} />
         </div>

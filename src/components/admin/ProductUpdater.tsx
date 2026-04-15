@@ -302,6 +302,9 @@ const ProductUpdater = () => {
           <p className="text-lg font-bold text-foreground">Arrastrá tu lista actualizada</p>
           <p className="text-sm text-muted-foreground mt-1">Excel o CSV con precios/stock nuevos</p>
           <p className="text-xs text-muted-foreground mt-3">Se comparará con los productos cargados y te mostrará las diferencias</p>
+          <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full">
+            <span>🛡️</span> Las fotos de tus productos nunca se modifican
+          </div>
           <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls,.tsv" className="hidden" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         </div>
       )}

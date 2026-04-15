@@ -272,6 +272,28 @@ const Home = () => {
         </div>
       </section>
 
+      {/* PRODUCTOS RECIENTES */}
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="container py-24 px-4 md:px-6">
+        <div className="flex items-center justify-between mb-12 px-2">
+          <div>
+            <span className="text-primary font-black uppercase text-xs tracking-[0.2em]">Catálogo</span>
+            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">
+              Todos los <span className="text-primary">Productos</span>
+            </h3>
+          </div>
+          <Link to="/productos" className="flex items-center gap-2 text-primary font-black uppercase text-sm tracking-tight hover:underline">
+            Ver todos <ChevronRight size={20} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+          {products.slice(0, 8).map((p) => (
+            <div key={p.id} className="w-full">
+              <ProductCard product={p as any} />
+            </div>
+          ))}
+        </div>
+      </motion.section>
+
       {/* VIDEO FINAL */}
       {siteSettings?.home_media_url && (
         <section className="pb-24 px-2 md:px-6">

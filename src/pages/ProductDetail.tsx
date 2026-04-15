@@ -211,8 +211,12 @@ const ProductDetail = () => {
               {product.images.map((img: string, i: number) => (
                 <button
                   key={i}
-                  onClick={() => setActiveImage(i)}
-                  className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage ? "border-orange-500 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
+                  onClick={() => {
+                    setActiveImage(i);
+                    setSelectedColor('');
+                    setSelectedSize('');
+                  }}
+                  className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage && !variantImage ? "border-orange-500 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>

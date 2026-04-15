@@ -249,18 +249,14 @@ const Home = () => {
             </div>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="relative overflow-hidden">
-            <motion.div
-              className="flex gap-4 md:gap-8 w-max"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ duration: featuredProducts.length * 5, repeat: Infinity, ease: "linear" }}
-            >
-              {[...featuredProducts, ...featuredProducts].map((p, i) => (
-                <div key={`${p.id}-${i}`} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex gap-4 md:gap-8 px-4 md:px-6 w-max">
+              {featuredProducts.map((p) => (
+                <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
                   <ProductCard product={p as any} />
                 </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </motion.section>
       )}

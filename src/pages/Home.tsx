@@ -249,14 +249,38 @@ const Home = () => {
             </div>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-4 md:gap-8 px-4 md:px-6 w-max">
-              {featuredProducts.map((p) => (
-                <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
-                  <ProductCard product={p as any} />
-                </div>
-              ))}
+          <div className="relative group">
+            <div
+              id="featured-scroll"
+              className="overflow-x-auto scrollbar-hide scroll-smooth"
+            >
+              <div className="flex gap-4 md:gap-8 px-4 md:px-6 w-max">
+                {featuredProducts.map((p) => (
+                  <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+                    <ProductCard product={p as any} />
+                  </div>
+                ))}
+              </div>
             </div>
+            {/* Flechas PC */}
+            <button
+              onClick={() => {
+                const el = document.getElementById('featured-scroll');
+                if (el) el.scrollBy({ left: -320, behavior: 'smooth' });
+              }}
+              className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={() => {
+                const el = document.getElementById('featured-scroll');
+                if (el) el.scrollBy({ left: 320, behavior: 'smooth' });
+              }}
+              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+            >
+              <ChevronRight size={24} />
+            </button>
           </div>
         </motion.section>
       )}

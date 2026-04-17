@@ -1,60 +1,55 @@
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, Truck, Shield, CreditCard, ArrowRight, Zap, ChevronRight, ChevronLeft, Volume2, VolumeX, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import CategoryGrid from "@/components/CategoryGrid";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.06 } },
 };
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 };
 const fadeRight = {
-  hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
+
+const BADGES = [
+  { icon: Truck, text: "Envíos a todo el país", sub: "Llegamos donde estés" },
+  { icon: Shield, text: "Calidad Garantizada", sub: "Repuestos seleccionados" },
+  { icon: CreditCard, text: "Pagos Flexibles", sub: "Transferencia o Efectivo" },
+];
 
 const Home = () => {
   const [q, setQ] = useState("");
   const [isMuted, setIsMuted] = useState(true);
-  const [currentBadge, setCurrentBadge] = useState(0); 
+  const [currentBadge, setCurrentBadge] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
-  const badges = [
-    { icon: Truck, text: "Envíos a todo el país", sub: "Llegamos donde estés" },
-    { icon: Shield, text: "Calidad Garantizada", sub: "Repuestos seleccionados" },
-    { icon: CreditCard, text: "Pagos Flexibles", sub: "Transferencia o Efectivo" },
-  ];
-
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentBadge((prev) => (prev + 1) % badges.length);
+      setCurrentBadge((prev) => (prev + 1) % BADGES.length);
     }, 3500);
     return () => clearInterval(timer);
   }, []);
 
-  const handleToggleSound = () => {
+  const handleToggleSound = useCallback(() => {
     if (videoRef.current) {
       const newMuted = !isMuted;
       videoRef.current.muted = newMuted;
       setIsMuted(newMuted);
       if (!newMuted) videoRef.current.play().catch(() => {});
     }
-  };
-
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  }, [isMuted]);
 
   const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
@@ -86,14 +81,28 @@ const Home = () => {
     staleTime: 1000 * 60 * 10,
   });
 
-  const featuredProducts = products.filter(p => (p as any).is_featured === true);
-  const featured = products.filter(p => p.is_on_sale === true);
-  const freeShipping = products.filter(p => p.free_shipping === true);
+  // Una sola pasada por el array en lugar de 3 .filter()
+  const { featuredProducts, featured, freeShipping, recent } = useMemo(() => {
+    const featuredProducts: any[] = [];
+    const featured: any[] = [];
+    const freeShipping: any[] = [];
+    for (const p of products) {
+      if ((p as any).is_featured === true) featuredProducts.push(p);
+      if (p.is_on_sale === true && featured.length < 4) featured.push(p);
+      if (p.free_shipping === true && freeShipping.length < 4) freeShipping.push(p);
+    }
+    return { featuredProducts, featured, freeShipping, recent: products.slice(0, 8) };
+  }, [products]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (q.trim()) navigate(`/productos?q=${encodeURIComponent(q)}`);
   };
+
+  const scrollFeatured = useCallback((dir: 'left' | 'right') => {
+    const el = document.getElementById('featured-scroll');
+    if (el) el.scrollBy({ left: dir === 'left' ? -320 : 320, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">

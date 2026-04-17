@@ -273,19 +273,13 @@ const Home = () => {
             </div>
             {/* Flechas PC */}
             <button
-              onClick={() => {
-                const el = document.getElementById('featured-scroll');
-                if (el) el.scrollBy({ left: -320, behavior: 'smooth' });
-              }}
+              onClick={() => scrollFeatured('left')}
               className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
             >
               <ChevronLeft size={24} />
             </button>
             <button
-              onClick={() => {
-                const el = document.getElementById('featured-scroll');
-                if (el) el.scrollBy({ left: 320, behavior: 'smooth' });
-              }}
+              onClick={() => scrollFeatured('right')}
               className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
             >
               <ChevronRight size={24} />
@@ -304,7 +298,7 @@ const Home = () => {
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-            {featured.slice(0, 4).map((p) => (
+            {featured.map((p) => (
               <div key={p.id} className="w-full">
                 <ProductCard product={p as any} />
               </div>
@@ -320,7 +314,7 @@ const Home = () => {
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 mb-20">
-          {freeShipping.slice(0, 4).map((p) => (
+          {freeShipping.map((p) => (
             <div key={p.id} className="w-full">
               <ProductCard product={p as any} />
             </div>
@@ -342,7 +336,7 @@ const Home = () => {
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-          {products.slice(0, 8).map((p) => (
+          {recent.map((p) => (
             <div key={p.id} className="w-full">
               <ProductCard product={p as any} />
             </div>

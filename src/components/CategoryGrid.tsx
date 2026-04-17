@@ -22,7 +22,8 @@ interface Category {
 
 const CategoryItem = React.memo(({ cat }: { cat: Category }) => {
   const [loaded, setLoaded] = useState(false);
-  const thumbUrl = getThumbnailUrl(cat.image);
+  const [src, setSrc] = useState(() => getThumbnailUrl(cat.image));
+  const hasImage = Boolean(cat.image);
 
   return (
     <Link
@@ -30,18 +31,30 @@ const CategoryItem = React.memo(({ cat }: { cat: Category }) => {
       className="group flex flex-col items-center text-center gap-3"
     >
       <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-muted border-4 border-transparent group-hover:border-primary transition-all duration-500 shadow-lg">
-        {!loaded && (
-          <div className="absolute inset-0 bg-muted animate-pulse" />
+        {hasImage ? (
+          <>
+            {!loaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
+            <img
+              src={src}
+              alt={cat.nombre}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setLoaded(true)}
+              onError={() => {
+                if (cat.image && src !== cat.image) {
+                  setSrc(cat.image);
+                } else {
+                  setLoaded(true);
+                }
+              }}
+              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${loaded ? "opacity-100" : "opacity-0"}`}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-2xl font-black text-muted-foreground">
+            {cat.nombre.charAt(0)}
+          </div>
         )}
-        <img
-          src={thumbUrl}
-          alt={cat.nombre}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          onLoad={() => setLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${loaded ? "opacity-100" : "opacity-0"}`}
-        />
       </div>
       <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-foreground">
         {cat.nombre}

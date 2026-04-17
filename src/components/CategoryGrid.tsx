@@ -2,13 +2,14 @@ import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const SUPABASE_STORAGE_HOST = "supabase.co/storage";
-
 function getThumbnailUrl(url: string | null): string {
   if (!url) return "";
-  if (url.includes(SUPABASE_STORAGE_HOST)) {
-    const separator = url.includes("?") ? "&" : "?";
-    return `${url}${separator}width=200&height=200&resize=cover`;
+  // Convertir URL pública de Supabase Storage al endpoint de transformación
+  // /storage/v1/object/public/... -> /storage/v1/render/image/public/...
+  if (url.includes("/storage/v1/object/public/")) {
+    const transformed = url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
+    const separator = transformed.includes("?") ? "&" : "?";
+    return `${transformed}${separator}width=300&height=300&resize=cover&quality=75`;
   }
   return url;
 }

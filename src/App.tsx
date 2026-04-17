@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from 'react'; // Importamos useEffect
 import ScrollToTop from "@/components/ScrollToTop";
 import { CartProvider } from "@/context/CartContext";
@@ -72,6 +72,42 @@ const WhatsAppFloating = () => (
   </a>
 );
 
+const AppLayout = () => {
+  const location = useLocation();
+  const isBackoffice = location.pathname.startsWith('/admin') || location.pathname.startsWith('/ventas');
+
+  return (
+    <div className="flex flex-col min-h-screen relative">
+      {!isBackoffice && <Header />}
+      <CartDrawer />
+
+      {!isBackoffice && (
+        <>
+          <WhatsAppFloating />
+          <Watermark />
+        </>
+      )}
+
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/productos" element={<ProductList />} />
+          <Route path="/producto/:slug" element={<ProductDetail />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/motos" element={<Motos />} />
+          <Route path="/taller" element={<Workshop />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/ventas" element={<POS />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      {!isBackoffice && <Footer />}
+    </div>
+  );
+};
+
 const App = () => {
   // --- LÓGICA PARA BORRAR EL SELLO DE LOVABLE POR CÓDIGO ---
   useEffect(() => {
@@ -101,31 +137,7 @@ const App = () => {
         <BrowserRouter>
           <CartProvider>
             <ScrollToTop />
-            <div className="flex flex-col min-h-screen relative">
-              <Header />
-              <CartDrawer />
-              
-              {/* BOTONES FLOTANTES */}
-              <WhatsAppFloating />
-              <Watermark />
-
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={ <Home /> } />
-                  <Route path="/productos" element={ <ProductList /> } />
-                  <Route path="/producto/:slug" element={ <ProductDetail /> } />
-                  <Route path="/checkout" element={ <Checkout /> } />
-                  <Route path="/motos" element={ <Motos /> } />
-                  <Route path="/taller" element={ <Workshop /> } />
-                  <Route path="/admin" element={ <Admin /> } />
-                  <Route path="/ventas" element={ <POS /> } />
-                  <Route path="/auth" element={ <Auth /> } />
-                  <Route path="/reset-password" element={ <ResetPassword /> } />
-                  <Route path="*" element={ <NotFound /> } />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
+            <AppLayout />
           </CartProvider>
         </BrowserRouter>
       </TooltipProvider>

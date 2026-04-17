@@ -248,26 +248,11 @@ const ProductList = () => {
                   <Button variant="outline" className="rounded-full border-foreground uppercase font-black text-xs" onClick={clearFilters}>Limpiar filtros</Button>
                 </motion.div>
               ) : (
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={stagger}
-                  className="grid grid-cols-2 md:grid-cols-3 gap-6"
-                >
-                  <AnimatePresence mode="popLayout">
-                    {filtered.map((p) => (
-                      <motion.div
-                        key={p.id}
-                        variants={fadeUp}
-                        layout
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 200 }}
-                      >
-                        <ProductCard product={p as any} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </motion.div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                  {filtered.map((p) => (
+                    <ProductCard key={p.id} product={p as any} />
+                  ))}
+                </div>
               )}
             </>
           )}

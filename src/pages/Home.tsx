@@ -1,60 +1,55 @@
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, Truck, Shield, CreditCard, ArrowRight, Zap, ChevronRight, ChevronLeft, Volume2, VolumeX, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import CategoryGrid from "@/components/CategoryGrid";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.06 } },
 };
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 };
 const fadeRight = {
-  hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
+
+const BADGES = [
+  { icon: Truck, text: "Envíos a todo el país", sub: "Llegamos donde estés" },
+  { icon: Shield, text: "Calidad Garantizada", sub: "Repuestos seleccionados" },
+  { icon: CreditCard, text: "Pagos Flexibles", sub: "Transferencia o Efectivo" },
+];
 
 const Home = () => {
   const [q, setQ] = useState("");
   const [isMuted, setIsMuted] = useState(true);
-  const [currentBadge, setCurrentBadge] = useState(0); 
+  const [currentBadge, setCurrentBadge] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
-  const badges = [
-    { icon: Truck, text: "Envíos a todo el país", sub: "Llegamos donde estés" },
-    { icon: Shield, text: "Calidad Garantizada", sub: "Repuestos seleccionados" },
-    { icon: CreditCard, text: "Pagos Flexibles", sub: "Transferencia o Efectivo" },
-  ];
-
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentBadge((prev) => (prev + 1) % badges.length);
+      setCurrentBadge((prev) => (prev + 1) % BADGES.length);
     }, 3500);
     return () => clearInterval(timer);
   }, []);
 
-  const handleToggleSound = () => {
+  const handleToggleSound = useCallback(() => {
     if (videoRef.current) {
       const newMuted = !isMuted;
       videoRef.current.muted = newMuted;
       setIsMuted(newMuted);
       if (!newMuted) videoRef.current.play().catch(() => {});
     }
-  };
-
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  }, [isMuted]);
 
   const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
@@ -86,14 +81,28 @@ const Home = () => {
     staleTime: 1000 * 60 * 10,
   });
 
-  const featuredProducts = products.filter(p => (p as any).is_featured === true);
-  const featured = products.filter(p => p.is_on_sale === true);
-  const freeShipping = products.filter(p => p.free_shipping === true);
+  // Una sola pasada por el array en lugar de 3 .filter()
+  const { featuredProducts, featured, freeShipping, recent } = useMemo(() => {
+    const featuredProducts: any[] = [];
+    const featured: any[] = [];
+    const freeShipping: any[] = [];
+    for (const p of products) {
+      if ((p as any).is_featured === true) featuredProducts.push(p);
+      if (p.is_on_sale === true && featured.length < 4) featured.push(p);
+      if (p.free_shipping === true && freeShipping.length < 4) freeShipping.push(p);
+    }
+    return { featuredProducts, featured, freeShipping, recent: products.slice(0, 8) };
+  }, [products]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (q.trim()) navigate(`/productos?q=${encodeURIComponent(q)}`);
   };
+
+  const scrollFeatured = useCallback((dir: 'left' | 'right') => {
+    const el = document.getElementById('featured-scroll');
+    if (el) el.scrollBy({ left: dir === 'left' ? -320 : 320, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -121,17 +130,17 @@ const Home = () => {
         </motion.div>
       </div>
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden min-h-[75vh] flex items-center">
-        <motion.img
-          style={{ y: heroY }}
+      {/* Hero Section - sin parallax (mejor performance) */}
+      <section className="relative overflow-hidden min-h-[75vh] flex items-center">
+        <img
           src="/hero-moto-street.jpg"
           alt="Moto de calle"
-          className="absolute inset-0 w-full h-full object-cover scale-110"
+          className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
-        <motion.div style={{ opacity: heroOpacity }} className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
+        <div className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
           <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-3xl">
             <motion.h2 variants={fadeRight} className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
               Rafaghelli <span className="text-primary">Motos</span>
@@ -139,7 +148,7 @@ const Home = () => {
             <motion.p variants={fadeUp} className="text-zinc-400 text-lg md:text-xl mb-10 font-medium max-w-xl">
               Repuestos originales y accesorios premium. Potenciamos tu viaje con la garantía de @rafaghellimotos.
             </motion.p>
-            
+
             <motion.form variants={fadeUp} onSubmit={handleSearch} className="flex flex-col md:flex-row w-full max-w-lg bg-transparent md:bg-card rounded-2xl md:p-1.5 md:shadow-2xl gap-3 md:gap-0">
               <input
                 value={q}
@@ -152,7 +161,7 @@ const Home = () => {
               </Button>
             </motion.form>
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Trust Badges */}
@@ -162,17 +171,17 @@ const Home = () => {
             <AnimatePresence mode="wait">
               <motion.div key={currentBadge} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-5">
                 <div className="bg-card p-4 rounded-2xl shadow-sm border border-border">
-                  {(() => { const Icon = badges[currentBadge].icon; return <Icon className="h-6 w-6 text-primary" />; })()}
+                  {(() => { const Icon = BADGES[currentBadge].icon; return <Icon className="h-6 w-6 text-primary" />; })()}
                 </div>
                 <div>
-                  <p className="text-sm font-black uppercase tracking-tight text-foreground">{badges[currentBadge].text}</p>
-                  <p className="text-xs text-muted-foreground font-bold">{badges[currentBadge].sub}</p>
+                  <p className="text-sm font-black uppercase tracking-tight text-foreground">{BADGES[currentBadge].text}</p>
+                  <p className="text-xs text-muted-foreground font-bold">{BADGES[currentBadge].sub}</p>
                 </div>
               </motion.div>
             </AnimatePresence>
           </div>
           <div className="hidden md:grid grid-cols-3 gap-8">
-            {badges.map(({ icon: Icon, text, sub }) => (
+            {BADGES.map(({ icon: Icon, text, sub }) => (
               <div key={text} className="flex items-center gap-5 group">
                 <div className="bg-card p-4 rounded-2xl shadow-sm border border-border group-hover:bg-primary transition-colors">
                   <Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground" />
@@ -264,19 +273,13 @@ const Home = () => {
             </div>
             {/* Flechas PC */}
             <button
-              onClick={() => {
-                const el = document.getElementById('featured-scroll');
-                if (el) el.scrollBy({ left: -320, behavior: 'smooth' });
-              }}
+              onClick={() => scrollFeatured('left')}
               className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
             >
               <ChevronLeft size={24} />
             </button>
             <button
-              onClick={() => {
-                const el = document.getElementById('featured-scroll');
-                if (el) el.scrollBy({ left: 320, behavior: 'smooth' });
-              }}
+              onClick={() => scrollFeatured('right')}
               className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
             >
               <ChevronRight size={24} />
@@ -295,7 +298,7 @@ const Home = () => {
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-            {featured.slice(0, 4).map((p) => (
+            {featured.map((p) => (
               <div key={p.id} className="w-full">
                 <ProductCard product={p as any} />
               </div>
@@ -311,7 +314,7 @@ const Home = () => {
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 mb-20">
-          {freeShipping.slice(0, 4).map((p) => (
+          {freeShipping.map((p) => (
             <div key={p.id} className="w-full">
               <ProductCard product={p as any} />
             </div>
@@ -333,7 +336,7 @@ const Home = () => {
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-          {products.slice(0, 8).map((p) => (
+          {recent.map((p) => (
             <div key={p.id} className="w-full">
               <ProductCard product={p as any} />
             </div>

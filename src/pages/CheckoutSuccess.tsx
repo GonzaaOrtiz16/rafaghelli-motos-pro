@@ -3,21 +3,27 @@ import { useSearchParams, Link } from "react-router-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/context/CartContext";
 
 const CheckoutSuccess = () => {
   const [params] = useSearchParams();
   const orderId = params.get("order");
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     if (!orderId) { setLoading(false); return; }
     (async () => {
       const { data } = await supabase.from("orders").select("id, total, buyer_email, payment_status").eq("id", orderId).maybeSingle();
       setOrder(data);
+      // Solo vaciamos el carrito si el pago se confirmó realmente
+      if (data && (data.payment_status === "approved" || data.payment_status === "in_process")) {
+        clearCart();
+      }
       setLoading(false);
     })();
-  }, [orderId]);
+  }, [orderId, clearCart]);
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-6">

@@ -80,6 +80,153 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_image: string | null
+          product_title: string
+          quantity: number
+          subtotal: number
+          unit_price: number
+          variant: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_image?: string | null
+          product_title: string
+          quantity: number
+          subtotal: number
+          unit_price: number
+          variant?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_image?: string | null
+          product_title?: string
+          quantity?: number
+          subtotal?: number
+          unit_price?: number
+          variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          approved_at: string | null
+          buyer_dni: string | null
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string
+          created_at: string
+          fulfillment_status: string
+          id: string
+          mp_payment_id: string | null
+          mp_payment_type: string | null
+          mp_preference_id: string | null
+          notes: string | null
+          payment_method: string
+          payment_status: string
+          shipping_apartment: string | null
+          shipping_city: string | null
+          shipping_cost: number
+          shipping_method: string
+          shipping_notes: string | null
+          shipping_number: string | null
+          shipping_state: string | null
+          shipping_street: string | null
+          shipping_tracking: string | null
+          shipping_zip: string | null
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          buyer_dni?: string | null
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string
+          created_at?: string
+          fulfillment_status?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_payment_type?: string | null
+          mp_preference_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_status?: string
+          shipping_apartment?: string | null
+          shipping_city?: string | null
+          shipping_cost?: number
+          shipping_method?: string
+          shipping_notes?: string | null
+          shipping_number?: string | null
+          shipping_state?: string | null
+          shipping_street?: string | null
+          shipping_tracking?: string | null
+          shipping_zip?: string | null
+          subtotal: number
+          total: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          buyer_dni?: string | null
+          buyer_email?: string
+          buyer_name?: string
+          buyer_phone?: string
+          created_at?: string
+          fulfillment_status?: string
+          id?: string
+          mp_payment_id?: string | null
+          mp_payment_type?: string | null
+          mp_preference_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_status?: string
+          shipping_apartment?: string | null
+          shipping_city?: string | null
+          shipping_cost?: number
+          shipping_method?: string
+          shipping_notes?: string | null
+          shipping_number?: string | null
+          shipping_state?: string | null
+          shipping_street?: string | null
+          shipping_tracking?: string | null
+          shipping_zip?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode: string | null

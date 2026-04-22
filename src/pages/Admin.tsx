@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw } from "lucide-react";
+import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw, ShoppingBag } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -10,10 +10,13 @@ import AjustesTab from '@/components/admin/AjustesTab';
 import StockControlTab from '@/components/admin/StockControlTab';
 import UniversalImporter from '@/components/admin/UniversalImporter';
 import ProductUpdater from '@/components/admin/ProductUpdater';
+import OrdersTab from '@/components/admin/OrdersTab';
 import { toast } from 'sonner';
 
+type TabId = 'ordenes' | 'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'ajustes';
+
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState<'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'ajustes'>('repuestos');
+  const [activeTab, setActiveTab] = useState<TabId>('ordenes');
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isEncargado, isVendedor, loading } = useUserRole();
@@ -38,14 +41,15 @@ const Admin = () => {
     navigate('/auth');
   };
 
-  const tabs = [
-    { id: 'repuestos' as const, label: 'Repuestos', icon: Package },
-    { id: 'motos' as const, label: 'Motos', icon: Bike },
-    { id: 'categorias' as const, label: 'Categorías', icon: LayoutGrid },
-    { id: 'stock' as const, label: 'Stock', icon: ScanBarcode },
-    { id: 'importar' as const, label: 'Importar', icon: FileUp },
-    { id: 'actualizar' as const, label: 'Actualizar', icon: RefreshCw },
-    { id: 'ajustes' as const, label: 'Ajustes', icon: Settings },
+  const tabs: { id: TabId; label: string; icon: any }[] = [
+    { id: 'ordenes', label: 'Órdenes', icon: ShoppingBag },
+    { id: 'repuestos', label: 'Repuestos', icon: Package },
+    { id: 'motos', label: 'Motos', icon: Bike },
+    { id: 'categorias', label: 'Categorías', icon: LayoutGrid },
+    { id: 'stock', label: 'Stock', icon: ScanBarcode },
+    { id: 'importar', label: 'Importar', icon: FileUp },
+    { id: 'actualizar', label: 'Actualizar', icon: RefreshCw },
+    { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ];
 
   if (loading) {
@@ -97,6 +101,7 @@ const Admin = () => {
       </header>
 
       <main className="max-w-7xl mx-auto p-4 md:p-8">
+        {activeTab === 'ordenes' && <OrdersTab />}
         {activeTab === 'repuestos' && <RepuestosTab />}
         {activeTab === 'motos' && <MotosTab />}
         {activeTab === 'categorias' && <CategoriasTab />}

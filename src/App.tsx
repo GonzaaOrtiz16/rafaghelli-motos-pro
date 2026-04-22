@@ -15,6 +15,10 @@ import { MessageCircle, X, Instagram } from "lucide-react";
 const ProductList = lazy(() => import("@/pages/ProductList"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
+const CheckoutSuccess = lazy(() => import("@/pages/CheckoutSuccess"));
+const CheckoutFailure = lazy(() => import("@/pages/CheckoutFailure"));
+const CheckoutPending = lazy(() => import("@/pages/CheckoutPending"));
+const MyOrders = lazy(() => import("@/pages/MyOrders"));
 const Workshop = lazy(() => import("@/pages/Workshop"));
 const Admin = lazy(() => import("@/pages/Admin"));
 const Motos = lazy(() => import("@/pages/Motos"));
@@ -110,6 +114,10 @@ const AppLayout = () => {
             <Route path="/productos" element={<ProductList />} />
             <Route path="/producto/:slug" element={<ProductDetail />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/checkout/failure" element={<CheckoutFailure />} />
+            <Route path="/checkout/pending" element={<CheckoutPending />} />
+            <Route path="/mis-compras" element={<MyOrders />} />
             <Route path="/motos" element={<Motos />} />
             <Route path="/taller" element={<Workshop />} />
             <Route path="/admin" element={<Admin />} />

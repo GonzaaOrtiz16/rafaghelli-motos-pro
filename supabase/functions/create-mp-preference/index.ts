@@ -150,23 +150,9 @@ Deno.serve(async (req) => {
       metadata: { order_id: order.id },
     };
 
-    // Mercado Envíos integrado
-    if (body.shipping.method === "mercado_envios") {
-      preference.shipments = {
-        mode: "me2",
-        zip_code: body.shipping.zip,
-        receiver_address: {
-          zip_code: body.shipping.zip,
-          street_name: body.shipping.street,
-          street_number: Number(body.shipping.number) || 0,
-          city_name: body.shipping.city,
-          state_name: body.shipping.state,
-          floor: body.shipping.apartment ?? "",
-        },
-      };
-    } else {
-      preference.shipments = { cost: 0, mode: "not_specified" };
-    }
+    // Envío: por ahora siempre "not_specified" (me2 requiere cuenta MP con Mercado Envíos habilitado).
+    // Los datos de domicilio se guardan en la orden y el vendedor coordina el despacho manualmente.
+    preference.shipments = { cost: 0, mode: "not_specified" };
 
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",

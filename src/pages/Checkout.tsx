@@ -94,8 +94,8 @@ const Checkout = () => {
       if (!data?.init_point && !data?.sandbox_init_point) {
         throw new Error("No se recibió el link de pago de Mercado Pago");
       }
-      // Limpiamos carrito al redirigir; si el pago falla, el cliente puede repetir
-      clearCart();
+      // No limpiamos el carrito acá: solo se vacía cuando el pago se confirma (CheckoutSuccess).
+      // Si el pago falla o se cancela, el cliente conserva sus productos para reintentar.
       // sandbox_init_point en modo TEST, init_point en producción
       window.location.href = data.sandbox_init_point || data.init_point;
     } catch (err: any) {

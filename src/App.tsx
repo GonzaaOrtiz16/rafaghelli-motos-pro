@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -30,6 +30,14 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Footer = lazy(() => import("@/components/Footer"));
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("JWT expired") || message.includes("invalid JWT")) {
+        window.dispatchEvent(new CustomEvent("app:auth-error", { detail: { message } }));
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,

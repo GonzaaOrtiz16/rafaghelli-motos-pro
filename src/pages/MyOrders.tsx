@@ -33,6 +33,7 @@ const MyOrders = () => {
         .from("orders")
         .select("*, order_items(*)")
         .eq("user_id", user.id)
+        .in("payment_status", ["approved", "in_process", "rejected", "refunded"])
         .order("created_at", { ascending: false });
       setOrders(data || []);
       setLoading(false);

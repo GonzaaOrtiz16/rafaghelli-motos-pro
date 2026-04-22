@@ -74,7 +74,11 @@ const Home = () => {
   const { data: siteSettings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('site_settings').select('home_media_url, home_media_type').limit(1).single();
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('home_media_url, home_media_type')
+        .limit(1)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },

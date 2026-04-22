@@ -3,13 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { CartProvider } from "@/context/CartContext";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
 import Home from "@/pages/Home";
 import { MessageCircle, X, Instagram } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Code-splitting: cargar páginas pesadas bajo demanda
 const ProductList = lazy(() => import("@/pages/ProductList"));
@@ -34,7 +35,11 @@ const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5,
       gcTime: 1000 * 60 * 30,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: (failureCount, error) => {
+        const message = error instanceof Error ? error.message : "";
+        if (message.includes("JWT expired") || message.includes("invalid JWT")) return false;
+        return failureCount < 1;
+      },
     },
   },
 });
@@ -137,6 +142,23 @@ const AppLayout = () => {
   );
 };
 
+const AuthSessionGuard = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    const onUnauthorized = async (event: Event) => {
+      const detail = (event as CustomEvent<{ message?: string }>).detail;
+      const message = detail?.message || "";
+      if (!message.includes("JWT expired") && !message.includes("invalid JWT")) return;
+      await supabase.auth.signOut({ scope: "local" });
+      queryClient.clear();
+    };
+
+    window.addEventListener("app:auth-error", onUnauthorized);
+    return () => window.removeEventListener("app:auth-error", onUnauthorized);
+  }, []);
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -144,8 +166,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <CartProvider>
-          <ScrollToTop />
-          <AppLayout />
+          <AuthSessionGuard>
+            <ScrollToTop />
+            <AppLayout />
+          </AuthSessionGuard>
         </CartProvider>
       </BrowserRouter>
     </TooltipProvider>

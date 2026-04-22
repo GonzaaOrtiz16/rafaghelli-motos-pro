@@ -1,6 +1,7 @@
 // Verifica el estado real de un pago en MP y actualiza la orden.
 // Fallback por si el webhook no llegó. Llamado desde la página de éxito.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { mapMpPaymentStatus, sendOwnerEmail } from "../_shared/mp-order-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,16 +47,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const statusMap: Record<string, string> = {
-      approved: "approved",
-      pending: "pending",
-      in_process: "in_process",
-      rejected: "rejected",
-      cancelled: "cancelled",
-      refunded: "refunded",
-      charged_back: "refunded",
-    };
-    const newStatus = statusMap[payment.status] || "pending";
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    const newStatus = mapMpPaymentStatus(payment.status);
     const total = payment.transaction_amount || 0;
 
     // Update solo si el estado cambió o no se había guardado el payment_id
@@ -82,6 +75,18 @@ Deno.serve(async (req) => {
         approved_at: newStatus === "approved" ? new Date().toISOString() : null,
       })
       .eq("id", order_id);
+
+    if (newStatus === "approved" && prev.payment_status !== "approved" && RESEND_API_KEY) {
+      const { data: order } = await supabase
+        .from("orders")
+        .select("*, order_items(*)")
+        .eq("id", order_id)
+        .single();
+
+      if (order) {
+        await sendOwnerEmail(order, RESEND_API_KEY);
+      }
+    }
 
     return new Response(
       JSON.stringify({ ok: true, status: newStatus, payment_id: payment.id }),

@@ -16,7 +16,7 @@ const PROVINCIAS = [
 ];
 
 const Checkout = () => {
-  const { items, total, clearCart } = useCart();
+  const { items, total } = useCart();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);

@@ -232,7 +232,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       slug,
       images: tempImages,
       sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
-      barcode: formData.barcode.trim() || null,
+      barcode: formData.barcode.trim() || `RM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       variants: cleanVariants,
       moto_fit: motoFitArr,
     };

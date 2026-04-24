@@ -366,11 +366,9 @@ const POS = () => {
                     </div>
                     <p className="text-sm font-black text-orange-500">{formatPrice(p.price)}</p>
                   </button>
-                  {p.barcode && (
-                    <button onClick={() => setQrProduct(p)} className="text-orange-500 hover:text-orange-600 flex-shrink-0" title="Ver QR">
-                      <QrCode size={18} />
-                    </button>
-                  )}
+                  <button onClick={() => setQrProduct(p)} className="text-orange-500 hover:text-orange-600 flex-shrink-0" title="Ver QR">
+                    <QrCode size={18} />
+                  </button>
                 </div>
               ))}
             </div>

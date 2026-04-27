@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 import type { Product } from "@/data/products";
 
@@ -44,13 +44,37 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CART_STORAGE_KEY = "rafaghelli_cart_items_v1";
+
+const loadStoredCart = (): CartItem[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(item => item?.product?.id && item.quantity > 0) : [];
+  } catch {
+    window.localStorage.removeItem(CART_STORAGE_KEY);
+    return [];
+  }
+};
+
 
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(loadStoredCart);
 
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (items.length > 0) {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } else {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+    }
+  }, [items]);
 
 
 
@@ -64,11 +88,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setItems(prev => {
 
-      const existing = prev.find(i => i.product.id === product.id);
+      const existing = prev.find(i => i.product.id === product.id && i.variant === variant);
 
       if (existing) {
 
-        return prev.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => i.product.id === product.id && i.variant === variant ? { ...i, quantity: i.quantity + 1 } : i);
 
       }
 

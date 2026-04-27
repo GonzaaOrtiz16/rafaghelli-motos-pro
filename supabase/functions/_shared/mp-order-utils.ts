@@ -34,8 +34,27 @@ export const mapMpPaymentStatus = (status?: string | null) => {
   return statusMap[status ?? ""] || "pending";
 };
 
-export async function sendOwnerEmail(order: any, resendKey?: string | null) {
-  if (!order || !resendKey) return;
+export async function sendOwnerEmail(
+  order: any,
+  resendKey?: string | null,
+  supabase?: any,
+  source = "unknown",
+) {
+  const subject = order ? `🏍️ Nueva venta #${order.id.slice(0, 8).toUpperCase()} – $${Number(order.total).toLocaleString("es-AR")}` : "";
+  if (!order || !resendKey) {
+    if (supabase && order) {
+      await logEmail(supabase, {
+        order_id: order.id,
+        recipient_email: NOTIFY_EMAIL,
+        recipient_type: "owner",
+        subject,
+        status: "skipped",
+        error_message: !resendKey ? "RESEND_API_KEY no configurada" : "order vacío",
+        source,
+      });
+    }
+    return;
+  }
 
   try {
     const itemsHtml = (order.order_items || [])

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw, ShoppingBag } from "lucide-react";
+import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw, ShoppingBag, Mail } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -11,9 +11,10 @@ import StockControlTab from '@/components/admin/StockControlTab';
 import UniversalImporter from '@/components/admin/UniversalImporter';
 import ProductUpdater from '@/components/admin/ProductUpdater';
 import OrdersTab from '@/components/admin/OrdersTab';
+import EmailLogsTab from '@/components/admin/EmailLogsTab';
 import { toast } from 'sonner';
 
-type TabId = 'ordenes' | 'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'ajustes';
+type TabId = 'ordenes' | 'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'emails' | 'ajustes';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState<TabId>('ordenes');
@@ -49,6 +50,7 @@ const Admin = () => {
     { id: 'stock', label: 'Stock', icon: ScanBarcode },
     { id: 'importar', label: 'Importar', icon: FileUp },
     { id: 'actualizar', label: 'Actualizar', icon: RefreshCw },
+    { id: 'emails', label: 'Emails', icon: Mail },
     { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ];
 
@@ -108,6 +110,7 @@ const Admin = () => {
         {activeTab === 'stock' && <StockControlTab />}
         {activeTab === 'importar' && <UniversalImporter />}
         {activeTab === 'actualizar' && <ProductUpdater />}
+        {activeTab === 'emails' && <EmailLogsTab />}
         {activeTab === 'ajustes' && <AjustesTab />}
       </main>
     </div>

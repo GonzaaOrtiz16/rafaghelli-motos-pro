@@ -38,6 +38,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          order_id: string | null
+          recipient_email: string
+          recipient_type: string
+          resend_id: string | null
+          source: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          recipient_email: string
+          recipient_type: string
+          resend_id?: string | null
+          source?: string | null
+          status: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          recipient_email?: string
+          recipient_type?: string
+          resend_id?: string | null
+          source?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       motorcycles: {
         Row: {
           brand: string

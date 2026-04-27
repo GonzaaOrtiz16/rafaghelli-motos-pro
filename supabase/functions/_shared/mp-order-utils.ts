@@ -1,5 +1,25 @@
 export const NOTIFY_EMAIL = "gonzaaortiz16@gmail.com";
 
+export async function logEmail(
+  supabase: any,
+  entry: {
+    order_id?: string | null;
+    recipient_email: string;
+    recipient_type: "owner" | "buyer";
+    subject?: string;
+    status: "sent" | "failed" | "skipped";
+    resend_id?: string | null;
+    error_message?: string | null;
+    source: string;
+  },
+) {
+  try {
+    await supabase.from("email_logs").insert(entry);
+  } catch (e) {
+    console.error("logEmail error", e);
+  }
+}
+
 export const mapMpPaymentStatus = (status?: string | null) => {
   const statusMap: Record<string, string> = {
     approved: "approved",

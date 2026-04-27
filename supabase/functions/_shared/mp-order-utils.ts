@@ -255,17 +255,24 @@ export async function sendBuyerEmail(
       body: JSON.stringify({
         from: "Rafaghelli Motos <onboarding@resend.dev>",
         to: [order.buyer_email],
-        subject: `✅ Confirmación de tu compra #${orderShort} – Rafaghelli Motos`,
+        subject,
         html,
       }),
     });
 
+    const responseText = await res.text();
+    let resendId: string | null = null;
+    try { resendId = JSON.parse(responseText)?.id ?? null; } catch {}
+
     if (!res.ok) {
-      console.error("Resend error (buyer)", await res.text());
+      console.error("Resend error (buyer)", responseText);
+      if (supabase) await logEmail(supabase, { order_id: order.id, recipient_email: order.buyer_email, recipient_type: "buyer", subject, status: "failed", error_message: responseText, source });
     } else {
       console.log("Email enviado al comprador", order.buyer_email);
+      if (supabase) await logEmail(supabase, { order_id: order.id, recipient_email: order.buyer_email, recipient_type: "buyer", subject, status: "sent", resend_id: resendId, source });
     }
   } catch (error) {
     console.error("sendBuyerEmail error", error);
+    if (supabase) await logEmail(supabase, { order_id: order?.id, recipient_email: order?.buyer_email, recipient_type: "buyer", subject, status: "failed", error_message: String(error), source });
   }
 }

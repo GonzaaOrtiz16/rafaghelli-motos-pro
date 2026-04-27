@@ -1,6 +1,6 @@
 // Webhook de Mercado Pago - actualiza el estado de la orden y notifica al dueño
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { mapMpPaymentStatus, sendOwnerEmail } from "../_shared/mp-order-utils.ts";
+import { mapMpPaymentStatus, sendOwnerEmail, sendBuyerEmail } from "../_shared/mp-order-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

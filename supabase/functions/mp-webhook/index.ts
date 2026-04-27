@@ -81,8 +81,8 @@ Deno.serve(async (req) => {
 
       if (order && RESEND_API_KEY) {
         await Promise.all([
-          sendOwnerEmail(order, RESEND_API_KEY),
-          sendBuyerEmail(order, RESEND_API_KEY),
+          sendOwnerEmail(order, RESEND_API_KEY, supabase, "mp-webhook"),
+          sendBuyerEmail(order, RESEND_API_KEY, supabase, "mp-webhook"),
         ]);
       }
     }

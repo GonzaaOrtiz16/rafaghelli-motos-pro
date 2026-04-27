@@ -1,7 +1,7 @@
 // Verifica el estado real de un pago en MP y actualiza la orden.
 // Fallback por si el webhook no llegó. Llamado desde la página de éxito.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { mapMpPaymentStatus, sendOwnerEmail } from "../_shared/mp-order-utils.ts";
+import { mapMpPaymentStatus, sendOwnerEmail, sendBuyerEmail } from "../_shared/mp-order-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

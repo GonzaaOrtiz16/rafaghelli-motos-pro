@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw, ShoppingBag } from "lucide-react";
+import { LogOut, Package, Bike, LayoutGrid, Settings, ScanBarcode, ScanLine, FileUp, RefreshCw, ShoppingBag, Mail } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';

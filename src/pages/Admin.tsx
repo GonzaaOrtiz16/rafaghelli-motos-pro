@@ -11,9 +11,10 @@ import StockControlTab from '@/components/admin/StockControlTab';
 import UniversalImporter from '@/components/admin/UniversalImporter';
 import ProductUpdater from '@/components/admin/ProductUpdater';
 import OrdersTab from '@/components/admin/OrdersTab';
+import EmailLogsTab from '@/components/admin/EmailLogsTab';
 import { toast } from 'sonner';
 
-type TabId = 'ordenes' | 'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'ajustes';
+type TabId = 'ordenes' | 'repuestos' | 'motos' | 'categorias' | 'stock' | 'importar' | 'actualizar' | 'emails' | 'ajustes';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState<TabId>('ordenes');

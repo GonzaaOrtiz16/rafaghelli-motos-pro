@@ -110,6 +110,7 @@ const Admin = () => {
         {activeTab === 'stock' && <StockControlTab />}
         {activeTab === 'importar' && <UniversalImporter />}
         {activeTab === 'actualizar' && <ProductUpdater />}
+        {activeTab === 'emails' && <EmailLogsTab />}
         {activeTab === 'ajustes' && <AjustesTab />}
       </main>
     </div>

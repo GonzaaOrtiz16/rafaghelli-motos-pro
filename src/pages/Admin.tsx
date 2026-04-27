@@ -50,6 +50,7 @@ const Admin = () => {
     { id: 'stock', label: 'Stock', icon: ScanBarcode },
     { id: 'importar', label: 'Importar', icon: FileUp },
     { id: 'actualizar', label: 'Actualizar', icon: RefreshCw },
+    { id: 'emails', label: 'Emails', icon: Mail },
     { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ];
 

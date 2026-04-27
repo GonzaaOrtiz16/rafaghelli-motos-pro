@@ -80,7 +80,10 @@ Deno.serve(async (req) => {
         .single();
 
       if (order && RESEND_API_KEY) {
-        await sendOwnerEmail(order, RESEND_API_KEY);
+        await Promise.all([
+          sendOwnerEmail(order, RESEND_API_KEY),
+          sendBuyerEmail(order, RESEND_API_KEY),
+        ]);
       }
     }
 

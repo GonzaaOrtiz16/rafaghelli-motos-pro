@@ -410,6 +410,7 @@ const UniversalImporter = () => {
       const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
       const sizeRaw = mappedCols['size'] != null ? String(row[mappedCols['size']] ?? '').trim() : '';
       const motoFitRaw = mappedCols['moto_fit'] != null ? String(row[mappedCols['moto_fit']] ?? '').trim() : '';
+      const imageUrlRaw = mappedCols['image_url'] != null ? String(row[mappedCols['image_url']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);

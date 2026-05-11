@@ -186,7 +186,7 @@ const Home = () => {
                 HASTA <span className="text-red-600">12</span>
               </h2>
               <p className="font-black uppercase italic text-2xl md:text-3xl text-zinc-900 tracking-tighter mt-1">
-                Cuotas s/interés
+                Cuotas con tarjeta
               </p>
               <div className="flex flex-wrap gap-2 justify-center mt-5">
                 <span className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>

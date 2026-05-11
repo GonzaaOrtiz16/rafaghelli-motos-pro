@@ -57,10 +57,10 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
           <img src={logo} alt="Rafaghelli Motos" className="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover" />
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-xl md:text-2xl font-display font-black tracking-tight text-zinc-900">
-              <span className="text-red-600">RAFAGHELLI</span>
+            <span className="text-2xl md:text-3xl font-display italic font-black tracking-tight title-brand">
+              RAFAGHELLI
             </span>
-            <span className="text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase">Motos</span>
+            <span className="font-script text-lg md:text-xl text-red-600 -mt-1 ml-1 -rotate-3">Motos</span>
           </div>
         </Link>
 

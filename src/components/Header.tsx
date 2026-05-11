@@ -117,15 +117,15 @@ const Header = () => {
             <Link
               key={cat.id}
               to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
-              className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
+              className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-zinc-800 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
             >
               {cat.nombre}
             </Link>
           ))}
-          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-zinc-800 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Motos
           </Link>
-          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-zinc-800 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Taller
           </Link>
         </div>

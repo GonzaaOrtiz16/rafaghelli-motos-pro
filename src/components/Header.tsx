@@ -34,7 +34,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-zinc-200">
+    <header className="sticky top-0 z-50 bg-zinc-950 shadow-lg border-b border-zinc-800">
       {/* Top promo bar (amarillo) */}
       <div className="bg-yellow-400 text-zinc-900 text-xs font-bold">
         <div className="container flex items-center justify-between py-1.5">
@@ -50,7 +50,7 @@ const Header = () => {
 
       {/* Main header */}
       <div className="container flex items-center gap-4 py-4">
-        <button className="lg:hidden text-zinc-800" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           <Menu className="h-6 w-6" />
         </button>
 
@@ -65,15 +65,15 @@ const Header = () => {
         </Link>
 
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">
-          <div className="flex w-full bg-zinc-100 rounded-full border border-zinc-200 focus-within:border-yellow-400 transition-colors">
+          <div className="flex w-full bg-zinc-800 rounded-full border border-zinc-700 focus-within:border-yellow-400 transition-colors">
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="¿Qué estás buscando?"
-              className="flex-1 bg-transparent text-zinc-900 px-6 py-3 text-sm focus:outline-none placeholder:text-zinc-500"
+              className="flex-1 bg-transparent text-white px-6 py-3 text-sm focus:outline-none placeholder:text-zinc-400"
             />
-            <button type="submit" className="px-5 text-zinc-700 hover:text-sky-500 transition-colors">
+            <button type="submit" className="px-5 text-zinc-300 hover:text-red-500 transition-colors">
               <Search className="h-5 w-5" />
             </button>
           </div>
@@ -83,23 +83,23 @@ const Header = () => {
           {user ? (
             <div className="hidden sm:flex items-center gap-2">
               <div className="text-right leading-tight">
-                <p className="text-xs text-zinc-500">¡Hola!</p>
-                <p className="text-xs font-bold text-zinc-900 truncate max-w-[140px]">{user.email}</p>
+                <p className="text-xs text-zinc-400">¡Hola!</p>
+                <p className="text-xs font-bold text-white truncate max-w-[140px]">{user.email}</p>
               </div>
-              <button onClick={signOut} className="p-2 text-zinc-700 hover:text-sky-500 transition-colors" title="Cerrar sesión">
+              <button onClick={signOut} className="p-2 text-zinc-300 hover:text-red-500 transition-colors" title="Cerrar sesión">
                 <LogOut className="h-5 w-5" />
               </button>
             </div>
           ) : (
-            <Link to="/auth" className="hidden sm:flex items-center gap-2 text-zinc-800 hover:text-sky-500 transition-colors">
+            <Link to="/auth" className="hidden sm:flex items-center gap-2 text-zinc-200 hover:text-red-500 transition-colors">
               <User className="h-6 w-6" />
               <div className="text-left leading-tight">
                 <p className="text-xs font-bold">¡Hola! Iniciá sesión</p>
-                <p className="text-[10px] text-zinc-500">O podés registrarte</p>
+                <p className="text-[10px] text-zinc-400">O podés registrarte</p>
               </div>
             </Link>
           )}
-          <button onClick={openCart} className="relative p-2 text-zinc-800 hover:text-sky-500 transition-colors">
+          <button onClick={openCart} className="relative p-2 text-zinc-200 hover:text-red-500 transition-colors">
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-yellow-400 text-zinc-900 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
@@ -111,21 +111,21 @@ const Header = () => {
       </div>
 
       {/* Category nav */}
-      <nav className="hidden lg:block border-t border-zinc-100 bg-zinc-50">
+      <nav className="hidden lg:block border-t border-zinc-800 bg-zinc-900">
         <div className="container flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
           {categories.map(cat => (
             <Link
               key={cat.id}
               to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
-              className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
+              className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
             >
               {cat.nombre}
             </Link>
           ))}
-          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Motos
           </Link>
-          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-red-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Taller
           </Link>
         </div>
@@ -133,41 +133,41 @@ const Header = () => {
 
       {/* Mobile search + menu */}
       <form onSubmit={handleSearch} className="md:hidden px-4 pb-3">
-        <div className="flex w-full bg-zinc-100 rounded-full border border-zinc-200">
+        <div className="flex w-full bg-zinc-800 rounded-full border border-zinc-700">
           <input
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="¿Qué estás buscando?"
-            className="flex-1 bg-transparent text-zinc-900 px-5 py-2.5 text-sm focus:outline-none placeholder:text-zinc-500"
+            className="flex-1 bg-transparent text-white px-5 py-2.5 text-sm focus:outline-none placeholder:text-zinc-400"
           />
-          <button type="submit" className="px-4 text-zinc-700">
+          <button type="submit" className="px-4 text-zinc-300">
             <Search className="h-5 w-5" />
           </button>
         </div>
       </form>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-zinc-100 bg-white">
+        <div className="lg:hidden border-t border-zinc-800 bg-zinc-950">
           <div className="flex flex-col pb-3">
             {categories.map(cat => (
               <Link
                 key={cat.id}
                 to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500 transition-colors border-b border-zinc-100"
+                className="px-4 py-2.5 text-sm font-bold text-zinc-200 hover:bg-zinc-800 hover:text-yellow-400 transition-colors border-b border-zinc-800"
               >
                 {cat.nombre}
               </Link>
             ))}
-            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500 border-b border-zinc-100">
+            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-200 hover:bg-zinc-800 hover:text-yellow-400 border-b border-zinc-800">
               Motos
             </Link>
-            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500">
+            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-200 hover:bg-zinc-800 hover:text-yellow-400">
               Taller
             </Link>
             {!user && (
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-sky-500 hover:bg-sky-50">
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-zinc-800">
                 Iniciar sesión / Registrarse
               </Link>
             )}

@@ -46,7 +46,8 @@
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground font-sans antialiased; }
-  h1, h2, h3, h4, h5, h6 { font-family: 'Space Grotesk', sans-serif; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Russo One', 'Inter', sans-serif; letter-spacing: -0.01em; }
+  .font-display { font-family: 'Russo One', 'Inter', sans-serif !important; }
 }
 
 @layer components {

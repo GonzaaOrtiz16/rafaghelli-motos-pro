@@ -8,6 +8,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import rafaghelliLogo from "@/assets/rafaghelli-logo.png";
 
 const stagger = {
   hidden: {},
@@ -178,6 +179,11 @@ const Home = () => {
             onClick={() => navigate('/productos')}
           >
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, hsl(48 100% 50% / 0.4), transparent 60%), radial-gradient(circle at 20% 80%, hsl(0 85% 50% / 0.3), transparent 60%)' }} />
+            <img
+              src={rafaghelliLogo}
+              alt=""
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 opacity-[0.07] blur-2xl pointer-events-none select-none"
+            />
             <div className="relative z-10 h-full flex flex-col justify-center items-center p-8 md:p-12 text-center">
               <span className="inline-block bg-zinc-900 text-yellow-400 text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
                 Pagá en cuotas

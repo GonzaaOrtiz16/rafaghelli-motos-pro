@@ -46,8 +46,15 @@
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground font-sans antialiased; }
-  h1, h2, h3, h4, h5, h6 { font-family: 'Russo One', 'Inter', sans-serif; letter-spacing: -0.01em; }
-  .font-display { font-family: 'Russo One', 'Inter', sans-serif !important; }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Kanit', 'Inter', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .font-display { font-family: 'Kanit', 'Inter', sans-serif !important; font-style: italic; font-weight: 900; }
+  .font-script { font-family: 'Permanent Marker', 'Caveat', cursive !important; font-style: normal; text-transform: none; letter-spacing: 0; }
 }
 
 @layer components {
@@ -59,6 +66,23 @@
     background: hsl(var(--success) / 0.1);
     color: hsl(var(--success));
   }
+  /* Títulos con degradado rojo→naranja estilo logo */
+  .title-brand {
+    background: linear-gradient(90deg, #E60000 0%, #FF4500 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+  }
+  /* Botón sport con colores del logo */
+  .btn-sport {
+    @apply inline-flex items-center justify-center gap-2 font-black italic uppercase tracking-tight px-6 py-3 rounded-2xl text-white transition-all;
+    background: linear-gradient(90deg, #E60000 0%, #FF4500 100%);
+    box-shadow: 0 6px 18px -4px rgba(230, 0, 0, 0.45);
+  }
+  .btn-sport:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -4px rgba(255, 69, 0, 0.55); }
 }
 
 /* ============================================================

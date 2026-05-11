@@ -305,6 +305,7 @@ interface VariantColor {
   moto_fit?: string[]; // motorcycles this color variant fits
   price?: number; // variant-specific price (if different from base)
   public_price?: number; // variant-specific public price
+  image?: string; // main image for this variant (when image url provided per row)
 }
 
 const UniversalImporter = () => {
@@ -483,13 +484,13 @@ const UniversalImporter = () => {
       const hasAnySizes = useDetectedVariants && groupItems.some(i => i.size);
 
       // Build variants: group by color, then aggregate sizes, moto_fit, and prices
-      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string>; prices: number[]; publicPrices: number[] }>();
+      const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string>; prices: number[]; publicPrices: number[]; image: string }>();
       let totalStock = 0;
 
       groupItems.forEach(item => {
         const color = useDetectedVariants ? (item.color || 'Único') : 'Único';
 
-        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set(), prices: [], publicPrices: [] });
+        if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set(), prices: [], publicPrices: [], image: '' });
         const entry = colorMap.get(color)!;
         
         if (item.size) {
@@ -502,6 +503,11 @@ const UniversalImporter = () => {
         // Track prices for this variant
         if (item.price) entry.prices.push(item.price);
         if (item.public_price) entry.publicPrices.push(item.public_price);
+
+        // Track first valid image URL for this variant
+        if (!entry.image && item.image_url && /^https?:\/\//i.test(item.image_url)) {
+          entry.image = item.image_url;
+        }
         
         // Parse moto_fit (comma or slash separated)
         if (item.motoFit) {
@@ -530,6 +536,10 @@ const UniversalImporter = () => {
         if (variantPubPrice && variantPubPrice !== basePubPrice) {
           variant.public_price = variantPubPrice;
         }
+        // Per-variant main image (only if image import is enabled)
+        if (importImages && data.image) {
+          variant.image = data.image;
+        }
         return variant;
       });
 
@@ -545,6 +555,14 @@ const UniversalImporter = () => {
         i.motoFit ? i.motoFit.split(/[,;\/]+/).map((m: string) => m.trim()).filter(Boolean) : []
       ))];
 
+      // Aggregate all variant images as the product image gallery (deduped, in order)
+      const variantImages = Array.from(new Set(
+        Array.from(colorMap.values()).map(v => v.image).filter(Boolean)
+      ));
+      // Fallback: if no per-variant images, use first item's image_url
+      const fallbackImage = first.image_url && /^https?:\/\//i.test(first.image_url) ? first.image_url : '';
+      const aggregatedImages = variantImages.length > 0 ? variantImages : (fallbackImage ? [fallbackImage] : []);
+
       return {
         ...first,
         name: productTitle,
@@ -554,9 +572,10 @@ const UniversalImporter = () => {
         sizes: allSizes,
         motoFit: allMotoFit,
         _variantCount: groupItems.length,
+        _aggregatedImages: aggregatedImages,
       };
     });
-  }, [step, parseAllRows, mapping.color, mapping.size]);
+  }, [step, parseAllRows, mapping.color, mapping.size, importImages]);
 
   // --- Preview data ---
   const previewData = groupedProducts;
@@ -599,10 +618,15 @@ const UniversalImporter = () => {
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
 
         // Imagen: solo si está habilitado Y el producto no tiene imágenes (no sobreescribe)
-        if (importImages && item.image_url && /^https?:\/\//i.test(item.image_url)) {
+        const newImages: string[] = (importImages && Array.isArray(item._aggregatedImages)) ? item._aggregatedImages : [];
+        if (importImages && newImages.length > 0) {
           const currentImages = Array.isArray(existing.images) ? existing.images : [];
           if (currentImages.length === 0) {
-            updateData.images = [item.image_url];
+            updateData.images = newImages;
+            // also persist variants (so each variant has its image)
+            if (item.variants && item.variants.length > 0) {
+              updateData.variants = item.variants;
+            }
           }
         }
 
@@ -632,7 +656,7 @@ const UniversalImporter = () => {
         brand: 'Importado',
         stock: item.stock,
         description: null,
-        images: importImages && item.image_url && /^https?:\/\//i.test(item.image_url) ? [item.image_url] : [],
+        images: importImages && Array.isArray(item._aggregatedImages) ? item._aggregatedImages : [],
         sizes: item.sizes || [],
         moto_fit: item.motoFit || [],
         variants: hasVariants ? item.variants : [],

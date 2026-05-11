@@ -199,7 +199,7 @@ const Auth = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-zinc-700/50 flex items-center justify-center p-4"
             onClick={() => setShowForgot(false)}
           >
             <motion.div

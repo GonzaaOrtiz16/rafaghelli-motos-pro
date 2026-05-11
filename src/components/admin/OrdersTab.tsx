@@ -59,7 +59,7 @@ const OrdersTab = () => {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full transition ${filter === f ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}
+            className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full transition ${filter === f ? "bg-zinc-700 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}
           >
             {f === "all" ? "Todas" : f}
           </button>
@@ -113,7 +113,7 @@ const OrdersTab = () => {
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+        <div className="fixed inset-0 z-50 bg-zinc-700/60 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">
               <div>

@@ -293,7 +293,7 @@ const POS = () => {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans pb-32">
       {/* Header */}
-      <header className="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+      <header className="bg-zinc-700 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <ScanLine size={20} className="text-yellow-400" />
           <div>
@@ -318,7 +318,7 @@ const POS = () => {
       </header>
 
       {/* Mobile user badge */}
-      <div className="sm:hidden bg-zinc-800 px-4 py-2 flex items-center justify-between">
+      <div className="sm:hidden bg-zinc-600 px-4 py-2 flex items-center justify-between">
         <p className="text-[10px] text-zinc-300 font-bold truncate">{displayName}</p>
         <span className="text-[9px] text-yellow-400 font-black uppercase bg-yellow-400/10 px-2 py-0.5 rounded-full">
           {isEncargado ? 'Encargado' : 'Vendedor'}
@@ -334,7 +334,7 @@ const POS = () => {
             </button>
           ) : (
             <div className="space-y-2">
-              <div className="rounded-2xl overflow-hidden border-2 border-yellow-400 bg-black aspect-video">
+              <div className="rounded-2xl overflow-hidden border-2 border-yellow-400 bg-zinc-700 aspect-video">
                 <div id="pos-scanner-container" className="w-full h-full" />
               </div>
               <button onClick={stopScanner} className="w-full bg-red-500 text-white py-3 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2">
@@ -409,7 +409,7 @@ const POS = () => {
             <div className="px-4 py-4 border-t bg-zinc-50">
               <div className="flex justify-between items-center mb-3">
                 <span className="font-black uppercase text-xs text-zinc-500">Total</span>
-                <span className="text-2xl font-black text-zinc-900 italic">{formatPrice(total)}</span>
+                <span className="text-2xl font-black text-zinc-800 italic">{formatPrice(total)}</span>
               </div>
               <button
                 onClick={confirmSale}

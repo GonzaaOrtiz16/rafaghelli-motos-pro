@@ -143,7 +143,7 @@ const Home = () => {
           loading="eager"
           fetchPriority="high"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/85 via-zinc-700/70 to-zinc-700/40" />
         <div className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
           <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-3xl">
             <motion.h2 variants={fadeRight} className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
@@ -217,11 +217,11 @@ const Home = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-white/10 group shadow-2xl"
+          className="relative overflow-hidden rounded-[2.5rem] bg-zinc-700 border border-white/10 group shadow-2xl"
         >
           <div className="flex flex-col md:flex-row items-center">
             <div className="flex-1 p-10 md:p-20 z-10 text-left">
-              <span className="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-[0.2em] uppercase bg-primary text-black rounded-full">
+              <span className="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-[0.2em] uppercase bg-primary text-zinc-800 rounded-full">
                 Unidades Seleccionadas
               </span>
               <h3 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.85] mb-8">
@@ -232,7 +232,7 @@ const Home = () => {
                 Revisá nuestro catálogo de motos usadas y 0km con la garantía de confianza Rafaghelli.
               </p>
               <Link to="/motos">
-                <Button className="bg-white text-black hover:bg-primary hover:text-black transition-all font-black uppercase px-10 py-7 rounded-2xl flex gap-3 items-center group/btn shadow-xl text-base tracking-tight">
+                <Button className="bg-white text-zinc-800 hover:bg-primary hover:text-zinc-800 transition-all font-black uppercase px-10 py-7 rounded-2xl flex gap-3 items-center group/btn shadow-xl text-base tracking-tight">
                   Ver catálogo
                   <ArrowRight className="group-hover/btn:translate-x-2 transition-transform h-6 w-6 text-primary" />
                 </Button>
@@ -245,8 +245,8 @@ const Home = () => {
                 alt="Motos en venta"
                 className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/30 to-transparent hidden md:block" />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent md:hidden" />
+              <div className="absolute inset-0 bg-gradient-to-r from-zinc-700 via-zinc-700/30 to-transparent hidden md:block" />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-700 via-transparent to-transparent md:hidden" />
             </div>
           </div>
         </motion.div>
@@ -355,7 +355,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-black shadow-2xl border-4 border-muted aspect-[9/16] md:aspect-video max-h-[85vh]"
+            className="relative group rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-zinc-700 shadow-2xl border-4 border-muted aspect-[9/16] md:aspect-video max-h-[85vh]"
           >
             <video
               key={siteSettings.home_media_url}
@@ -380,7 +380,7 @@ const Home = () => {
               </motion.div>
             </div>
             
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-4 md:p-10">
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-800/80 via-transparent to-zinc-700/20 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-between p-4 md:p-10">
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"

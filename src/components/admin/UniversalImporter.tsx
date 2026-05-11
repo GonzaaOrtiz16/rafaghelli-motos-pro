@@ -745,7 +745,7 @@ const UniversalImporter = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter">Importador Universal</h2>
         {step !== 'upload' && (
-          <button onClick={reset} className="text-xs font-black uppercase text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors">
+          <button onClick={reset} className="text-xs font-black uppercase text-zinc-500 hover:text-zinc-800 flex items-center gap-1 transition-colors">
             <Trash2 size={14} /> Reiniciar
           </button>
         )}
@@ -810,7 +810,7 @@ const UniversalImporter = () => {
             <div className={`rounded-2xl p-4 border-2 transition-all ${importImages ? 'bg-yellow-50 border-yellow-300' : 'bg-zinc-50 border-zinc-200'}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-black uppercase text-zinc-900 mb-1">
+                  <p className="text-xs font-black uppercase text-zinc-800 mb-1">
                     📸 Importar imágenes desde URL
                   </p>
                   <p className="text-[11px] font-medium text-zinc-600">
@@ -886,7 +886,7 @@ const UniversalImporter = () => {
                 if (mapping.name === null) { toast.error("Mapeá al menos el campo 'Nombre del Producto'"); return; }
                 setStep('preview');
               }}
-              className="w-full bg-zinc-900 text-white py-4 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+              className="w-full bg-zinc-700 text-white py-4 rounded-2xl font-black uppercase text-sm hover:bg-zinc-600 transition-all flex items-center justify-center gap-2"
             >
               <Eye size={18} /> Ver Vista Previa
             </button>
@@ -929,7 +929,7 @@ const UniversalImporter = () => {
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 font-black text-zinc-900">{formatPrice(item.public_price || item.price)}</td>
+                        <td className="px-3 py-2.5 font-black text-zinc-800">{formatPrice(item.public_price || item.price)}</td>
                         <td className="px-3 py-2.5">
                           <span className="bg-zinc-100 text-zinc-600 text-[9px] font-black uppercase px-2 py-1 rounded-full">{item.category}</span>
                         </td>
@@ -1012,7 +1012,7 @@ const UniversalImporter = () => {
               )}
             </p>
           </div>
-          <button onClick={reset} className="bg-zinc-900 text-white px-8 py-3 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all">
+          <button onClick={reset} className="bg-zinc-700 text-white px-8 py-3 rounded-2xl font-black uppercase text-sm hover:bg-zinc-600 transition-all">
             Importar Otro Archivo
           </button>
         </div>

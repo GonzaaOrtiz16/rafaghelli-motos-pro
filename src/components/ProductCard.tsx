@@ -72,7 +72,7 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
             decoding="async"
             onLoad={() => setImgLoaded(true)}
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-zinc-700/0 group-hover:bg-zinc-700/5 transition-colors duration-300" />
         </div>
 
         {/* INFO */}

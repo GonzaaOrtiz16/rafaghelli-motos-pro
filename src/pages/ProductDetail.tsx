@@ -231,10 +231,10 @@ const ProductDetail = () => {
         <div className="flex flex-col lg:pl-6">
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <span className="bg-zinc-900 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg tracking-widest">{product.category}</span>
+              <span className="bg-zinc-700 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg tracking-widest">{product.category}</span>
               <span className="text-yellow-400 font-black text-[10px] uppercase tracking-widest border border-yellow-400/20 px-3 py-1.5 rounded-lg">{product.brand || 'Original'}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] italic text-zinc-900">
+            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] italic text-zinc-800">
               {product.title}
             </h1>
           </div>
@@ -243,12 +243,12 @@ const ProductDetail = () => {
             {hasDiscount && (
               <p className="text-xl text-zinc-400 line-through font-bold mb-1">{formatPrice(product.original_price)}</p>
             )}
-            <div className="text-6xl font-black text-zinc-900 tracking-tighter leading-none mb-4">
+            <div className="text-6xl font-black text-zinc-800 tracking-tighter leading-none mb-4">
               {formatPrice(product.price)}
             </div>
             <div className="flex items-center gap-2 text-zinc-500 font-bold text-sm">
               <Box size={18} className="text-yellow-400" /> 
-              Stock disponible: <span className="text-zinc-900">
+              Stock disponible: <span className="text-zinc-800">
                 {hasVariants && selectedColor && selectedSize
                   ? `${currentStock} unidades (${selectedColor} - ${selectedSize})`
                   : `${product.stock} unidades`
@@ -378,7 +378,7 @@ const ProductDetail = () => {
       {/* Descripción Técnica */}
       <div className="mt-24">
         <div className="max-w-3xl">
-          <h3 className="text-3xl font-black uppercase tracking-tighter italic mb-8 flex items-center gap-4 text-zinc-900">
+          <h3 className="text-3xl font-black uppercase tracking-tighter italic mb-8 flex items-center gap-4 text-zinc-800">
             Detalles <span className="text-yellow-400">Técnicos</span>
           </h3>
           <div className="bg-white p-10 rounded-[3rem] border-2 border-zinc-100 shadow-sm">
@@ -397,7 +397,7 @@ const ProductDetail = () => {
               <p className="text-yellow-400 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Sugerencias</p>
               <h3 className="text-3xl font-black uppercase tracking-tighter italic">Productos Relacionados</h3>
             </div>
-            <Link to="/productos" className="text-zinc-400 hover:text-zinc-900 text-xs font-black uppercase tracking-widest transition-colors">Ver catálogo completo ›</Link>
+            <Link to="/productos" className="text-zinc-400 hover:text-zinc-800 text-xs font-black uppercase tracking-widest transition-colors">Ver catálogo completo ›</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {related.map(p => <ProductCard key={p.id} product={p} />)}

@@ -60,7 +60,7 @@ const Header = () => {
             <span className="text-2xl md:text-3xl font-display italic font-black tracking-tight title-brand">
               RAFAGHELLI
             </span>
-            <span className="font-script text-lg md:text-xl text-red-600 -mt-1 ml-1 -rotate-3">Motos</span>
+            <span className="font-script text-lg md:text-xl text-sky-500 -mt-1 ml-1 -rotate-3">Motos</span>
           </div>
         </Link>
 
@@ -73,7 +73,7 @@ const Header = () => {
               placeholder="¿Qué estás buscando?"
               className="flex-1 bg-transparent text-zinc-900 px-6 py-3 text-sm focus:outline-none placeholder:text-zinc-500"
             />
-            <button type="submit" className="px-5 text-zinc-700 hover:text-red-600 transition-colors">
+            <button type="submit" className="px-5 text-zinc-700 hover:text-sky-500 transition-colors">
               <Search className="h-5 w-5" />
             </button>
           </div>
@@ -86,12 +86,12 @@ const Header = () => {
                 <p className="text-xs text-zinc-500">¡Hola!</p>
                 <p className="text-xs font-bold text-zinc-900 truncate max-w-[140px]">{user.email}</p>
               </div>
-              <button onClick={signOut} className="p-2 text-zinc-700 hover:text-red-600 transition-colors" title="Cerrar sesión">
+              <button onClick={signOut} className="p-2 text-zinc-700 hover:text-sky-500 transition-colors" title="Cerrar sesión">
                 <LogOut className="h-5 w-5" />
               </button>
             </div>
           ) : (
-            <Link to="/auth" className="hidden sm:flex items-center gap-2 text-zinc-800 hover:text-red-600 transition-colors">
+            <Link to="/auth" className="hidden sm:flex items-center gap-2 text-zinc-800 hover:text-sky-500 transition-colors">
               <User className="h-6 w-6" />
               <div className="text-left leading-tight">
                 <p className="text-xs font-bold">¡Hola! Iniciá sesión</p>
@@ -99,7 +99,7 @@ const Header = () => {
               </div>
             </Link>
           )}
-          <button onClick={openCart} className="relative p-2 text-zinc-800 hover:text-red-600 transition-colors">
+          <button onClick={openCart} className="relative p-2 text-zinc-800 hover:text-sky-500 transition-colors">
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-yellow-400 text-zinc-900 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
@@ -117,15 +117,15 @@ const Header = () => {
             <Link
               key={cat.id}
               to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
-              className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
+              className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
             >
               {cat.nombre}
             </Link>
           ))}
-          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Motos
           </Link>
-          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
+          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-sky-500 hover:bg-sky-50 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Taller
           </Link>
         </div>
@@ -155,19 +155,19 @@ const Header = () => {
                 key={cat.id}
                 to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600 transition-colors border-b border-zinc-100"
+                className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500 transition-colors border-b border-zinc-100"
               >
                 {cat.nombre}
               </Link>
             ))}
-            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600 border-b border-zinc-100">
+            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500 border-b border-zinc-100">
               Motos
             </Link>
-            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600">
+            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-sky-50 hover:text-sky-500">
               Taller
             </Link>
             {!user && (
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-yellow-100">
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-sky-500 hover:bg-sky-50">
                 Iniciar sesión / Registrarse
               </Link>
             )}

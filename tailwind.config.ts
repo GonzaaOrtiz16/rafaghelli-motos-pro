@@ -15,7 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Russo One', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Kanit', 'Inter', 'system-ui', 'sans-serif'],
+        script: ['Permanent Marker', 'Caveat', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",

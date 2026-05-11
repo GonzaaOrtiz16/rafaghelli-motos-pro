@@ -438,7 +438,7 @@ const UniversalImporter = () => {
 
       return {
         barcode, name: nameVal, detectedBaseName, price: price ?? 0, public_price: pubPrice ?? price ?? 0,
-        category, color, size, stock, available, motoFit, _generated: !barcodeRaw,
+        category, color, size, stock, available, motoFit, image_url: imageUrlRaw, _generated: !barcodeRaw,
       };
     }).filter(Boolean) as any[];
   }, [rows, headers, mapping]);

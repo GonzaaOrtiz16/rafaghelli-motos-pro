@@ -121,9 +121,9 @@ const Home = () => {
             <span key={idx} className="flex items-center gap-10">
               <span className="flex items-center gap-2">🏍️ ENVÍO GRATIS EN COMPRAS DESDE $200.000</span>
               <span>•</span>
-              <span>3 CUOTAS S/INTERÉS EN COMPRAS +$180.000</span>
+              <span>PAGÁ EN HASTA 12 CUOTAS CON TARJETA</span>
               <span>•</span>
-              <span>6 CUOTAS S/INTERÉS EN COMPRAS +$360.000</span>
+              <span>ACEPTAMOS TODAS LAS TARJETAS DE CRÉDITO Y DÉBITO</span>
               <span>•</span>
               <span>SHOWROOM EN CENTENARIO URUGUAYO 1113, LANÚS 🔥</span>
               <span>•</span>

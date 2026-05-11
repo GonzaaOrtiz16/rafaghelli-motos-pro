@@ -625,7 +625,7 @@ const UniversalImporter = () => {
         brand: 'Importado',
         stock: item.stock,
         description: null,
-        images: [],
+        images: importImages && item.image_url && /^https?:\/\//i.test(item.image_url) ? [item.image_url] : [],
         sizes: item.sizes || [],
         moto_fit: item.motoFit || [],
         variants: hasVariants ? item.variants : [],

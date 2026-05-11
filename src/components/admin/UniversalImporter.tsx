@@ -305,6 +305,7 @@ interface VariantColor {
   moto_fit?: string[]; // motorcycles this color variant fits
   price?: number; // variant-specific price (if different from base)
   public_price?: number; // variant-specific public price
+  image?: string; // main image for this variant (when image url provided per row)
 }
 
 const UniversalImporter = () => {

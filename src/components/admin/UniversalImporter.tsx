@@ -618,10 +618,15 @@ const UniversalImporter = () => {
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
 
         // Imagen: solo si está habilitado Y el producto no tiene imágenes (no sobreescribe)
-        if (importImages && item.image_url && /^https?:\/\//i.test(item.image_url)) {
+        const newImages: string[] = (importImages && Array.isArray(item._aggregatedImages)) ? item._aggregatedImages : [];
+        if (importImages && newImages.length > 0) {
           const currentImages = Array.isArray(existing.images) ? existing.images : [];
           if (currentImages.length === 0) {
-            updateData.images = [item.image_url];
+            updateData.images = newImages;
+            // also persist variants (so each variant has its image)
+            if (item.variants && item.variants.length > 0) {
+              updateData.variants = item.variants;
+            }
           }
         }
 
@@ -651,7 +656,7 @@ const UniversalImporter = () => {
         brand: 'Importado',
         stock: item.stock,
         description: null,
-        images: importImages && item.image_url && /^https?:\/\//i.test(item.image_url) ? [item.image_url] : [],
+        images: importImages && Array.isArray(item._aggregatedImages) ? item._aggregatedImages : [],
         sizes: item.sizes || [],
         moto_fit: item.motoFit || [],
         variants: hasVariants ? item.variants : [],

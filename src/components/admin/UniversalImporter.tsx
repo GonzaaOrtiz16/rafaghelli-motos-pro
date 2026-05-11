@@ -292,6 +292,7 @@ const DB_FIELDS = [
   { key: 'size', label: 'Talle', required: false },
   { key: 'moto_fit', label: 'Moto que le va', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
+  { key: 'image_url', label: 'URL de Imagen', required: false },
 ] as const;
 
 type MappingKey = typeof DB_FIELDS[number]['key'];
@@ -315,9 +316,10 @@ const UniversalImporter = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
   const [mapping, setMapping] = useState<Record<MappingKey, number | null>>({
-    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
+    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null,
   });
   const [importing, setImporting] = useState(false);
+  const [importImages, setImportImages] = useState(false);
   const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number; grouped: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -357,7 +359,7 @@ const UniversalImporter = () => {
 
     // Auto-map
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -370,6 +372,7 @@ const UniversalImporter = () => {
       else if (/talle|size|medida|talla/.test(hl) && autoMap.size === null) autoMap.size = i;
       else if (/moto|modelo|aplica|fit|compatible/.test(hl) && autoMap.moto_fit === null) autoMap.moto_fit = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
+      else if (/imagen|imagen.*url|image|foto|picture|img|url.*foto|url.*imagen/.test(hl) && autoMap.image_url === null) autoMap.image_url = i;
     });
     setMapping(autoMap);
     setStep('map');
@@ -407,6 +410,7 @@ const UniversalImporter = () => {
       const colorRaw = mappedCols['color'] != null ? String(row[mappedCols['color']] ?? '').trim() : '';
       const sizeRaw = mappedCols['size'] != null ? String(row[mappedCols['size']] ?? '').trim() : '';
       const motoFitRaw = mappedCols['moto_fit'] != null ? String(row[mappedCols['moto_fit']] ?? '').trim() : '';
+      const imageUrlRaw = mappedCols['image_url'] != null ? String(row[mappedCols['image_url']] ?? '').trim() : '';
 
       const price = cleanPrice(priceRaw);
       const pubPrice = cleanPrice(pubPriceRaw);
@@ -434,7 +438,7 @@ const UniversalImporter = () => {
 
       return {
         barcode, name: nameVal, detectedBaseName, price: price ?? 0, public_price: pubPrice ?? price ?? 0,
-        category, color, size, stock, available, motoFit, _generated: !barcodeRaw,
+        category, color, size, stock, available, motoFit, image_url: imageUrlRaw, _generated: !barcodeRaw,
       };
     }).filter(Boolean) as any[];
   }, [rows, headers, mapping]);
@@ -586,7 +590,15 @@ const UniversalImporter = () => {
         if (item.price && item.price !== existing.original_price) updateData.original_price = item.price;
         if (item.stock != null) updateData.stock = item.stock;
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
-        
+
+        // Imagen: solo si está habilitado Y el producto no tiene imágenes (no sobreescribe)
+        if (importImages && item.image_url && /^https?:\/\//i.test(item.image_url)) {
+          const currentImages = Array.isArray(existing.images) ? existing.images : [];
+          if (currentImages.length === 0) {
+            updateData.images = [item.image_url];
+          }
+        }
+
         if (Object.keys(updateData).length > 0) {
           updateBatch.push({ id: existing.id, data: updateData });
         } else {
@@ -613,7 +625,7 @@ const UniversalImporter = () => {
         brand: 'Importado',
         stock: item.stock,
         description: null,
-        images: [],
+        images: importImages && item.image_url && /^https?:\/\//i.test(item.image_url) ? [item.image_url] : [],
         sizes: item.sizes || [],
         moto_fit: item.motoFit || [],
         variants: hasVariants ? item.variants : [],
@@ -653,7 +665,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null });
     setImportResult(null);
   };
 
@@ -724,6 +736,29 @@ const UniversalImporter = () => {
               <p>📐 Si mapeás "Talle", cada color tendrá sus propios talles con stock independiente.</p>
               <p>🏍️ Detecta Honda, Yamaha, Suzuki, etc. en el nombre como "moto que le va".</p>
               <p>💰 Si una variante tiene precio distinto, se guarda por separado.</p>
+            </div>
+
+            {/* Image import toggle */}
+            <div className={`rounded-2xl p-4 border-2 transition-all ${importImages ? 'bg-orange-50 border-orange-300' : 'bg-zinc-50 border-zinc-200'}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-black uppercase text-zinc-900 mb-1">
+                    📸 Importar imágenes desde URL
+                  </p>
+                  <p className="text-[11px] font-medium text-zinc-600">
+                    {importImages
+                      ? 'ACTIVADO: se cargará la imagen de la columna mapeada. En productos existentes solo se agrega si NO tienen foto (las fotos actuales nunca se modifican).'
+                      : 'DESACTIVADO: se ignora la columna de imagen. Las fotos existentes quedan intactas.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setImportImages(v => !v)}
+                  className={`relative w-14 h-7 rounded-full transition-colors flex-shrink-0 ${importImages ? 'bg-orange-500' : 'bg-zinc-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${importImages ? 'translate-x-7' : ''}`} />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3">

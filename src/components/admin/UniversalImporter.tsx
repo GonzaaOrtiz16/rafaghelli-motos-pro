@@ -636,7 +636,7 @@ const UniversalImporter = () => {
           // Sumar stock de las nuevas variantes al stock total
           const addedStock = brandNewVariants.reduce((acc: number, v: any) => {
             if (typeof v.stock === 'number') return acc + v.stock;
-            const sizesSum = Object.values(v.sizes || {}).reduce((s: number, n: any) => s + (Number(n) || 0), 0);
+            const sizesSum = Object.values(v.sizes || {}).reduce<number>((s, n: any) => s + (Number(n) || 0), 0);
             return acc + sizesSum;
           }, 0);
           if (addedStock > 0) {

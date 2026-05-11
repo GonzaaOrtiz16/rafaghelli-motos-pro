@@ -225,7 +225,7 @@ const Checkout = () => {
                 <span className="px-2 py-1 rounded bg-[#006FCF] text-white text-[10px] font-black tracking-tight">AMEX</span>
                 <span className="px-2 py-1 rounded bg-[#FF5F00] text-white text-[10px] font-black tracking-tight">Naranja</span>
                 <span className="px-2 py-1 rounded bg-[#0033A0] text-white text-[10px] font-black tracking-tight">Cabal</span>
-                <span className="px-2 py-1 rounded bg-zinc-800 text-white text-[10px] font-black tracking-tight">Débito</span>
+                <span className="px-2 py-1 rounded bg-zinc-600 text-white text-[10px] font-black tracking-tight">Débito</span>
                 <span className="px-2 py-1 rounded bg-emerald-600 text-white text-[10px] font-black tracking-tight">Efectivo</span>
               </div>
               <p className="text-[10px] text-center text-muted-foreground mt-3">Hasta 12 cuotas · Pago Seguro</p>

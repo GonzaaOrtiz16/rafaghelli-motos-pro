@@ -100,7 +100,7 @@ const RepuestosTab = () => {
                 <div>
                   <p className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
                   <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
-                  <p className="font-black text-sm text-zinc-900 mt-0.5">${p.price.toLocaleString('es-AR')}</p>
+                  <p className="font-black text-sm text-zinc-800 mt-0.5">${p.price.toLocaleString('es-AR')}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {colorCount > 0 && (
                       <span className="flex items-center gap-0.5 text-[8px] font-bold bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">
@@ -119,7 +119,7 @@ const RepuestosTab = () => {
                 </div>
                 <div className="flex gap-2 mt-2">
                   <button onClick={(e) => { e.stopPropagation(); handleToggleFeatured(p.id, !!(p as any).is_featured); }} className={`p-2 rounded-xl ${(p as any).is_featured ? 'bg-yellow-100 text-yellow-500' : 'bg-zinc-100 text-zinc-400'}`}><Star size={14} fill={(p as any).is_featured ? 'currentColor' : 'none'}/></button>
-                  <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
+                  <button onClick={() => handleEdit(p)} className="flex-1 bg-zinc-700 text-white py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
                   <button onClick={() => handleDuplicate(p)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
                   <button onClick={() => handleDelete(p.id)} className="p-2 bg-red-50 rounded-xl text-red-500"><Trash2 size={14}/></button>
                 </div>
@@ -208,7 +208,7 @@ const RepuestosTab = () => {
                     <div className="flex justify-center gap-1">
                       <button onClick={() => handleToggleFeatured(p.id, !!(p as any).is_featured)} className={`p-2 ${(p as any).is_featured ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}`}><Star size={18} fill={(p as any).is_featured ? 'currentColor' : 'none'}/></button>
                       <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-yellow-400"><Pencil size={18}/></button>
-                      <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
+                      <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-800"><Copy size={18}/></button>
                       <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                     </div>
                   </td>

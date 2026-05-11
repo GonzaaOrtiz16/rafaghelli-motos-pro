@@ -22,14 +22,14 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       {/* Hero Section - Estilo Rafaghelli */}
-      <section className="relative h-[80vh] flex items-center bg-black overflow-hidden">
+      <section className="relative h-[80vh] flex items-center bg-zinc-700 overflow-hidden">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1600&fit=crop" 
             className="w-full h-full object-cover opacity-60" 
             alt="Motos" 
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 via-zinc-700/40 to-transparent" />
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-8 w-full">
@@ -44,7 +44,7 @@ const Home = () => {
               Repuestos de alta gama y accesorios certificados para potenciar tu moto. Envíos a todo el país.
             </p>
             <div className="flex gap-4">
-              <button className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-white transition-all shadow-xl">
+              <button className="bg-white text-zinc-800 px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-white transition-all shadow-xl">
                 Ver Catálogo
               </button>
             </div>
@@ -65,7 +65,7 @@ const Home = () => {
           {categories.map((cat) => (
             <Link key={cat.id} to={`/category/${cat.id}`} className="group relative aspect-square rounded-[40px] overflow-hidden bg-gray-100 border border-gray-100 transition-all hover:-translate-y-2">
               <img src={cat.image} className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt={cat.name} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-7">
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-800/90 via-zinc-700/20 to-transparent flex flex-col justify-end p-7">
                 <span className="text-white font-black uppercase text-xs tracking-widest">{cat.name}</span>
               </div>
             </Link>
@@ -98,7 +98,7 @@ const Home = () => {
                       alt={product.title} 
                     />
                     {product.is_on_sale && (
-                      <span className="absolute top-6 left-6 bg-black text-white text-[10px] font-black uppercase px-4 py-2 rounded-full shadow-2xl">SALE</span>
+                      <span className="absolute top-6 left-6 bg-zinc-700 text-white text-[10px] font-black uppercase px-4 py-2 rounded-full shadow-2xl">SALE</span>
                     )}
                   </div>
                   
@@ -118,7 +118,7 @@ const Home = () => {
                           <span className="text-sm text-gray-400 line-through font-medium">${product.original_price.toLocaleString('es-AR')}</span>
                         )}
                       </div>
-                      <Link to={`/product/${product.slug}`} className="bg-zinc-100 text-black p-5 rounded-3xl hover:bg-black hover:text-white transition-all group/btn">
+                      <Link to={`/product/${product.slug}`} className="bg-zinc-100 text-zinc-800 p-5 rounded-3xl hover:bg-zinc-700 hover:text-white transition-all group/btn">
                         <ArrowRight size={24} className="group-hover/btn:translate-x-1 transition-transform" />
                       </Link>
                     </div>
@@ -141,14 +141,14 @@ const Home = () => {
             <p className="text-gray-500 font-medium leading-relaxed">Despachamos tu pedido en menos de 24hs a todo el país.</p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 bg-zinc-100 rounded-[32px] flex items-center justify-center mb-6 text-black">
+            <div className="w-20 h-20 bg-zinc-100 rounded-[32px] flex items-center justify-center mb-6 text-zinc-800">
               <ShieldCheck size={36} strokeWidth={2.5} />
             </div>
             <h4 className="font-black uppercase text-xl tracking-tighter mb-3">Garantía Rafaghelli</h4>
             <p className="text-gray-500 font-medium leading-relaxed">Todos nuestros repuestos están certificados y garantizados.</p>
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 bg-zinc-900 rounded-[32px] flex items-center justify-center mb-6 text-white">
+            <div className="w-20 h-20 bg-zinc-700 rounded-[32px] flex items-center justify-center mb-6 text-white">
               <Clock size={36} strokeWidth={2.5} />
             </div>
             <h4 className="font-black uppercase text-xl tracking-tighter mb-3">Soporte 24/7</h4>

@@ -68,13 +68,13 @@ const Admin = () => {
         <div className="flex items-center justify-between w-full md:w-auto gap-6">
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xl font-black uppercase text-yellow-500 italic">Rafaghelli Motos</span>
-            <span className="text-xl font-black uppercase text-black italic">Admin</span>
+            <span className="text-xl font-black uppercase text-zinc-800 italic">Admin</span>
           </div>
           <div className="flex items-center gap-3 md:hidden">
             <button onClick={() => navigate('/ventas')} className="text-yellow-400 hover:text-yellow-500 flex items-center gap-1 text-xs font-bold transition-all">
               <ScanLine size={14} /> POS
             </button>
-            <button onClick={handleLogout} className="text-gray-400 hover:text-black flex items-center gap-2 text-xs font-bold transition-all">
+            <button onClick={handleLogout} className="text-gray-400 hover:text-zinc-800 flex items-center gap-2 text-xs font-bold transition-all">
               <LogOut size={14} /> Salir
             </button>
           </div>
@@ -85,7 +85,7 @@ const Admin = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap flex-1 md:flex-none justify-center ${activeTab === tab.id ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900'}`}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap flex-1 md:flex-none justify-center ${activeTab === tab.id ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-800'}`}
             >
               <tab.icon size={14} /> {tab.label}
             </button>
@@ -96,7 +96,7 @@ const Admin = () => {
           <button onClick={() => navigate('/ventas')} className="text-yellow-400 hover:text-yellow-500 flex items-center gap-2 text-sm font-bold transition-all">
             <ScanLine size={16} /> POS
           </button>
-          <button onClick={handleLogout} className="text-gray-400 hover:text-black flex items-center gap-2 text-sm font-bold transition-all">
+          <button onClick={handleLogout} className="text-gray-400 hover:text-zinc-800 flex items-center gap-2 text-sm font-bold transition-all">
             <LogOut size={16} /> Salir
           </button>
         </div>

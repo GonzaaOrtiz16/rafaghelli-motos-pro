@@ -75,7 +75,7 @@ const AjustesTab = () => {
             {mediaType === 'video' ? <video src={mediaUrl} controls className="w-full h-full object-cover" /> : <img src={mediaUrl} className="w-full h-full object-cover" />}
           </div>
         )}
-        <button onClick={handleSave} disabled={saving} className="w-full bg-zinc-900 hover:bg-yellow-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all">{saving ? "Guardando..." : "Guardar Cambios"}</button>
+        <button onClick={handleSave} disabled={saving} className="w-full bg-zinc-700 hover:bg-yellow-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all">{saving ? "Guardando..." : "Guardar Cambios"}</button>
       </div>
     </div>
   );

@@ -146,11 +146,11 @@ const MotosTab = () => {
                 <p className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">{m.brand}</p>
                 <h3 className="font-black uppercase text-[11px] truncate leading-tight">{m.title}</h3>
                 <p className="text-[10px] font-bold text-zinc-400 mt-1">{m.year} · {m.kilometers} km</p>
-                <p className="font-black text-sm mt-2 text-zinc-900">${m.price.toLocaleString('es-AR')}</p>
+                <p className="font-black text-sm mt-2 text-zinc-800">${m.price.toLocaleString('es-AR')}</p>
               </div>
             </div>
             <div className="flex gap-2 mt-4 pt-4 border-t">
-              <button onClick={() => handleEdit(m)} className="flex-1 bg-zinc-900 text-white py-2 rounded-xl text-[10px] font-black uppercase">Editar</button>
+              <button onClick={() => handleEdit(m)} className="flex-1 bg-zinc-700 text-white py-2 rounded-xl text-[10px] font-black uppercase">Editar</button>
               <button onClick={() => handleDuplicate(m)} className="p-2 bg-zinc-100 rounded-xl text-zinc-500"><Copy size={14}/></button>
               <button onClick={() => handleDelete(m.id)} className="p-2 bg-red-50 text-red-500 rounded-xl"><Trash2 size={14}/></button>
             </div>
@@ -183,7 +183,7 @@ const MotosTab = () => {
                 <td className="px-8 py-4 text-center">
                    <div className="flex justify-center gap-1">
                     <button onClick={() => handleEdit(m)} className="p-2 text-gray-400 hover:text-yellow-400"><Pencil size={18}/></button>
-                    <button onClick={() => handleDuplicate(m)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
+                    <button onClick={() => handleDuplicate(m)} className="p-2 text-gray-400 hover:text-zinc-800"><Copy size={18}/></button>
                     <button onClick={() => handleDelete(m.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                   </div>
                 </td>
@@ -194,7 +194,7 @@ const MotosTab = () => {
       </div>
 
       {isAdding && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-zinc-700/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 md:px-10 md:py-6 border-b flex justify-between items-center">
               <h2 className="text-xl md:text-2xl font-black uppercase italic">{editingId ? 'Editar Moto' : 'Nueva Moto'}</h2>
@@ -228,7 +228,7 @@ const MotosTab = () => {
 
               <textarea className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold min-h-[80px]" placeholder="Descripción de la moto..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               
-              <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8">
+              <div className="bg-zinc-700 rounded-[32px] p-6 md:p-8">
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Precio de Venta ($)</label>
                 <input className="w-full bg-white/10 rounded-xl px-5 py-4 text-yellow-400 font-black text-2xl outline-none mt-2" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
               </div>

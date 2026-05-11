@@ -260,7 +260,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-2 md:p-4">
+    <div className="fixed inset-0 bg-zinc-700/90 backdrop-blur-xl z-50 flex items-center justify-center p-2 md:p-4">
       <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Header */}
         <div className="px-5 py-4 md:px-8 md:py-5 border-b flex justify-between items-center shrink-0">
@@ -320,7 +320,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
               </div>
 
               {/* Pricing block */}
-              <div className="bg-zinc-900 rounded-2xl p-5 space-y-4 mt-2">
+              <div className="bg-zinc-700 rounded-2xl p-5 space-y-4 mt-2">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] text-zinc-500 font-black uppercase ml-1 block mb-1">Precio de Venta</label>
@@ -400,7 +400,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                             <>
                               <img src={variant.image} className="w-full h-full object-cover" />
                               <button type="button" onClick={(e) => { e.preventDefault(); updateVariant(vi, 'image', null); }}
-                                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                className="absolute inset-0 bg-zinc-700/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <X size={14} className="text-white" />
                               </button>
                             </>
@@ -487,7 +487,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                             onChange={e => setNewSizeInput(prev => ({ ...prev, [vi]: e.target.value }))}
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSizeToVariant(vi); } }}
                           />
-                          <button type="button" onClick={() => addSizeToVariant(vi)} className="bg-zinc-900 text-white p-1.5 rounded-lg hover:bg-zinc-700 transition-colors">
+                          <button type="button" onClick={() => addSizeToVariant(vi)} className="bg-zinc-700 text-white p-1.5 rounded-lg hover:bg-zinc-700 transition-colors">
                             <Plus size={12} />
                           </button>
                         </div>

@@ -118,7 +118,7 @@ const CategoriasTab = () => {
       </div>
 
       {isAdding && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-zinc-700/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] w-full max-w-lg shadow-2xl overflow-hidden">
             <div className="px-6 py-4 md:px-10 md:py-6 border-b flex justify-between items-center">
               <h2 className="text-xl md:text-2xl font-black uppercase italic">{editingId ? 'Editar' : 'Nueva'} Categoría</h2>
@@ -130,8 +130,8 @@ const CategoriasTab = () => {
               <div>
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2 mb-2 block">Tipo</label>
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setFormData({...formData, tipo: 'repuestos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'repuestos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Repuestos</button>
-                  <button type="button" onClick={() => setFormData({...formData, tipo: 'motos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'motos' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Motos</button>
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'repuestos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'repuestos' ? 'bg-zinc-700 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Repuestos</button>
+                  <button type="button" onClick={() => setFormData({...formData, tipo: 'motos'})} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${formData.tipo === 'motos' ? 'bg-zinc-700 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Motos</button>
                 </div>
               </div>
 

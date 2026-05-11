@@ -381,7 +381,7 @@ const StockControlTab = () => {
           <h3 className="font-black uppercase tracking-tighter text-lg">Importar / Exportar</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button onClick={handleExportExcel} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
+          <button onClick={handleExportExcel} className="flex items-center justify-center gap-3 bg-zinc-700 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-600 transition-all shadow-lg">
             <Download size={20} /> Exportar Excel Completo
           </button>
           <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-yellow-400 text-yellow-400 py-5 rounded-2xl font-black uppercase text-sm hover:bg-yellow-50 transition-all disabled:opacity-50">
@@ -473,7 +473,7 @@ const StockControlTab = () => {
                       {p.is_on_sale && <span className="text-[9px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Oferta</span>}
                       {p.is_featured && <span className="text-[9px] font-black bg-fuchsia-100 text-fuchsia-600 px-2 py-0.5 rounded-full uppercase">Destacado</span>}
                     </div>
-                    <p className="text-sm font-black text-zinc-900 truncate">{p.title}</p>
+                    <p className="text-sm font-black text-zinc-800 truncate">{p.title}</p>
                     <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-500 mt-0.5">
                       {p.barcode && <span>Cód: {p.barcode}</span>}
                       <span>{formatPrice(p.price || 0)}</span>

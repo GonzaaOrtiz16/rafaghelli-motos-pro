@@ -77,14 +77,14 @@ const EmailLogsTab = () => {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-lg text-xs font-black uppercase hover:bg-zinc-800"
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-700 text-white rounded-lg text-xs font-black uppercase hover:bg-zinc-600"
         >
           <RefreshCw size={14} /> Actualizar
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Total" value={stats.total} color="bg-zinc-100 text-zinc-900" />
+        <StatCard label="Total" value={stats.total} color="bg-zinc-100 text-zinc-800" />
         <StatCard label="✅ Comprador OK" value={stats.sentBuyer} color="bg-green-100 text-green-700" />
         <StatCard label="❌ Comprador falló" value={stats.failedBuyer} color="bg-red-100 text-red-700" />
         <StatCard label="✅ Vendedor OK" value={stats.sentOwner} color="bg-green-100 text-green-700" />
@@ -128,7 +128,7 @@ const EmailLogsTab = () => {
                       <span className="text-[10px] text-zinc-400 uppercase">{log.source}</span>
                     )}
                   </div>
-                  <div className="font-mono text-xs text-zinc-900 break-all">
+                  <div className="font-mono text-xs text-zinc-800 break-all">
                     📧 {log.recipient_email}
                   </div>
                   {log.subject && (

@@ -292,6 +292,7 @@ const DB_FIELDS = [
   { key: 'size', label: 'Talle', required: false },
   { key: 'moto_fit', label: 'Moto que le va', required: false },
   { key: 'stock', label: 'Stock / Disponibilidad', required: false },
+  { key: 'image_url', label: 'URL de Imagen', required: false },
 ] as const;
 
 type MappingKey = typeof DB_FIELDS[number]['key'];

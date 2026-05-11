@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import rafaghelliLogo from "@/assets/rafaghelli-logo.png";
+import bannerCuotas from "@/assets/banner-cuotas.jpg";
 
 const stagger = {
   hidden: {},
@@ -175,28 +176,31 @@ const Home = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 group cursor-pointer"
+            className="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden bg-zinc-950 group cursor-pointer"
             onClick={() => navigate('/productos')}
           >
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, hsl(48 100% 50% / 0.4), transparent 60%), radial-gradient(circle at 20% 80%, hsl(0 85% 50% / 0.3), transparent 60%)' }} />
             <img
-              src={rafaghelliLogo}
-              alt=""
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 opacity-[0.07] blur-2xl pointer-events-none select-none"
+              src={bannerCuotas}
+              alt="Pagá en cuotas con tarjeta"
+              loading="lazy"
+              width={1280}
+              height={768}
+              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
             />
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/85 via-zinc-950/55 to-zinc-950/30" />
             <div className="relative z-10 h-full flex flex-col justify-center items-center p-8 md:p-12 text-center">
-              <span className="inline-block bg-zinc-900 text-yellow-400 text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
+              <span className="inline-block bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
                 Pagá en cuotas
               </span>
-              <h2 className="text-4xl md:text-6xl font-black text-zinc-900 uppercase italic tracking-tighter leading-[0.85]">
-                HASTA <span className="text-sky-500">12</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-[0.85] drop-shadow-lg">
+                HASTA <span className="text-yellow-400">12</span>
               </h2>
-              <p className="font-black uppercase italic text-2xl md:text-3xl text-zinc-900 tracking-tighter mt-1">
+              <p className="font-black uppercase italic text-2xl md:text-3xl text-white tracking-tighter mt-1 drop-shadow-lg">
                 Cuotas con tarjeta
               </p>
               <div className="flex flex-wrap gap-2 justify-center mt-5">
-                <span className="bg-sky-500 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>
-                <span className="bg-zinc-900 text-yellow-400 text-xs font-black px-4 py-2 rounded-full">6 CUOTAS</span>
+                <span className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>
+                <span className="bg-orange-500 text-white text-xs font-black px-4 py-2 rounded-full">6 CUOTAS</span>
                 <span className="bg-yellow-400 text-zinc-900 text-xs font-black px-4 py-2 rounded-full">12 CUOTAS</span>
               </div>
             </div>

@@ -47,7 +47,7 @@ const StockControlTab = () => {
       let variantStock = 0;
       valid.forEach((v: any) => {
         if (v.sizes && typeof v.sizes === 'object') {
-          variantStock += Object.values(v.sizes).reduce((s: number, q: any) => s + (Number(q) || 0), 0);
+          variantStock += (Object.values(v.sizes) as any[]).reduce<number>((s, q) => s + (Number(q) || 0), 0);
         } else {
           variantStock += Number(v.stock) || 0;
         }

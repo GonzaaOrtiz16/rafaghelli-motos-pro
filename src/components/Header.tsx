@@ -60,7 +60,7 @@ const Header = () => {
             <span className="text-2xl md:text-3xl font-display italic font-black tracking-tight title-brand">
               RAFAGHELLI
             </span>
-            <span className="font-script text-lg md:text-xl text-sky-500 -mt-1 ml-1 -rotate-3">Motos</span>
+            <span className="font-script text-lg md:text-xl title-motos -mt-1 ml-1 -rotate-3">Motos</span>
           </div>
         </Link>
 

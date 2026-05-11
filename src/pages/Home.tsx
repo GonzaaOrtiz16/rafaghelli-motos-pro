@@ -110,62 +110,113 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Marquee Ticker */}
-      <div className="bg-primary text-primary-foreground overflow-hidden whitespace-nowrap">
+      {/* Marquee Ticker - Amarillo */}
+      <div className="bg-yellow-400 text-zinc-900 overflow-hidden whitespace-nowrap">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="flex items-center gap-8 py-2 text-xs font-black uppercase tracking-widest"
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="flex items-center gap-10 py-2 text-xs font-black uppercase tracking-widest"
         >
           {[...Array(2)].map((_, idx) => (
-            <span key={idx} className="flex items-center gap-8">
-              <span className="flex items-center gap-2"><Zap size={12} /> Envíos a todo el país</span>
+            <span key={idx} className="flex items-center gap-10">
+              <span className="flex items-center gap-2">🏍️ ENVÍO GRATIS EN COMPRAS DESDE $200.000</span>
               <span>•</span>
-              <span className="flex items-center gap-2"><Shield size={12} /> Calidad garantizada</span>
+              <span>3 CUOTAS S/INTERÉS EN COMPRAS +$180.000</span>
               <span>•</span>
-              <span className="flex items-center gap-2"><CreditCard size={12} /> Transferencia y efectivo</span>
+              <span>6 CUOTAS S/INTERÉS EN COMPRAS +$360.000</span>
               <span>•</span>
-              <span className="flex items-center gap-2"><Truck size={12} /> Envío gratis en productos seleccionados</span>
-              <span>•</span>
-              <span>Repuestos originales y accesorios premium</span>
+              <span>SHOWROOM EN CENTENARIO URUGUAYO 1113, LANÚS 🔥</span>
               <span>•</span>
             </span>
           ))}
         </motion.div>
       </div>
 
-      {/* Hero Section - sin parallax (mejor performance) */}
-      <section className="relative overflow-hidden min-h-[75vh] flex items-center">
-        <img
-          src="/hero-moto-street.jpg"
-          alt="Moto de calle"
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800/85 via-zinc-700/70 to-zinc-700/40" />
-        <div className="container py-16 md:py-28 px-6 relative z-10 text-primary-foreground">
-          <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-3xl">
-            <motion.h2 variants={fadeRight} className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
-              Rafaghelli <span className="text-primary">Motos</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-zinc-400 text-lg md:text-xl mb-10 font-medium max-w-xl">
-              Repuestos originales y accesorios premium. Potenciamos tu viaje con la garantía de @rafaghellimotos.
-            </motion.p>
+      {/* Hero estilo VXV - Dos banners lado a lado */}
+      <section className="container px-4 md:px-6 pt-6 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Banner izquierdo - HOT SALE */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden bg-zinc-800 group cursor-pointer"
+            onClick={() => navigate('/productos')}
+          >
+            <img
+              src="/hero-moto-street.jpg"
+              alt="Hot Sale Rafaghelli"
+              className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700"
+              loading="eager"
+              fetchPriority="high"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/60 to-transparent" />
+            <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12">
+              <span className="inline-block w-fit bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
+                Esta semana
+              </span>
+              <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-2">
+                HOT
+                <br />
+                <span className="text-yellow-400">RAFAGHELLI</span>
+              </h2>
+              <p className="text-yellow-400 font-black uppercase italic text-2xl md:text-4xl tracking-tighter mt-2">
+                ¡Envíos en el día!
+              </p>
+              <p className="text-zinc-300 text-sm md:text-base mt-3 max-w-md font-medium">
+                Comprando antes de las 12hs, el envío te llega en el día.
+              </p>
+            </div>
+          </motion.div>
 
-            <motion.form variants={fadeUp} onSubmit={handleSearch} className="flex flex-col md:flex-row w-full max-w-lg bg-transparent md:bg-card rounded-2xl md:p-1.5 md:shadow-2xl gap-3 md:gap-0">
-              <input
-                value={q}
-                onChange={e => setQ(e.target.value)}
-                placeholder="Buscá por marca o repuesto..."
-                className="flex-1 px-5 py-4 md:py-3 rounded-2xl md:rounded-l-xl text-foreground outline-none font-bold placeholder:text-muted-foreground bg-card md:bg-transparent"
-              />
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl md:rounded-xl px-8 h-14 md:h-12 font-black uppercase tracking-tight w-full md:w-auto">
-                <Search className="h-5 w-5 mr-2 shrink-0" /> <span className="whitespace-nowrap">Buscar</span>
-              </Button>
-            </motion.form>
+          {/* Banner derecho - Cuotas */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 group cursor-pointer"
+            onClick={() => navigate('/productos')}
+          >
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, hsl(48 100% 50% / 0.4), transparent 60%), radial-gradient(circle at 20% 80%, hsl(0 85% 50% / 0.3), transparent 60%)' }} />
+            <div className="relative z-10 h-full flex flex-col justify-center items-center p-8 md:p-12 text-center">
+              <span className="inline-block bg-zinc-900 text-yellow-400 text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
+                Pagá en cuotas
+              </span>
+              <h2 className="text-4xl md:text-6xl font-black text-zinc-900 uppercase italic tracking-tighter leading-[0.85]">
+                HASTA <span className="text-red-600">12</span>
+              </h2>
+              <p className="font-black uppercase italic text-2xl md:text-3xl text-zinc-900 tracking-tighter mt-1">
+                Cuotas s/interés
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center mt-5">
+                <span className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>
+                <span className="bg-zinc-900 text-yellow-400 text-xs font-black px-4 py-2 rounded-full">6 CUOTAS</span>
+                <span className="bg-yellow-400 text-zinc-900 text-xs font-black px-4 py-2 rounded-full">12 CUOTAS</span>
+              </div>
+            </div>
           </motion.div>
         </div>
+
+        {/* Buscador prominente debajo */}
+        <motion.form
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          onSubmit={handleSearch}
+          className="mt-6 md:hidden"
+        >
+          <div className="flex w-full bg-zinc-100 rounded-full border border-zinc-200">
+            <input
+              value={q}
+              onChange={e => setQ(e.target.value)}
+              placeholder="¿Qué estás buscando?"
+              className="flex-1 bg-transparent text-zinc-900 px-5 py-3 text-sm focus:outline-none placeholder:text-zinc-500"
+            />
+            <button type="submit" className="bg-yellow-400 text-zinc-900 px-6 rounded-full font-black uppercase text-xs">
+              Buscar
+            </button>
+          </div>
+        </motion.form>
       </section>
 
       {/* Trust Badges */}

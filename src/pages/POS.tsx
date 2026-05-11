@@ -283,7 +283,7 @@ const POS = () => {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
         <div className="text-center space-y-2">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-bold text-zinc-400">Cargando...</p>
         </div>
       </div>
@@ -295,7 +295,7 @@ const POS = () => {
       {/* Header */}
       <header className="bg-zinc-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          <ScanLine size={20} className="text-orange-500" />
+          <ScanLine size={20} className="text-yellow-400" />
           <div>
             <span className="font-black uppercase text-sm italic tracking-tight">Rafaghelli Motos</span>
             <span className="text-[9px] text-zinc-400 font-bold ml-2 uppercase">POS</span>
@@ -304,7 +304,7 @@ const POS = () => {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <p className="text-[10px] text-zinc-400 font-bold">{displayName}</p>
-            <p className="text-[9px] text-orange-400 font-black uppercase">{isEncargado ? 'Encargado' : 'Vendedor'}</p>
+            <p className="text-[9px] text-yellow-400 font-black uppercase">{isEncargado ? 'Encargado' : 'Vendedor'}</p>
           </div>
           {isEncargado && (
             <button onClick={() => navigate('/admin')} className="text-zinc-400 hover:text-white text-[10px] font-black uppercase flex items-center gap-1 transition-colors">
@@ -320,7 +320,7 @@ const POS = () => {
       {/* Mobile user badge */}
       <div className="sm:hidden bg-zinc-800 px-4 py-2 flex items-center justify-between">
         <p className="text-[10px] text-zinc-300 font-bold truncate">{displayName}</p>
-        <span className="text-[9px] text-orange-400 font-black uppercase bg-orange-500/10 px-2 py-0.5 rounded-full">
+        <span className="text-[9px] text-yellow-400 font-black uppercase bg-yellow-400/10 px-2 py-0.5 rounded-full">
           {isEncargado ? 'Encargado' : 'Vendedor'}
         </span>
       </div>
@@ -329,12 +329,12 @@ const POS = () => {
         {/* Scanner */}
         <div className="space-y-3">
           {!scanning ? (
-            <button onClick={startScanner} className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black uppercase text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-orange-500/20">
+            <button onClick={startScanner} className="w-full bg-yellow-400 text-white py-4 rounded-2xl font-black uppercase text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-yellow-400/20">
               <Camera size={20} /> Escanear Producto
             </button>
           ) : (
             <div className="space-y-2">
-              <div className="rounded-2xl overflow-hidden border-2 border-orange-500 bg-black aspect-video">
+              <div className="rounded-2xl overflow-hidden border-2 border-yellow-400 bg-black aspect-video">
                 <div id="pos-scanner-container" className="w-full h-full" />
               </div>
               <button onClick={stopScanner} className="w-full bg-red-500 text-white py-3 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2">
@@ -350,7 +350,7 @@ const POS = () => {
           <input
             type="text"
             placeholder="Buscar producto..."
-            className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/30 transition-all"
+            className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3.5 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/30 transition-all"
             value={manualSearch}
             onChange={e => handleSearch(e.target.value)}
           />
@@ -364,9 +364,9 @@ const POS = () => {
                       <p className="text-xs font-black uppercase truncate">{p.title}</p>
                       <p className="text-[10px] text-zinc-400 font-bold">Stock: {p.stock ?? 0}</p>
                     </div>
-                    <p className="text-sm font-black text-orange-500">{formatPrice(p.price)}</p>
+                    <p className="text-sm font-black text-yellow-400">{formatPrice(p.price)}</p>
                   </button>
-                  <button onClick={() => setQrProduct(p)} className="text-orange-500 hover:text-orange-600 flex-shrink-0" title="Ver QR">
+                  <button onClick={() => setQrProduct(p)} className="text-yellow-400 hover:text-yellow-500 flex-shrink-0" title="Ver QR">
                     <QrCode size={18} />
                   </button>
                 </div>
@@ -379,7 +379,7 @@ const POS = () => {
         {cart.length > 0 && (
           <div className="bg-white rounded-[24px] border shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b bg-zinc-50 flex items-center gap-2">
-              <ShoppingCart size={16} className="text-orange-500" />
+              <ShoppingCart size={16} className="text-yellow-400" />
               <span className="font-black uppercase text-xs tracking-wider">Venta Actual ({cart.length})</span>
             </div>
             <div className="divide-y">

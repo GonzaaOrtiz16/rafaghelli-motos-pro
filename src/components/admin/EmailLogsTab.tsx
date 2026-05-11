@@ -96,7 +96,7 @@ const EmailLogsTab = () => {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-              filter === f ? 'bg-orange-500 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              filter === f ? 'bg-yellow-400 text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
             {f === 'all' ? 'Todos' : f === 'buyer' ? 'Compradores' : f === 'owner' ? 'Vendedor' : 'Fallidos'}

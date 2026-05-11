@@ -64,7 +64,7 @@ const OrdersTab = () => {
             {f === "all" ? "Todas" : f}
           </button>
         ))}
-        <button onClick={load} className="ml-auto text-xs font-bold text-orange-600 hover:underline">Actualizar</button>
+        <button onClick={load} className="ml-auto text-xs font-bold text-yellow-500 hover:underline">Actualizar</button>
       </div>
 
       {loading ? (
@@ -103,7 +103,7 @@ const OrdersTab = () => {
                         </select>
                       ) : <span className="text-xs text-zinc-400">—</span>}
                     </td>
-                    <td className="p-3"><button onClick={() => setSelected(o)} className="text-orange-600 hover:text-orange-700"><Eye size={16} /></button></td>
+                    <td className="p-3"><button onClick={() => setSelected(o)} className="text-yellow-500 hover:text-red-600"><Eye size={16} /></button></td>
                   </tr>
                 ))}
               </tbody>

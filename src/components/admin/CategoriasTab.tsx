@@ -72,13 +72,13 @@ const CategoriasTab = () => {
     <>
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none">Categorías</h1>
-        <button onClick={() => { setEditingId(null); setFormData({ nombre: '', tipo: 'repuestos', image: '' }); setIsAdding(true); }} className="bg-orange-500 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center gap-2 hover:bg-orange-600 transition-all font-black uppercase shadow-lg shadow-orange-500/20">
+        <button onClick={() => { setEditingId(null); setFormData({ nombre: '', tipo: 'repuestos', image: '' }); setIsAdding(true); }} className="bg-yellow-400 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center gap-2 hover:bg-yellow-500 transition-all font-black uppercase shadow-lg shadow-yellow-400/20">
           <Plus size={20} /> <span className="hidden md:inline">Nueva</span>
         </button>
       </div>
 
       <div className="mb-10">
-        <h3 className="text-sm font-black uppercase tracking-widest text-orange-500 mb-4">Repuestos</h3>
+        <h3 className="text-sm font-black uppercase tracking-widest text-yellow-400 mb-4">Repuestos</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {repuestosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
@@ -88,7 +88,7 @@ const CategoriasTab = () => {
               <div className="p-4 flex items-center justify-between">
                 <span className="font-black uppercase text-sm tracking-tight truncate mr-2">{cat.nombre}</span>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-orange-500"><Pencil size={14}/></button>
+                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-yellow-400"><Pencil size={14}/></button>
                   <button onClick={() => handleDelete(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500"><Trash2 size={14}/></button>
                 </div>
               </div>
@@ -98,7 +98,7 @@ const CategoriasTab = () => {
       </div>
 
       <div className="mb-10">
-        <h3 className="text-sm font-black uppercase tracking-widest text-orange-500 mb-4">Motos</h3>
+        <h3 className="text-sm font-black uppercase tracking-widest text-yellow-400 mb-4">Motos</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {motosCats.map(cat => (
             <div key={cat.id} className="bg-white rounded-3xl border overflow-hidden shadow-sm group relative">
@@ -108,7 +108,7 @@ const CategoriasTab = () => {
               <div className="p-4 flex items-center justify-between">
                 <span className="font-black uppercase text-sm tracking-tight truncate mr-2">{cat.nombre}</span>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-orange-500"><Pencil size={14}/></button>
+                  <button onClick={() => handleEdit(cat)} className="p-1.5 text-gray-400 hover:text-yellow-400"><Pencil size={14}/></button>
                   <button onClick={() => handleDelete(cat.id)} className="p-1.5 text-gray-400 hover:text-red-500"><Trash2 size={14}/></button>
                 </div>
               </div>
@@ -143,14 +143,14 @@ const CategoriasTab = () => {
                     <button type="button" onClick={() => setFormData({...formData, image: ''})} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5"><X size={12}/></button>
                   </div>
                 ) : (
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full aspect-video border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-zinc-400 hover:text-orange-500 hover:border-orange-500 transition-all">
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full aspect-video border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-zinc-400 hover:text-yellow-400 hover:border-yellow-400 transition-all">
                     {uploading ? <Loader2 className="animate-spin" size={24} /> : <><Upload size={24} /><span className="text-[10px] font-black uppercase mt-2">Subir foto</span></>}
                   </button>
                 )}
                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
               </div>
 
-              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">
+              <button type="submit" disabled={loading} className="w-full bg-yellow-400 hover:bg-yellow-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">
                 {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Crear Categoría"}
               </button>
             </form>

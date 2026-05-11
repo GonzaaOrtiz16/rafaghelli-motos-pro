@@ -334,7 +334,7 @@ const StockControlTab = () => {
       {/* GLOBAL STATS */}
       <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-6">
         <div className="flex items-center gap-3">
-          <Boxes size={24} className="text-orange-500" />
+          <Boxes size={24} className="text-yellow-400" />
           <h3 className="font-black uppercase tracking-tighter text-lg">Resumen General del Inventario</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -363,9 +363,9 @@ const StockControlTab = () => {
             <CheckCircle2 size={20} className="text-green-600" />
             <div><p className="text-2xl font-black text-green-700">{stats.withStock}</p><p className="text-[9px] font-black uppercase text-green-700">Con stock</p></div>
           </div>
-          <div className="bg-orange-50 rounded-2xl p-4 border border-orange-100 flex items-center gap-3">
-            <AlertTriangle size={20} className="text-orange-600" />
-            <div><p className="text-2xl font-black text-orange-700">{stats.low}</p><p className="text-[9px] font-black uppercase text-orange-700">Stock bajo (≤5)</p></div>
+          <div className="bg-yellow-50 rounded-2xl p-4 border border-yellow-100 flex items-center gap-3">
+            <AlertTriangle size={20} className="text-yellow-500" />
+            <div><p className="text-2xl font-black text-red-600">{stats.low}</p><p className="text-[9px] font-black uppercase text-red-600">Stock bajo (≤5)</p></div>
           </div>
           <div className="bg-red-50 rounded-2xl p-4 border border-red-100 flex items-center gap-3">
             <XCircle size={20} className="text-red-600" />
@@ -377,14 +377,14 @@ const StockControlTab = () => {
       {/* IMPORT / EXPORT */}
       <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
-          <FileSpreadsheet size={24} className="text-orange-500" />
+          <FileSpreadsheet size={24} className="text-yellow-400" />
           <h3 className="font-black uppercase tracking-tighter text-lg">Importar / Exportar</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button onClick={handleExportExcel} className="flex items-center justify-center gap-3 bg-zinc-900 text-white py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all shadow-lg">
             <Download size={20} /> Exportar Excel Completo
           </button>
-          <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-orange-500 text-orange-500 py-5 rounded-2xl font-black uppercase text-sm hover:bg-orange-50 transition-all disabled:opacity-50">
+          <button onClick={() => fileInputRef.current?.click()} disabled={importing} className="flex items-center justify-center gap-3 border-2 border-dashed border-yellow-400 text-yellow-400 py-5 rounded-2xl font-black uppercase text-sm hover:bg-yellow-50 transition-all disabled:opacity-50">
             {importing ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
             {importing ? 'Importando...' : 'Importar Excel/CSV'}
           </button>
@@ -405,7 +405,7 @@ const StockControlTab = () => {
       <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <Package size={24} className="text-orange-500" />
+            <Package size={24} className="text-yellow-400" />
             <h3 className="font-black uppercase tracking-tighter text-lg">Detalle de Productos</h3>
           </div>
           <p className="text-xs font-black uppercase text-zinc-500">{filtered.length} resultados</p>
@@ -418,7 +418,7 @@ const StockControlTab = () => {
             <input
               type="text"
               placeholder="Buscar por nombre, marca o código..."
-              className="w-full bg-gray-50 border rounded-2xl pl-11 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+              className="w-full bg-gray-50 border rounded-2xl pl-11 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
               value={search} onChange={e => setSearch(e.target.value)}
             />
           </div>
@@ -446,28 +446,28 @@ const StockControlTab = () => {
           </select>
         </div>
         {hasFilters && (
-          <button onClick={clearFilters} className="text-xs font-black uppercase text-orange-500 hover:text-orange-600 flex items-center gap-1">
+          <button onClick={clearFilters} className="text-xs font-black uppercase text-yellow-400 hover:text-yellow-500 flex items-center gap-1">
             <X size={12} /> Limpiar filtros
           </button>
         )}
 
         {/* List */}
         {isLoading ? (
-          <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-orange-500" /></div>
+          <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-yellow-400" /></div>
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-zinc-400 text-sm font-bold uppercase">No hay productos que coincidan</div>
         ) : (
           <div className="divide-y border rounded-2xl overflow-hidden">
             {filtered.map(p => {
               const s = p._totalStock;
-              const stockColor = s <= 0 ? 'text-red-600 bg-red-50' : s <= 5 ? 'text-orange-600 bg-orange-50' : 'text-green-700 bg-green-50';
+              const stockColor = s <= 0 ? 'text-red-600 bg-red-50' : s <= 5 ? 'text-yellow-500 bg-yellow-50' : 'text-green-700 bg-green-50';
               const isEditing = editingId === p.id;
               return (
                 <div key={p.id} className="flex items-center gap-3 p-3 hover:bg-zinc-50/50">
                   <img src={p.images?.[0] || '/placeholder.svg'} className="w-14 h-14 rounded-xl object-cover bg-zinc-100 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{p.brand}</p>
+                      <p className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">{p.brand}</p>
                       <p className="text-[9px] font-black text-zinc-400 uppercase">{p.category}</p>
                       {p._variantsCount > 0 && <span className="text-[9px] font-black bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full uppercase">{p._variantsCount} variantes</span>}
                       {p.is_on_sale && <span className="text-[9px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase">Oferta</span>}
@@ -489,18 +489,18 @@ const StockControlTab = () => {
                       <button onClick={() => setEditDelta(d => d - 1)} className="w-8 h-8 rounded-lg bg-white text-red-500 flex items-center justify-center"><Minus size={14} /></button>
                       <span className={`w-10 text-center text-sm font-black ${editDelta > 0 ? 'text-green-600' : editDelta < 0 ? 'text-red-600' : 'text-zinc-600'}`}>{editDelta > 0 ? '+' : ''}{editDelta}</span>
                       <button onClick={() => setEditDelta(d => d + 1)} className="w-8 h-8 rounded-lg bg-white text-green-600 flex items-center justify-center"><Plus size={14} /></button>
-                      <button onClick={() => handleSaveDelta(p)} disabled={savingId === p.id} className="bg-orange-500 text-white text-[10px] font-black uppercase px-3 py-2 rounded-lg disabled:opacity-50">
+                      <button onClick={() => handleSaveDelta(p)} disabled={savingId === p.id} className="bg-yellow-400 text-white text-[10px] font-black uppercase px-3 py-2 rounded-lg disabled:opacity-50">
                         {savingId === p.id ? '...' : 'OK'}
                       </button>
                       <button onClick={() => { setEditingId(null); setEditDelta(0); }} className="text-zinc-400 px-1"><X size={14} /></button>
                     </div>
                   ) : (
                     <>
-                      <button onClick={() => { setEditingId(p.id); setEditDelta(0); }} className="text-zinc-400 hover:text-orange-500 p-2" title="Ajustar stock">
+                      <button onClick={() => { setEditingId(p.id); setEditDelta(0); }} className="text-zinc-400 hover:text-yellow-400 p-2" title="Ajustar stock">
                         <Edit3 size={16} />
                       </button>
                       {p.barcode && (
-                        <button onClick={() => setQrProduct(p)} className="text-zinc-400 hover:text-orange-500 p-2" title="Ver QR">
+                        <button onClick={() => setQrProduct(p)} className="text-zinc-400 hover:text-yellow-400 p-2" title="Ver QR">
                           <QrCode size={16} />
                         </button>
                       )}

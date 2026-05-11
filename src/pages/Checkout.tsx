@@ -204,7 +204,7 @@ const Checkout = () => {
           {/* Trust badges */}
           <div className="mt-5 space-y-3">
             <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-600/30 bg-emerald-600/5">
-              <Lock className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <LockIcon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
               <div className="leading-tight">
                 <p className="text-xs font-bold text-foreground">Sitio Seguro · Encriptación SSL</p>
                 <p className="text-[10px] text-muted-foreground">Tus datos viajan cifrados de extremo a extremo</p>

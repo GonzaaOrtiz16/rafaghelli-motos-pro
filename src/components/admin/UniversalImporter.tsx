@@ -609,24 +609,61 @@ const UniversalImporter = () => {
 
       const existing = existingMap.get(normalizedName);
       if (existing) {
-        // PROTECCIÓN DE FOTOS: solo actualizar precio/stock/category, NUNCA tocar images
+        // PROTECCIÓN DE FOTOS: solo actualizar precio/stock/category, NUNCA tocar images existentes
         const updateData: Record<string, any> = {};
         const newPrice = item.public_price ?? item.price;
         if (newPrice && newPrice !== existing.price) updateData.price = newPrice;
         if (item.price && item.price !== existing.original_price) updateData.original_price = item.price;
-        if (item.stock != null) updateData.stock = item.stock;
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
 
-        // Imagen: solo si está habilitado Y el producto no tiene imágenes (no sobreescribe)
-        const newImages: string[] = (importImages && Array.isArray(item._aggregatedImages)) ? item._aggregatedImages : [];
-        if (importImages && newImages.length > 0) {
-          const currentImages = Array.isArray(existing.images) ? existing.images : [];
+        // === MERGE DE VARIANTES ===
+        // Si el item importado trae variantes nuevas que el producto existente no tiene,
+        // las agregamos sin pisar las que ya están.
+        const incomingVariants: any[] = Array.isArray(item.variants) ? item.variants : [];
+        const currentVariants: any[] = Array.isArray(existing.variants) ? existing.variants : [];
+        const existingColors = new Set(
+          currentVariants.map((v: any) => String(v.color || '').toLowerCase().trim())
+        );
+        const brandNewVariants = incomingVariants.filter(
+          (v: any) => !existingColors.has(String(v.color || '').toLowerCase().trim())
+        );
+
+        let mergedVariants = currentVariants;
+        let addedVariantImages: string[] = [];
+        if (brandNewVariants.length > 0) {
+          mergedVariants = [...currentVariants, ...brandNewVariants];
+          updateData.variants = mergedVariants;
+          // Sumar stock de las nuevas variantes al stock total
+          const addedStock = brandNewVariants.reduce((acc: number, v: any) => {
+            if (typeof v.stock === 'number') return acc + v.stock;
+            const sizesSum = Object.values(v.sizes || {}).reduce((s: number, n: any) => s + (Number(n) || 0), 0);
+            return acc + sizesSum;
+          }, 0);
+          if (addedStock > 0) {
+            updateData.stock = (existing.stock || 0) + addedStock;
+          }
+          // Imágenes de variantes nuevas (sólo si está habilitado importar imágenes)
+          if (importImages) {
+            addedVariantImages = brandNewVariants
+              .map((v: any) => v.image)
+              .filter((img: any) => typeof img === 'string' && /^https?:\/\//i.test(img));
+          }
+        } else if (item.stock != null && currentVariants.length === 0) {
+          // Sin variantes: actualizar stock simple sólo si no hay variantes
+          if (item.stock !== existing.stock) updateData.stock = item.stock;
+        }
+
+        // Imagen: agregar fotos nuevas (de variantes nuevas) sin pisar las existentes
+        const currentImages = Array.isArray(existing.images) ? existing.images : [];
+        if (importImages) {
           if (currentImages.length === 0) {
-            updateData.images = newImages;
-            // also persist variants (so each variant has its image)
-            if (item.variants && item.variants.length > 0) {
-              updateData.variants = item.variants;
-            }
+            // Producto sin fotos: cargar todas las agregadas
+            const newImages: string[] = Array.isArray(item._aggregatedImages) ? item._aggregatedImages : [];
+            if (newImages.length > 0) updateData.images = newImages;
+          } else if (addedVariantImages.length > 0) {
+            // Producto con fotos: sólo agregar las de las variantes recién creadas
+            const merged = Array.from(new Set([...currentImages, ...addedVariantImages]));
+            if (merged.length !== currentImages.length) updateData.images = merged;
           }
         }
 

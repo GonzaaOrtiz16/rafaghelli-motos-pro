@@ -319,6 +319,7 @@ const UniversalImporter = () => {
     barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null,
   });
   const [importing, setImporting] = useState(false);
+  const [importImages, setImportImages] = useState(false);
   const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number; grouped: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 

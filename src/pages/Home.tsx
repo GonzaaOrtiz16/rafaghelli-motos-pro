@@ -121,9 +121,9 @@ const Home = () => {
             <span key={idx} className="flex items-center gap-10">
               <span className="flex items-center gap-2">🏍️ ENVÍO GRATIS EN COMPRAS DESDE $200.000</span>
               <span>•</span>
-              <span>3 CUOTAS S/INTERÉS EN COMPRAS +$180.000</span>
+              <span>PAGÁ EN HASTA 12 CUOTAS CON TARJETA</span>
               <span>•</span>
-              <span>6 CUOTAS S/INTERÉS EN COMPRAS +$360.000</span>
+              <span>ACEPTAMOS TODAS LAS TARJETAS DE CRÉDITO Y DÉBITO</span>
               <span>•</span>
               <span>SHOWROOM EN CENTENARIO URUGUAYO 1113, LANÚS 🔥</span>
               <span>•</span>
@@ -186,7 +186,7 @@ const Home = () => {
                 HASTA <span className="text-red-600">12</span>
               </h2>
               <p className="font-black uppercase italic text-2xl md:text-3xl text-zinc-900 tracking-tighter mt-1">
-                Cuotas s/interés
+                Cuotas con tarjeta
               </p>
               <div className="flex flex-wrap gap-2 justify-center mt-5">
                 <span className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>

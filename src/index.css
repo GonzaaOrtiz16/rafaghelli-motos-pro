@@ -6,28 +6,28 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
-    --primary: 198 75% 53%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 0 85% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 93%;
-    --secondary-foreground: 0 0% 15%;
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 54 86% 60%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 48 90% 50%;
     --accent-foreground: 0 0% 8%;
     --destructive: 0 85% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 88%;
-    --input: 0 0% 90%;
-    --ring: 198 75% 53%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 0 85% 50%;
     --radius: 0.5rem;
     --success: 142 71% 45%;
-    --header-bg: 0 0% 20%;
+    --header-bg: 0 0% 6%;
   }
 
   .dark {
@@ -59,30 +59,41 @@
 
 @layer components {
   .header-gradient {
-    background: linear-gradient(135deg, hsl(0 0% 22%) 0%, hsl(0 0% 32%) 100%);
+    background: linear-gradient(135deg, hsl(0 0% 6%) 0%, hsl(0 0% 12%) 100%);
   }
   .free-shipping-badge {
     @apply inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full;
-    background: hsl(var(--success) / 0.1);
+    background: hsl(var(--success) / 0.15);
     color: hsl(var(--success));
   }
-  /* Títulos con degradado cyan→amarillo estilo logo Rafaghelli */
+  /* RAFAGHELLI: rojo sólido con borde negro grueso */
   .title-brand {
-    background: linear-gradient(90deg, #30B0E0 0%, #F0E040 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+    color: #E60000;
+    -webkit-text-stroke: 2px #000;
+    text-shadow:
+      3px 3px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000;
   }
-  /* Botón sport con colores del logo (cyan → amarillo) */
+  /* MOTOS: amarillo oscuro con borde negro */
+  .title-motos {
+    color: #D4A017;
+    -webkit-text-stroke: 1.5px #000;
+    text-shadow:
+      2px 2px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000;
+  }
+  /* Botón sport rojo motoquero */
   .btn-sport {
-    @apply inline-flex items-center justify-center gap-2 font-black italic uppercase tracking-tight px-6 py-3 rounded-2xl text-zinc-900 transition-all;
-    background: linear-gradient(90deg, #30B0E0 0%, #F0E040 100%);
-    box-shadow: 0 6px 18px -4px rgba(48, 176, 224, 0.45);
+    @apply inline-flex items-center justify-center gap-2 font-black italic uppercase tracking-tight px-6 py-3 rounded-2xl text-white transition-all;
+    background: linear-gradient(90deg, #B30000 0%, #E60000 100%);
+    border: 2px solid #000;
+    box-shadow: 0 6px 18px -4px rgba(230, 0, 0, 0.55);
   }
-  .btn-sport:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -4px rgba(240, 224, 64, 0.55); }
+  .btn-sport:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -4px rgba(230, 0, 0, 0.7); }
 }
 
 /* ============================================================

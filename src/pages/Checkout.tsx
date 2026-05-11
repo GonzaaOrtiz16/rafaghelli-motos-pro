@@ -201,9 +201,40 @@ const Checkout = () => {
             )}
           </Button>
 
-          <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <span>Pago 100% seguro procesado por Mercado Pago. Aceptamos todas las tarjetas, débito y efectivo.</span>
+          {/* Trust badges */}
+          <div className="mt-5 space-y-3">
+            <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-600/30 bg-emerald-600/5">
+              <Lock className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <div className="leading-tight">
+                <p className="text-xs font-bold text-foreground">Sitio Seguro · Encriptación SSL</p>
+                <p className="text-[10px] text-muted-foreground">Tus datos viajan cifrados de extremo a extremo</p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2 text-center">Pagás con Mercado Pago</p>
+              <div className="flex items-center justify-center">
+                <img
+                  src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg"
+                  alt="Mercado Pago"
+                  className="h-7"
+                  loading="lazy"
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="Visa" className="h-5" loading="lazy" />
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/cb730f90-f3bd-11eb-8e0d-6f4af49bf82e-m.svg" alt="Mastercard" className="h-5" loading="lazy" />
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/9bb45200-f3bd-11eb-829e-3f8189d5c179-m.svg" alt="American Express" className="h-5" loading="lazy" />
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/151bc130-f3be-11eb-9ee0-bb38c264f1b4-m.svg" alt="Naranja" className="h-5" loading="lazy" />
+                <img src="https://http2.mlstatic.com/storage/logos-api-admin/1cb3a380-f3be-11eb-829e-3f8189d5c179-m.svg" alt="Cabal" className="h-5" loading="lazy" />
+              </div>
+              <p className="text-[10px] text-center text-muted-foreground mt-2">Tarjetas, débito, efectivo y cuotas sin interés</p>
+            </div>
+
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Compra Protegida por Mercado Pago</span>
+            </div>
           </div>
         </div>
       </div>

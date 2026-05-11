@@ -316,7 +316,7 @@ const UniversalImporter = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
   const [mapping, setMapping] = useState<Record<MappingKey, number | null>>({
-    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
+    barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null,
   });
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ inserted: number; errors: number; skipped: number; grouped: number } | null>(null);
@@ -358,7 +358,7 @@ const UniversalImporter = () => {
 
     // Auto-map
     const autoMap: Record<MappingKey, number | null> = {
-      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null,
+      barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null,
     };
     parsedHeaders.forEach((h, i) => {
       const hl = h.toLowerCase();
@@ -654,7 +654,7 @@ const UniversalImporter = () => {
     setFileName('');
     setHeaders([]);
     setRows([]);
-    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null });
+    setMapping({ barcode: null, name: null, price: null, public_price: null, category: null, color: null, size: null, moto_fit: null, stock: null, image_url: null });
     setImportResult(null);
   };
 

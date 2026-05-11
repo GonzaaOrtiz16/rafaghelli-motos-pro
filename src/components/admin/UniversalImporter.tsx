@@ -467,21 +467,28 @@ const UniversalImporter = () => {
     return Array.from(groups.entries()).map(([_groupKey, groupItems]) => {
       const first = groupItems[0];
       const hasMultiple = groupItems.length > 1;
-      const hasAnyColor = groupItems.some(i => i.color);
+
+      // Only treat detected color/size as variants when actually merging multiple
+      // rows OR when explicit color/size columns were mapped. For a single row
+      // (e.g. "Casco Volt Blanco/Negro") keep the title as-is and don't fabricate
+      // a variant from words in the name.
+      const useDetectedVariants = hasMultiple || mapping.color !== null || mapping.size !== null;
+      const hasAnyColor = useDetectedVariants && groupItems.some(i => i.color);
 
       const productTitle = hasMultiple
         ? first.detectedBaseName || getGroupKey(first.name, first.color, first.motoFit) || first.name
         : first.name;
 
       // Check if any item in the group has sizes
-      const hasAnySizes = groupItems.some(i => i.size);
+      const hasAnySizes = useDetectedVariants && groupItems.some(i => i.size);
 
       // Build variants: group by color, then aggregate sizes, moto_fit, and prices
       const colorMap = new Map<string, { sizes: Record<string, number>; stock: number; motoFit: Set<string>; prices: number[]; publicPrices: number[] }>();
       let totalStock = 0;
 
       groupItems.forEach(item => {
-        const color = item.color || 'Único';
+        const color = useDetectedVariants ? (item.color || 'Único') : 'Único';
+
         if (!colorMap.has(color)) colorMap.set(color, { sizes: {}, stock: 0, motoFit: new Set(), prices: [], publicPrices: [] });
         const entry = colorMap.get(color)!;
         

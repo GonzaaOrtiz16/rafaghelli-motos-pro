@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, CreditCard, Store, Truck, ShieldCheck } from "lucide-react";
+import { Loader2, CreditCard, Store, Truck, ShieldCheck, Lock as LockIcon } from "lucide-react";
 
 const PROVINCIAS = [
   "CABA", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",

@@ -738,6 +738,29 @@ const UniversalImporter = () => {
               <p>💰 Si una variante tiene precio distinto, se guarda por separado.</p>
             </div>
 
+            {/* Image import toggle */}
+            <div className={`rounded-2xl p-4 border-2 transition-all ${importImages ? 'bg-orange-50 border-orange-300' : 'bg-zinc-50 border-zinc-200'}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-black uppercase text-zinc-900 mb-1">
+                    📸 Importar imágenes desde URL
+                  </p>
+                  <p className="text-[11px] font-medium text-zinc-600">
+                    {importImages
+                      ? 'ACTIVADO: se cargará la imagen de la columna mapeada. En productos existentes solo se agrega si NO tienen foto (las fotos actuales nunca se modifican).'
+                      : 'DESACTIVADO: se ignora la columna de imagen. Las fotos existentes quedan intactas.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setImportImages(v => !v)}
+                  className={`relative w-14 h-7 rounded-full transition-colors flex-shrink-0 ${importImages ? 'bg-orange-500' : 'bg-zinc-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${importImages ? 'translate-x-7' : ''}`} />
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-3">
               {DB_FIELDS.map(field => (
                 <div key={field.key} className="flex items-center gap-3 bg-zinc-50 rounded-2xl p-3 border">

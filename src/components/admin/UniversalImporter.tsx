@@ -586,8 +586,8 @@ const UniversalImporter = () => {
     setImporting(true);
     let inserted = 0, errors = 0, skipped = 0, grouped = 0;
 
-    // Fetch existing products to avoid overwriting images
-    const { data: existingProducts } = await supabase.from('products').select('id, title, images');
+    // Fetch existing products to avoid overwriting images and to merge variants
+    const { data: existingProducts } = await supabase.from('products').select('id, title, images, variants, stock');
     const existingMap = new Map<string, any>();
     (existingProducts || []).forEach((p: any) => {
       existingMap.set(p.title?.toLowerCase().trim(), p);

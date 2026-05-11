@@ -590,7 +590,15 @@ const UniversalImporter = () => {
         if (item.price && item.price !== existing.original_price) updateData.original_price = item.price;
         if (item.stock != null) updateData.stock = item.stock;
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
-        
+
+        // Imagen: solo si está habilitado Y el producto no tiene imágenes (no sobreescribe)
+        if (importImages && item.image_url && /^https?:\/\//i.test(item.image_url)) {
+          const currentImages = Array.isArray(existing.images) ? existing.images : [];
+          if (currentImages.length === 0) {
+            updateData.images = [item.image_url];
+          }
+        }
+
         if (Object.keys(updateData).length > 0) {
           updateBatch.push({ id: existing.id, data: updateData });
         } else {

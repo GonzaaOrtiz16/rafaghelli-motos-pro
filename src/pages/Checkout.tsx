@@ -212,23 +212,23 @@ const Checkout = () => {
             </div>
 
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2 text-center">Pagás con Mercado Pago</p>
-              <div className="flex items-center justify-center">
-                <img
-                  src="https://http2.mlstatic.com/storage/logos-api-admin/a5f047d0-9be0-11ec-aad4-c3381f368aaf-m.svg"
-                  alt="Mercado Pago"
-                  className="h-7"
-                  loading="lazy"
-                />
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-3 text-center">Pagás con</p>
+              <div className="flex items-center justify-center mb-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#00B1EA] text-white">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5l-4-4 1.41-1.41L11 13.67l4.59-4.58L17 10.5l-6 6z"/></svg>
+                  <span className="font-black text-sm tracking-tight">Mercado Pago</span>
+                </div>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                <img src="https://http2.mlstatic.com/storage/logos-api-admin/b2c93a40-f3be-11eb-9984-b7076edb0bb7-m.svg" alt="Visa" className="h-5" loading="lazy" />
-                <img src="https://http2.mlstatic.com/storage/logos-api-admin/cb730f90-f3bd-11eb-8e0d-6f4af49bf82e-m.svg" alt="Mastercard" className="h-5" loading="lazy" />
-                <img src="https://http2.mlstatic.com/storage/logos-api-admin/9bb45200-f3bd-11eb-829e-3f8189d5c179-m.svg" alt="American Express" className="h-5" loading="lazy" />
-                <img src="https://http2.mlstatic.com/storage/logos-api-admin/151bc130-f3be-11eb-9ee0-bb38c264f1b4-m.svg" alt="Naranja" className="h-5" loading="lazy" />
-                <img src="https://http2.mlstatic.com/storage/logos-api-admin/1cb3a380-f3be-11eb-829e-3f8189d5c179-m.svg" alt="Cabal" className="h-5" loading="lazy" />
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                <span className="px-2 py-1 rounded bg-[#1A1F71] text-white text-[10px] font-black italic tracking-wider">VISA</span>
+                <span className="px-2 py-1 rounded bg-white border border-border text-[10px] font-black tracking-tight" style={{ color: '#EB001B' }}>Master<span style={{ color: '#F79E1B' }}>card</span></span>
+                <span className="px-2 py-1 rounded bg-[#006FCF] text-white text-[10px] font-black tracking-tight">AMEX</span>
+                <span className="px-2 py-1 rounded bg-[#FF5F00] text-white text-[10px] font-black tracking-tight">Naranja</span>
+                <span className="px-2 py-1 rounded bg-[#0033A0] text-white text-[10px] font-black tracking-tight">Cabal</span>
+                <span className="px-2 py-1 rounded bg-zinc-800 text-white text-[10px] font-black tracking-tight">Débito</span>
+                <span className="px-2 py-1 rounded bg-emerald-600 text-white text-[10px] font-black tracking-tight">Efectivo</span>
               </div>
-              <p className="text-[10px] text-center text-muted-foreground mt-2">Tarjetas, débito, efectivo y cuotas sin interés</p>
+              <p className="text-[10px] text-center text-muted-foreground mt-3">Hasta 12 cuotas · Pago Seguro</p>
             </div>
 
             <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">

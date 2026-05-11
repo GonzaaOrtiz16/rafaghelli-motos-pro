@@ -1,11 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, Menu, Wrench, Phone, User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/rafaghelli-logo.png";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();
@@ -34,64 +34,75 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 header-gradient shadow-lg">
-      {/* Top bar */}
-      <div className="border-b border-muted/10">
-        <div className="container flex items-center justify-between py-1.5 text-xs text-muted-foreground">
+    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-zinc-200">
+      {/* Top promo bar (amarillo) */}
+      <div className="bg-yellow-400 text-zinc-900 text-xs font-bold">
+        <div className="container flex items-center justify-between py-1.5">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> (011) 15 7074-1745</span>
             <span className="hidden sm:inline">Lun a Sáb 9:00 - 19:00</span>
           </div>
-          <Link to="/taller" className="flex items-center gap-1 text-primary hover:underline font-medium">
+          <Link to="/taller" className="flex items-center gap-1 hover:underline uppercase tracking-wide">
             <Wrench className="h-3 w-3" /> Turnos de Taller
           </Link>
         </div>
       </div>
 
       {/* Main header */}
-      <div className="container flex items-center gap-4 py-3">
-        <button className="lg:hidden text-header-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+      <div className="container flex items-center gap-4 py-4">
+        <button className="lg:hidden text-zinc-800" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           <Menu className="h-6 w-6" />
         </button>
 
-        <Link to="/" className="flex-shrink-0">
-          <h1 className="text-xl md:text-2xl font-display font-bold text-header-foreground tracking-tight">
-            <span className="text-primary">Rafaghelli</span> Motos
-          </h1>
+        <Link to="/" className="flex items-center gap-3 flex-shrink-0">
+          <img src={logo} alt="Rafaghelli Motos" className="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover" />
+          <div className="hidden sm:flex flex-col leading-none">
+            <span className="text-xl md:text-2xl font-display font-black tracking-tight text-zinc-900">
+              <span className="text-red-600">RAFAGHELLI</span>
+            </span>
+            <span className="text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase">Motos</span>
+          </div>
         </Link>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4">
-          <div className="flex w-full">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">
+          <div className="flex w-full bg-zinc-100 rounded-full border border-zinc-200 focus-within:border-yellow-400 transition-colors">
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Buscar repuestos, cascos, cubiertas..."
-              className="flex-1 rounded-l-lg border-0 bg-card text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="¿Qué estás buscando?"
+              className="flex-1 bg-transparent text-zinc-900 px-6 py-3 text-sm focus:outline-none placeholder:text-zinc-500"
             />
-            <Button type="submit" variant="cta" className="rounded-l-none rounded-r-lg px-4">
-              <Search className="h-4 w-4" />
-            </Button>
+            <button type="submit" className="px-5 text-zinc-700 hover:text-red-600 transition-colors">
+              <Search className="h-5 w-5" />
+            </button>
           </div>
         </form>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-3 ml-auto">
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[120px]">{user.email}</span>
-              <button onClick={signOut} className="p-2 text-header-foreground hover:text-primary transition-colors" title="Cerrar sesión">
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="text-right leading-tight">
+                <p className="text-xs text-zinc-500">¡Hola!</p>
+                <p className="text-xs font-bold text-zinc-900 truncate max-w-[140px]">{user.email}</p>
+              </div>
+              <button onClick={signOut} className="p-2 text-zinc-700 hover:text-red-600 transition-colors" title="Cerrar sesión">
                 <LogOut className="h-5 w-5" />
               </button>
             </div>
           ) : (
-            <Link to="/auth" className="p-2 text-header-foreground hover:text-primary transition-colors" title="Iniciar sesión">
+            <Link to="/auth" className="hidden sm:flex items-center gap-2 text-zinc-800 hover:text-red-600 transition-colors">
               <User className="h-6 w-6" />
+              <div className="text-left leading-tight">
+                <p className="text-xs font-bold">¡Hola! Iniciá sesión</p>
+                <p className="text-[10px] text-zinc-500">O podés registrarte</p>
+              </div>
             </Link>
           )}
-          <button onClick={openCart} className="relative p-2 text-header-foreground hover:text-primary transition-colors">
+          <button onClick={openCart} className="relative p-2 text-zinc-800 hover:text-red-600 transition-colors">
             <ShoppingCart className="h-6 w-6" />
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 bg-yellow-400 text-zinc-900 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
                 {itemCount}
               </span>
             )}
@@ -100,62 +111,66 @@ const Header = () => {
       </div>
 
       {/* Category nav */}
-      <nav className="hidden lg:block border-t border-muted/10">
-        <div className="container flex items-center gap-6 py-2">
+      <nav className="hidden lg:block border-t border-zinc-100 bg-zinc-50">
+        <div className="container flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
           {categories.map(cat => (
             <Link
               key={cat.id}
-              /* CORRECCIÓN: Usamos cat.nombre para que el filtro de la página de productos lo reconozca */
               to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap"
             >
               {cat.nombre}
             </Link>
           ))}
-          <Link to="/motos" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/motos" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Motos
           </Link>
-          <Link to="/taller" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/taller" className="text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-red-600 hover:bg-yellow-100 px-3 py-1.5 rounded-md transition-all whitespace-nowrap">
             Taller
           </Link>
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile search + menu */}
+      <form onSubmit={handleSearch} className="md:hidden px-4 pb-3">
+        <div className="flex w-full bg-zinc-100 rounded-full border border-zinc-200">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="¿Qué estás buscando?"
+            className="flex-1 bg-transparent text-zinc-900 px-5 py-2.5 text-sm focus:outline-none placeholder:text-zinc-500"
+          />
+          <button type="submit" className="px-4 text-zinc-700">
+            <Search className="h-5 w-5" />
+          </button>
+        </div>
+      </form>
+
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-muted/10 bg-card">
-          <form onSubmit={handleSearch} className="p-3">
-            <div className="flex">
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Buscar..."
-                className="flex-1 rounded-l-lg border bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button type="submit" variant="cta" size="sm" className="rounded-l-none rounded-r-lg">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
+        <div className="lg:hidden border-t border-zinc-100 bg-white">
           <div className="flex flex-col pb-3">
             {categories.map(cat => (
               <Link
                 key={cat.id}
-                /* CORRECCIÓN: Usamos cat.nombre también en el menú móvil */
                 to={`/productos?categoria=${encodeURIComponent(cat.nombre)}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600 transition-colors border-b border-zinc-100"
               >
                 {cat.nombre}
               </Link>
             ))}
-            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
+            <Link to="/motos" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600 border-b border-zinc-100">
               Motos
             </Link>
-            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">
+            <Link to="/taller" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-zinc-800 hover:bg-yellow-100 hover:text-red-600">
               Taller
             </Link>
+            {!user && (
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-yellow-100">
+                Iniciar sesión / Registrarse
+              </Link>
+            )}
           </div>
         </div>
       )}

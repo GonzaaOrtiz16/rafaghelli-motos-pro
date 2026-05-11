@@ -153,7 +153,7 @@ const Home = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/60 to-transparent" />
             <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12">
-              <span className="inline-block w-fit bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
+              <span className="inline-block w-fit bg-sky-500 text-white text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full mb-4">
                 Esta semana
               </span>
               <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] mb-2">
@@ -189,13 +189,13 @@ const Home = () => {
                 Pagá en cuotas
               </span>
               <h2 className="text-4xl md:text-6xl font-black text-zinc-900 uppercase italic tracking-tighter leading-[0.85]">
-                HASTA <span className="text-red-600">12</span>
+                HASTA <span className="text-sky-500">12</span>
               </h2>
               <p className="font-black uppercase italic text-2xl md:text-3xl text-zinc-900 tracking-tighter mt-1">
                 Cuotas con tarjeta
               </p>
               <div className="flex flex-wrap gap-2 justify-center mt-5">
-                <span className="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>
+                <span className="bg-sky-500 text-white text-xs font-black px-4 py-2 rounded-full">3 CUOTAS</span>
                 <span className="bg-zinc-900 text-yellow-400 text-xs font-black px-4 py-2 rounded-full">6 CUOTAS</span>
                 <span className="bg-yellow-400 text-zinc-900 text-xs font-black px-4 py-2 rounded-full">12 CUOTAS</span>
               </div>

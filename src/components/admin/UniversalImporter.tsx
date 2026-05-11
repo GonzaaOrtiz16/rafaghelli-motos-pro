@@ -371,6 +371,7 @@ const UniversalImporter = () => {
       else if (/talle|size|medida|talla/.test(hl) && autoMap.size === null) autoMap.size = i;
       else if (/moto|modelo|aplica|fit|compatible/.test(hl) && autoMap.moto_fit === null) autoMap.moto_fit = i;
       else if (/stock|cantidad|disp|exist|qty|inventory/.test(hl) && autoMap.stock === null) autoMap.stock = i;
+      else if (/imagen|imagen.*url|image|foto|picture|img|url.*foto|url.*imagen/.test(hl) && autoMap.image_url === null) autoMap.image_url = i;
     });
     setMapping(autoMap);
     setStep('map');

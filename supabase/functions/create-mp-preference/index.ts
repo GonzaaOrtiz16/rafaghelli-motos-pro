@@ -150,9 +150,27 @@ Deno.serve(async (req) => {
       metadata: { order_id: order.id },
     };
 
-    // Envío: por ahora siempre "not_specified" (me2 requiere cuenta MP con Mercado Envíos habilitado).
-    // Los datos de domicilio se guardan en la orden y el vendedor coordina el despacho manualmente.
-    preference.shipments = { cost: 0, mode: "not_specified" };
+    // Mercado Envíos (me2): MP calcula el flete según CP de destino y se lo cobra al comprador.
+    // Origen: CP 1824 (Lanús, Centenario Uruguayo 1113).
+    // Dimensiones default por item: 50x40x20 cm, 5000 g.
+    // Permite retiro en local sin costo.
+    preference.shipments = {
+      mode: "me2",
+      dimensions: "50x40x20,5000",
+      local_pickup: true,
+      default_shipping_method: null,
+      free_methods: [],
+      receiver_address: body.shipping.method === "mercado_envios"
+        ? {
+            zip_code: body.shipping.zip,
+            street_name: body.shipping.street,
+            street_number: body.shipping.number ? Number(String(body.shipping.number).replace(/\D/g, "")) || undefined : undefined,
+            floor: body.shipping.apartment,
+            city_name: body.shipping.city,
+            state_name: body.shipping.state,
+          }
+        : undefined,
+    };
 
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",

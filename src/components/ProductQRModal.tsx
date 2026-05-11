@@ -77,7 +77,7 @@ const ProductQRModal: React.FC<ProductQRModalProps> = ({ open, onOpenChange, pro
 
           <div className="text-center space-y-1">
             <p className="font-black uppercase text-sm tracking-tight leading-tight">{product.title}</p>
-            <p className="text-2xl font-black text-orange-500 italic">{formatPrice(product.price)}</p>
+            <p className="text-2xl font-black text-yellow-400 italic">{formatPrice(product.price)}</p>
             <p className="text-[10px] text-zinc-400 font-bold font-mono break-all">{code}</p>
           </div>
         </div>

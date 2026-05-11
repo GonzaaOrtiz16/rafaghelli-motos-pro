@@ -126,13 +126,13 @@ const MotosTab = () => {
             <input 
               type="text" 
               placeholder="Buscar marca o modelo..." 
-              className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-sm"
+              className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
-        <button onClick={() => { resetForm(); setIsAdding(true); }} className="w-full md:w-auto bg-orange-500 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-orange-600 transition-all font-black uppercase shadow-lg shadow-orange-500/20">
+        <button onClick={() => { resetForm(); setIsAdding(true); }} className="w-full md:w-auto bg-yellow-400 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-yellow-500 transition-all font-black uppercase shadow-lg shadow-yellow-400/20">
           <Plus size={20} /> Nueva Moto
         </button>
       </div>
@@ -143,7 +143,7 @@ const MotosTab = () => {
             <div className="flex gap-4">
               <img src={m.images?.[0] || '/placeholder.svg'} className="w-24 h-24 rounded-2xl object-cover shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{m.brand}</p>
+                <p className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">{m.brand}</p>
                 <h3 className="font-black uppercase text-[11px] truncate leading-tight">{m.title}</h3>
                 <p className="text-[10px] font-bold text-zinc-400 mt-1">{m.year} · {m.kilometers} km</p>
                 <p className="font-black text-sm mt-2 text-zinc-900">${m.price.toLocaleString('es-AR')}</p>
@@ -182,7 +182,7 @@ const MotosTab = () => {
                 <td className="px-8 py-4 text-right font-black text-lg">${m.price.toLocaleString('es-AR')}</td>
                 <td className="px-8 py-4 text-center">
                    <div className="flex justify-center gap-1">
-                    <button onClick={() => handleEdit(m)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
+                    <button onClick={() => handleEdit(m)} className="p-2 text-gray-400 hover:text-yellow-400"><Pencil size={18}/></button>
                     <button onClick={() => handleDuplicate(m)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
                     <button onClick={() => handleDelete(m.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                   </div>
@@ -230,7 +230,7 @@ const MotosTab = () => {
               
               <div className="bg-zinc-900 rounded-[32px] p-6 md:p-8">
                 <label className="text-[10px] text-zinc-500 font-black uppercase ml-2">Precio de Venta ($)</label>
-                <input className="w-full bg-white/10 rounded-xl px-5 py-4 text-orange-500 font-black text-2xl outline-none mt-2" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
+                <input className="w-full bg-white/10 rounded-xl px-5 py-4 text-yellow-400 font-black text-2xl outline-none mt-2" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
               </div>
 
               <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
@@ -240,13 +240,13 @@ const MotosTab = () => {
                     <button type="button" onClick={() => setTempImages(prev => prev.filter(u => u !== url))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"><X size={10}/></button>
                   </div>
                 ))}
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed rounded-xl flex items-center justify-center text-gray-300 hover:text-orange-500 hover:border-orange-500 transition-colors">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed rounded-xl flex items-center justify-center text-gray-300 hover:text-yellow-400 hover:border-yellow-400 transition-colors">
                   {uploadingImages ? <Loader2 className="animate-spin"/> : <Upload/>}
                 </button>
               </div>
               <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
               
-              <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 sticky bottom-0 transition-all">
+              <button type="submit" disabled={loading} className="w-full bg-yellow-400 hover:bg-yellow-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-yellow-400/20 sticky bottom-0 transition-all">
                 {loading ? "Guardando..." : editingId ? "Guardar Cambios" : "Publicar Moto"}
               </button>
             </form>

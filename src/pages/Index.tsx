@@ -34,17 +34,17 @@ const Home = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-8 w-full">
           <div className="max-w-2xl">
-            <span className="inline-block bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full mb-6">
+            <span className="inline-block bg-yellow-400 text-white text-[10px] font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full mb-6">
               Nueva Temporada 2026
             </span>
             <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter uppercase leading-[0.8] mb-6">
-              POWER <br /> <span className="text-orange-500">PARTS.</span>
+              POWER <br /> <span className="text-yellow-400">PARTS.</span>
             </h1>
             <p className="text-gray-300 text-lg font-medium mb-10 max-w-lg">
               Repuestos de alta gama y accesorios certificados para potenciar tu moto. Envíos a todo el país.
             </p>
             <div className="flex gap-4">
-              <button className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all shadow-xl">
+              <button className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 hover:text-white transition-all shadow-xl">
                 Ver Catálogo
               </button>
             </div>
@@ -104,12 +104,12 @@ const Home = () => {
                   
                   <div className="px-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">{product.brand}</span>
+                      <span className="text-[10px] font-black text-yellow-400 uppercase tracking-widest">{product.brand}</span>
                       <div className="h-1 w-1 bg-gray-300 rounded-full" />
                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{product.category}</span>
                     </div>
                     
-                    <h3 className="font-bold text-xl text-gray-900 line-clamp-2 h-14 leading-tight group-hover:text-orange-500 transition-colors">{product.title}</h3>
+                    <h3 className="font-bold text-xl text-gray-900 line-clamp-2 h-14 leading-tight group-hover:text-yellow-400 transition-colors">{product.title}</h3>
                     
                     <div className="flex items-center justify-between mt-8">
                       <div>
@@ -134,7 +134,7 @@ const Home = () => {
       <section className="py-24 px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16">
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 bg-orange-100 rounded-[32px] flex items-center justify-center mb-6 text-orange-500">
+            <div className="w-20 h-20 bg-yellow-100 rounded-[32px] flex items-center justify-center mb-6 text-yellow-400">
               <Truck size={36} strokeWidth={2.5} />
             </div>
             <h4 className="font-black uppercase text-xl tracking-tighter mb-3">Envíos Rápidos</h4>

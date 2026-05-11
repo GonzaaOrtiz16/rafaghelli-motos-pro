@@ -115,7 +115,7 @@ const ProductDetail = () => {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
         <p className="font-black uppercase tracking-tighter text-zinc-400">Sincronizando con Rafaghelli...</p>
       </div>
     </div>
@@ -125,7 +125,7 @@ const ProductDetail = () => {
     return (
       <div className="container py-20 text-center">
         <p className="text-xl font-bold mb-4">Producto no encontrado</p>
-        <Button asChild className="bg-orange-500 rounded-2xl"><Link to="/productos">Ir al catálogo</Link></Button>
+        <Button asChild className="bg-yellow-400 rounded-2xl"><Link to="/productos">Ir al catálogo</Link></Button>
       </div>
     );
   }
@@ -182,7 +182,7 @@ const ProductDetail = () => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container py-10 px-6 max-w-7xl mx-auto">
       {/* Navegación Superior */}
       <div className="flex justify-between items-center mb-8">
-        <Link to="/productos" className="inline-flex items-center gap-2 text-zinc-400 hover:text-orange-500 font-black uppercase text-[10px] tracking-widest transition-all">
+        <Link to="/productos" className="inline-flex items-center gap-2 text-zinc-400 hover:text-yellow-400 font-black uppercase text-[10px] tracking-widest transition-all">
           <ArrowLeft size={14} /> Volver
         </Link>
         <div className="flex gap-4">
@@ -202,7 +202,7 @@ const ProductDetail = () => {
               className="w-full h-full object-contain"
             />
             {hasDiscount && (
-              <div className="absolute top-6 left-6 bg-orange-500 text-white font-black px-4 py-2 rounded-2xl italic text-lg shadow-lg">
+              <div className="absolute top-6 left-6 bg-yellow-400 text-white font-black px-4 py-2 rounded-2xl italic text-lg shadow-lg">
                 {discountPercent}% OFF
               </div>
             )}
@@ -218,7 +218,7 @@ const ProductDetail = () => {
                     setSelectedSize('');
                     setManualGallery(true);
                   }}
-                  className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage && !variantImage ? "border-orange-500 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
+                  className={`w-24 h-24 flex-shrink-0 rounded-[1.5rem] overflow-hidden border-4 transition-all ${i === activeImage && !variantImage ? "border-yellow-400 scale-95 shadow-lg" : "border-transparent opacity-50 hover:opacity-100"}`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -232,7 +232,7 @@ const ProductDetail = () => {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="bg-zinc-900 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg tracking-widest">{product.category}</span>
-              <span className="text-orange-500 font-black text-[10px] uppercase tracking-widest border border-orange-500/20 px-3 py-1.5 rounded-lg">{product.brand || 'Original'}</span>
+              <span className="text-yellow-400 font-black text-[10px] uppercase tracking-widest border border-yellow-400/20 px-3 py-1.5 rounded-lg">{product.brand || 'Original'}</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] italic text-zinc-900">
               {product.title}
@@ -247,7 +247,7 @@ const ProductDetail = () => {
               {formatPrice(product.price)}
             </div>
             <div className="flex items-center gap-2 text-zinc-500 font-bold text-sm">
-              <Box size={18} className="text-orange-500" /> 
+              <Box size={18} className="text-yellow-400" /> 
               Stock disponible: <span className="text-zinc-900">
                 {hasVariants && selectedColor && selectedSize
                   ? `${currentStock} unidades (${selectedColor} - ${selectedSize})`
@@ -267,11 +267,11 @@ const ProductDetail = () => {
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-4 p-5 bg-orange-50 rounded-3xl border border-orange-100">
-              <Shield className="h-8 w-8 text-orange-600" />
+            <div className="flex items-center gap-4 p-5 bg-yellow-50 rounded-3xl border border-yellow-100">
+              <Shield className="h-8 w-8 text-yellow-500" />
               <div>
-                <p className="text-xs font-black uppercase text-orange-700">Garantía</p>
-                <p className="text-[10px] text-orange-600 font-bold uppercase">Oficial Rafaghelli</p>
+                <p className="text-xs font-black uppercase text-red-600">Garantía</p>
+                <p className="text-[10px] text-yellow-500 font-bold uppercase">Oficial Rafaghelli</p>
               </div>
             </div>
           </div>
@@ -287,8 +287,8 @@ const ProductDetail = () => {
                     onClick={() => { setSelectedColor(v.color); setManualGallery(false); }}
                     className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${
                       selectedColor === v.color 
-                        ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
-                        : 'border-zinc-200 text-zinc-600 hover:border-orange-300'
+                        ? 'border-yellow-400 bg-yellow-400 text-white shadow-lg shadow-yellow-400/20' 
+                        : 'border-zinc-200 text-zinc-600 hover:border-yellow-300'
                     }`}
                   >
                     {v.color}
@@ -310,10 +310,10 @@ const ProductDetail = () => {
                     disabled={stock <= 0}
                     className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all relative ${
                       selectedSize === size 
-                        ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                        ? 'border-yellow-400 bg-yellow-400 text-white shadow-lg shadow-yellow-400/20' 
                         : stock <= 0
                           ? 'border-zinc-100 text-zinc-300 cursor-not-allowed line-through'
-                          : 'border-zinc-200 text-zinc-600 hover:border-orange-300'
+                          : 'border-zinc-200 text-zinc-600 hover:border-yellow-300'
                     }`}
                   >
                     {size}
@@ -334,7 +334,7 @@ const ProductDetail = () => {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${selectedSize === size ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'border-zinc-200 text-zinc-600 hover:border-orange-300'}`}
+                    className={`px-5 py-3 rounded-2xl font-black uppercase text-sm border-2 transition-all ${selectedSize === size ? 'border-yellow-400 bg-yellow-400 text-white shadow-lg shadow-yellow-400/20' : 'border-zinc-200 text-zinc-600 hover:border-yellow-300'}`}
                   >
                     {size}
                   </button>
@@ -347,7 +347,7 @@ const ProductDetail = () => {
             <Button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`w-full h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group ${outOfStock ? 'bg-zinc-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+              className={`w-full h-20 rounded-[2.5rem] text-xl font-black uppercase tracking-tighter shadow-2xl transition-all active:scale-95 group ${outOfStock ? 'bg-zinc-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'} text-white`}
             >
               <ShoppingCart size={28} className="mr-4 group-hover:scale-110 transition-transform" />
               {outOfStock ? 'SIN STOCK' : 'Agregar al Carrito'}
@@ -355,7 +355,7 @@ const ProductDetail = () => {
             <Button 
               onClick={handleWhatsAppClick}
               variant="outline"
-              className="w-full border-2 border-zinc-200 hover:border-orange-500 text-zinc-700 hover:text-orange-500 h-16 rounded-[2.5rem] text-lg font-black uppercase tracking-tighter transition-all active:scale-95 group"
+              className="w-full border-2 border-zinc-200 hover:border-yellow-400 text-zinc-700 hover:text-yellow-400 h-16 rounded-[2.5rem] text-lg font-black uppercase tracking-tighter transition-all active:scale-95 group"
             >
               <MessageCircle size={24} className="mr-4 group-hover:rotate-12 transition-transform" />
               Consultar por WhatsApp
@@ -379,7 +379,7 @@ const ProductDetail = () => {
       <div className="mt-24">
         <div className="max-w-3xl">
           <h3 className="text-3xl font-black uppercase tracking-tighter italic mb-8 flex items-center gap-4 text-zinc-900">
-            Detalles <span className="text-orange-500">Técnicos</span>
+            Detalles <span className="text-yellow-400">Técnicos</span>
           </h3>
           <div className="bg-white p-10 rounded-[3rem] border-2 border-zinc-100 shadow-sm">
             <p className="text-zinc-600 text-xl leading-relaxed font-medium whitespace-pre-line">
@@ -394,7 +394,7 @@ const ProductDetail = () => {
         <section className="mt-24">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-orange-500 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Sugerencias</p>
+              <p className="text-yellow-400 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Sugerencias</p>
               <h3 className="text-3xl font-black uppercase tracking-tighter italic">Productos Relacionados</h3>
             </div>
             <Link to="/productos" className="text-zinc-400 hover:text-zinc-900 text-xs font-black uppercase tracking-widest transition-colors">Ver catálogo completo ›</Link>

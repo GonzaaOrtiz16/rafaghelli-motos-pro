@@ -314,7 +314,7 @@ const Home = () => {
       {/* ENVÍO GRATIS */}
       <section className="container py-24 px-4 md:px-6">
         <div className="flex items-center gap-4 mb-12">
-          <Truck className="h-8 w-8 text-orange-500" />
+          <Truck className="h-8 w-8 text-yellow-400" />
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 mb-20">

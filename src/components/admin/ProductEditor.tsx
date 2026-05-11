@@ -275,7 +275,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
               key={s.id}
               type="button"
               onClick={() => setActiveSection(s.id)}
-              className={`px-4 py-3 text-[10px] font-black uppercase tracking-wider border-b-2 transition-all ${activeSection === s.id ? 'border-orange-500 text-orange-600' : 'border-transparent text-zinc-400 hover:text-zinc-600'}`}
+              className={`px-4 py-3 text-[10px] font-black uppercase tracking-wider border-b-2 transition-all ${activeSection === s.id ? 'border-yellow-400 text-yellow-500' : 'border-transparent text-zinc-400 hover:text-zinc-600'}`}
             >
               {s.label}
             </button>
@@ -289,16 +289,16 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
             <div className="p-5 md:p-8 space-y-4">
               <div>
                 <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Nombre del producto</label>
-                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Marca</label>
-                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
+                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Categoría</label>
-                  <select className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
+                  <select className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
                     <option value="">Seleccionar...</option>
                     {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
                   </select>
@@ -306,16 +306,16 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
               </div>
               <div>
                 <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Descripción</label>
-                <textarea className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm min-h-[80px] focus:ring-2 focus:ring-orange-500/20 transition-all" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                <textarea className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm min-h-[80px] focus:ring-2 focus:ring-yellow-400/20 transition-all" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Código de barras</label>
-                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} />
+                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} />
                 </div>
                 <div>
                   <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Motos compatibles</label>
-                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" placeholder="CG Titan, XR 150..." value={formData.moto_fit} onChange={e => setFormData({...formData, moto_fit: e.target.value})} />
+                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="CG Titan, XR 150..." value={formData.moto_fit} onChange={e => setFormData({...formData, moto_fit: e.target.value})} />
                 </div>
               </div>
 
@@ -324,7 +324,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] text-zinc-500 font-black uppercase ml-1 block mb-1">Precio de Venta</label>
-                    <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-orange-500 font-black text-xl outline-none focus:ring-2 focus:ring-orange-500/30" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
+                    <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-yellow-400 font-black text-xl outline-none focus:ring-2 focus:ring-yellow-400/30" type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
                   </div>
                   <div>
                     <label className="text-[10px] text-zinc-500 font-black uppercase ml-1 block mb-1">Stock General</label>
@@ -338,13 +338,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <button type="button" onClick={() => setFormData({...formData, is_on_sale: !formData.is_on_sale})}
-                        className={`w-11 h-6 rounded-full relative transition-colors ${formData.is_on_sale ? 'bg-orange-500' : 'bg-zinc-700'}`}>
+                        className={`w-11 h-6 rounded-full relative transition-colors ${formData.is_on_sale ? 'bg-yellow-400' : 'bg-zinc-700'}`}>
                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.is_on_sale ? 'left-6' : 'left-1'}`} />
                       </button>
                       <span className="text-white text-[10px] font-black uppercase">Oferta</span>
                     </div>
                     {formData.is_on_sale && (
-                      <input className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-zinc-400 font-bold text-sm outline-none w-32 focus:border-orange-500/50" placeholder="Precio anterior" type="number"
+                      <input className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-zinc-400 font-bold text-sm outline-none w-32 focus:border-yellow-400/50" placeholder="Precio anterior" type="number"
                         value={formData.original_price} onChange={e => setFormData({...formData, original_price: e.target.value})} />
                     )}
                   </div>
@@ -360,7 +360,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
               <div>
                 <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
-                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-orange-500/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
               </div>
             </div>
           )}
@@ -373,7 +373,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                   <p className="text-sm font-black uppercase">Variantes del producto</p>
                   <p className="text-[10px] text-zinc-400">Cada color/versión con su stock y talles independientes</p>
                 </div>
-                <button type="button" onClick={addVariant} className="bg-orange-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-1.5 hover:bg-orange-600 transition-colors">
+                <button type="button" onClick={addVariant} className="bg-yellow-400 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-1.5 hover:bg-yellow-500 transition-colors">
                   <Plus size={14} /> Agregar
                 </button>
               </div>
@@ -395,7 +395,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                     <div className="flex items-start gap-3 px-4 py-3 bg-zinc-100/50">
                       {/* Variant image */}
                       <div className="flex flex-col items-center gap-1 shrink-0">
-                        <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-orange-500 cursor-pointer flex items-center justify-center overflow-hidden transition-colors group">
+                        <label className="relative w-14 h-14 rounded-xl border-2 border-dashed border-zinc-300 hover:border-yellow-400 cursor-pointer flex items-center justify-center overflow-hidden transition-colors group">
                           {variant.image ? (
                             <>
                               <img src={variant.image} className="w-full h-full object-cover" />
@@ -405,7 +405,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                               </button>
                             </>
                           ) : (
-                            <ImagePlus size={16} className="text-zinc-400 group-hover:text-orange-500 transition-colors" />
+                            <ImagePlus size={16} className="text-zinc-400 group-hover:text-yellow-400 transition-colors" />
                           )}
                           <input type="file" accept="image/*" className="hidden" onChange={e => {
                             const file = e.target.files?.[0];
@@ -420,7 +420,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                               setPasteTargetVariant(vi);
                               toast.info("Ahora pegá la imagen (Ctrl+V)");
                             }}
-                            className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded transition-colors ${pasteTargetVariant === vi ? 'bg-orange-500 text-white animate-pulse' : 'bg-zinc-200 text-zinc-500 hover:bg-orange-100 hover:text-orange-600'}`}
+                            className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded transition-colors ${pasteTargetVariant === vi ? 'bg-yellow-400 text-white animate-pulse' : 'bg-zinc-200 text-zinc-500 hover:bg-yellow-100 hover:text-yellow-500'}`}
                           >
                             {pasteTargetVariant === vi ? '⌨ Pegá' : '📋 Pegar'}
                           </button>
@@ -428,13 +428,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                       </div>
                       <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2">
                         <input
-                          className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+                          className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
                           placeholder="Color / Versión"
                           value={variant.color}
                           onChange={e => updateVariant(vi, 'color', e.target.value)}
                         />
                         <input
-                          className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+                          className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
                           placeholder="Precio (opcional)"
                           type="number"
                           value={variant.price ?? ''}
@@ -448,7 +448,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                         </div>
                         {!hasSizes && (
                           <input
-                            className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+                            className="bg-white border rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
                             placeholder="Stock"
                             type="number"
                             value={variant.stock ?? ''}
@@ -481,7 +481,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                         ))}
                         <div className="flex items-center gap-1">
                           <input
-                            className="bg-white border rounded-lg px-2.5 py-1.5 text-sm font-bold w-20 outline-none focus:ring-2 focus:ring-orange-500/20"
+                            className="bg-white border rounded-lg px-2.5 py-1.5 text-sm font-bold w-20 outline-none focus:ring-2 focus:ring-yellow-400/20"
                             placeholder="Talle..."
                             value={newSizeInput[vi] || ''}
                             onChange={e => setNewSizeInput(prev => ({ ...prev, [vi]: e.target.value }))}
@@ -497,7 +497,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                       <div className="pt-2">
                         <label className="text-[9px] font-black text-zinc-400 uppercase block mb-1">Motos compatibles (variante)</label>
                         <input
-                          className="w-full bg-white border rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+                          className="w-full bg-white border rounded-lg px-3 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
                           placeholder="CG Titan, Wave 110..."
                           value={(variant.moto_fit || []).join(', ')}
                           onChange={e => updateVariant(vi, 'moto_fit', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
@@ -519,10 +519,10 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                   <div key={i} className="relative aspect-square rounded-xl overflow-hidden border group">
                     <img src={url} className="w-full h-full object-cover" />
                     <button type="button" onClick={() => setTempImages(prev => prev.filter(u => u !== url))} className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={10}/></button>
-                    {i === 0 && <span className="absolute bottom-1.5 left-1.5 bg-orange-500 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full">Principal</span>}
+                    {i === 0 && <span className="absolute bottom-1.5 left-1.5 bg-yellow-400 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full">Principal</span>}
                   </div>
                 ))}
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-gray-300 hover:text-orange-500 hover:border-orange-500 transition-colors gap-1">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-gray-300 hover:text-yellow-400 hover:border-yellow-400 transition-colors gap-1">
                   {uploadingImages ? <Loader2 className="animate-spin" size={20} /> : <><Upload size={20} /><span className="text-[8px] font-bold uppercase">Subir</span></>}
                 </button>
               </div>
@@ -536,7 +536,7 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
           {/* Submit */}
           <div className="p-5 md:p-8 pt-0 sticky bottom-0 bg-white border-t">
-            <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-wider shadow-xl shadow-orange-500/20 transition-colors">
+            <button type="submit" disabled={loading} className="w-full bg-yellow-400 hover:bg-yellow-500 text-white py-4 rounded-2xl font-black uppercase tracking-wider shadow-xl shadow-yellow-400/20 transition-colors">
               {loading ? "Guardando..." : product?.id ? "Guardar Cambios" : "Publicar Ahora"}
             </button>
           </div>

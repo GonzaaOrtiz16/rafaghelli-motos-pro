@@ -63,11 +63,11 @@ const AjustesTab = () => {
         </div>
         <div className="space-y-4">
           <div className="flex gap-3">
-            <button type="button" onClick={() => setMediaType('image')} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${mediaType === 'image' ? 'bg-orange-500 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Imagen</button>
-            <button type="button" onClick={() => setMediaType('video')} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${mediaType === 'video' ? 'bg-orange-500 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Video</button>
+            <button type="button" onClick={() => setMediaType('image')} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${mediaType === 'image' ? 'bg-yellow-400 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Imagen</button>
+            <button type="button" onClick={() => setMediaType('video')} className={`flex-1 py-3 rounded-xl font-black text-[10px] uppercase transition-all ${mediaType === 'video' ? 'bg-yellow-400 text-white' : 'bg-zinc-100 text-zinc-500'}`}>Video</button>
           </div>
           <input className="w-full bg-gray-50 rounded-2xl px-6 py-4 outline-none font-bold text-sm" placeholder="URL del medio" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} />
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed rounded-2xl py-8 text-zinc-400 hover:text-orange-500 hover:border-orange-500 font-black uppercase text-xs tracking-widest transition-all"><Upload size={20} className="inline mr-2" /> Subir archivo</button>
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed rounded-2xl py-8 text-zinc-400 hover:text-yellow-400 hover:border-yellow-400 font-black uppercase text-xs tracking-widest transition-all"><Upload size={20} className="inline mr-2" /> Subir archivo</button>
           <input type="file" accept="image/*,video/mp4" className="hidden" ref={fileInputRef} onChange={handleUploadBanner} />
         </div>
         {mediaUrl && (
@@ -75,7 +75,7 @@ const AjustesTab = () => {
             {mediaType === 'video' ? <video src={mediaUrl} controls className="w-full h-full object-cover" /> : <img src={mediaUrl} className="w-full h-full object-cover" />}
           </div>
         )}
-        <button onClick={handleSave} disabled={saving} className="w-full bg-zinc-900 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all">{saving ? "Guardando..." : "Guardar Cambios"}</button>
+        <button onClick={handleSave} disabled={saving} className="w-full bg-zinc-900 hover:bg-yellow-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all">{saving ? "Guardando..." : "Guardar Cambios"}</button>
       </div>
     </div>
   );

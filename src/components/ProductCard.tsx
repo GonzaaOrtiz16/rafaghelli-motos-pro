@@ -100,14 +100,14 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
                   {formatPrice(product.price)}
                 </p>
                 {product.free_shipping && (
-                  <div className="bg-orange-500/10 p-1.5 rounded-full text-orange-600 shadow-sm">
+                  <div className="bg-yellow-400/10 p-1.5 rounded-full text-yellow-500 shadow-sm">
                     <Truck className="h-4 w-4" strokeWidth={3} />
                   </div>
                 )}
               </div>
             </div>
             {product.free_shipping && (
-              <p className="text-[9px] font-black text-orange-600 uppercase tracking-tighter mt-1">
+              <p className="text-[9px] font-black text-yellow-500 uppercase tracking-tighter mt-1">
                 Envío Gratis
               </p>
             )}

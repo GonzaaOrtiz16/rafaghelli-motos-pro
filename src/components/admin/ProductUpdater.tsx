@@ -283,7 +283,7 @@ const ProductUpdater = () => {
         {(['upload', 'map', 'review', 'done'] as const).map((s, i) => (
           <React.Fragment key={s}>
             {i > 0 && <ArrowRight size={12} className="text-muted-foreground/40" />}
-            <span className={`px-3 py-1.5 rounded-full transition-colors ${step === s ? 'bg-orange-500 text-white' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-3 py-1.5 rounded-full transition-colors ${step === s ? 'bg-yellow-400 text-white' : 'bg-muted text-muted-foreground'}`}>
               {s === 'upload' ? 'Subir' : s === 'map' ? 'Mapear' : s === 'review' ? 'Revisar' : 'Listo'}
             </span>
           </React.Fragment>
@@ -296,7 +296,7 @@ const ProductUpdater = () => {
           onDrop={handleDrop}
           onDragOver={e => e.preventDefault()}
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-12 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/50 transition-all"
+          className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-12 text-center cursor-pointer hover:border-yellow-400 hover:bg-yellow-50/50 transition-all"
         >
           <Upload size={40} className="mx-auto mb-4 text-muted-foreground/50" />
           <p className="text-lg font-bold text-foreground">Arrastrá tu lista actualizada</p>
@@ -313,7 +313,7 @@ const ProductUpdater = () => {
       {step === 'map' && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm">
-            <FileSpreadsheet size={16} className="text-orange-500" />
+            <FileSpreadsheet size={16} className="text-yellow-400" />
             <span className="font-bold">{fileName}</span>
             <span className="text-muted-foreground">— {rows.length} filas</span>
           </div>
@@ -366,7 +366,7 @@ const ProductUpdater = () => {
           <button
             onClick={compareProducts}
             disabled={mapping.name === null}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-muted disabled:text-muted-foreground text-white font-black uppercase text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-muted disabled:text-muted-foreground text-white font-black uppercase text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCw size={16} /> Comparar con productos cargados
           </button>
@@ -381,7 +381,7 @@ const ProductUpdater = () => {
               <Equal size={40} className="mx-auto mb-4 text-green-500" />
               <p className="text-lg font-bold">¡Todo al día!</p>
               <p className="text-sm text-muted-foreground">No se encontraron diferencias entre el archivo y los productos cargados.</p>
-              <button onClick={reset} className="mt-4 text-sm font-bold text-orange-500 hover:underline">Intentar con otro archivo</button>
+              <button onClick={reset} className="mt-4 text-sm font-bold text-yellow-400 hover:underline">Intentar con otro archivo</button>
             </div>
           ) : (
             <>
@@ -392,7 +392,7 @@ const ProductUpdater = () => {
                   <div className="text-[10px] font-bold uppercase text-muted-foreground">Con cambios</div>
                 </div>
                 <div className="bg-card border rounded-xl p-3 text-center">
-                  <div className="text-2xl font-black text-orange-500">{stats.selected}</div>
+                  <div className="text-2xl font-black text-yellow-400">{stats.selected}</div>
                   <div className="text-[10px] font-bold uppercase text-muted-foreground">Seleccionados</div>
                 </div>
                 <div className="bg-card border rounded-xl p-3 text-center">
@@ -407,7 +407,7 @@ const ProductUpdater = () => {
 
               {/* Select all / none */}
               <div className="flex gap-2">
-                <button onClick={() => toggleAll(true)} className="text-xs font-bold text-orange-500 hover:underline">Seleccionar todos</button>
+                <button onClick={() => toggleAll(true)} className="text-xs font-bold text-yellow-400 hover:underline">Seleccionar todos</button>
                 <span className="text-muted-foreground">|</span>
                 <button onClick={() => toggleAll(false)} className="text-xs font-bold text-muted-foreground hover:underline">Deseleccionar todos</button>
               </div>
@@ -417,7 +417,7 @@ const ProductUpdater = () => {
                 {changes.map((change, idx) => (
                   <div
                     key={change.productId}
-                    className={`border rounded-xl p-3 transition-all cursor-pointer ${change.selected ? 'bg-orange-50 border-orange-300' : 'bg-card border-border opacity-60'}`}
+                    className={`border rounded-xl p-3 transition-all cursor-pointer ${change.selected ? 'bg-yellow-50 border-yellow-300' : 'bg-card border-border opacity-60'}`}
                     onClick={() => toggleOne(idx)}
                   >
                     <div className="flex items-start gap-3">
@@ -425,7 +425,7 @@ const ProductUpdater = () => {
                         type="checkbox"
                         checked={change.selected}
                         onChange={() => toggleOne(idx)}
-                        className="mt-1 accent-orange-500"
+                        className="mt-1 accent-yellow-400"
                         onClick={e => e.stopPropagation()}
                       />
                       <div className="flex-1 min-w-0">
@@ -463,7 +463,7 @@ const ProductUpdater = () => {
               <button
                 onClick={applyUpdates}
                 disabled={updating || stats.selected === 0}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-muted disabled:text-muted-foreground text-white font-black uppercase text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-muted disabled:text-muted-foreground text-white font-black uppercase text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 {updating ? <><Loader2 size={16} className="animate-spin" /> Actualizando...</> : <><RefreshCw size={16} /> Actualizar {stats.selected} productos</>}
               </button>
@@ -484,7 +484,7 @@ const ProductUpdater = () => {
             <p className="text-xl font-black">{result.updated} productos actualizados</p>
             {result.errors > 0 && <p className="text-sm text-destructive">{result.errors} errores</p>}
           </div>
-          <button onClick={reset} className="text-sm font-bold text-orange-500 hover:underline">Actualizar otro archivo</button>
+          <button onClick={reset} className="text-sm font-bold text-yellow-400 hover:underline">Actualizar otro archivo</button>
         </div>
       )}
     </div>

@@ -76,13 +76,13 @@ const RepuestosTab = () => {
             <input
               type="text"
               placeholder="Buscar por nombre, marca o categoría..."
-              className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-sm"
+              className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
-        <button onClick={handleNew} className="w-full md:w-auto bg-orange-500 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-orange-600 transition-all font-black uppercase shadow-lg shadow-orange-500/20">
+        <button onClick={handleNew} className="w-full md:w-auto bg-yellow-400 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-yellow-500 transition-all font-black uppercase shadow-lg shadow-yellow-400/20">
           <Plus size={20} /> Nuevo Repuesto
         </button>
       </div>
@@ -98,7 +98,7 @@ const RepuestosTab = () => {
               <img src={p.images?.[0] || '/placeholder.svg'} className="w-20 h-20 rounded-xl object-cover shrink-0 bg-zinc-100" />
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
-                  <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
+                  <p className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">{p.brand || 'Genérico'}</p>
                   <h3 className="font-black uppercase text-[11px] leading-tight truncate">{p.title}</h3>
                   <p className="font-black text-sm text-zinc-900 mt-0.5">${p.price.toLocaleString('es-AR')}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
@@ -191,13 +191,13 @@ const RepuestosTab = () => {
                   <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
                     <div className="flex flex-wrap gap-1">
                       {(p as any).is_featured && <span className="flex items-center gap-1 bg-yellow-100 text-yellow-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Star size={10} fill="currentColor" /> Destacado</span>}
-                      {p.is_on_sale && <span className="flex items-center gap-1 bg-orange-100 text-orange-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
+                      {p.is_on_sale && <span className="flex items-center gap-1 bg-yellow-100 text-yellow-500 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Tag size={10} fill="currentColor" /> Oferta</span>}
                       {p.free_shipping && <span className="flex items-center gap-1 bg-green-100 text-green-600 text-[8px] px-2 py-1 rounded-full font-black uppercase"><Truck size={10} fill="currentColor" /> Envío</span>}
                     </div>
                   </td>
                   <td className="px-4 py-4"><span className="bg-zinc-100 text-zinc-500 text-[9px] px-2 py-1 rounded-md font-black uppercase tracking-tighter">{p.category}</span></td>
                   <td className="px-4 py-4 text-right">
-                    <div className="font-black text-lg text-orange-600">${p.price.toLocaleString('es-AR')}</div>
+                    <div className="font-black text-lg text-yellow-500">${p.price.toLocaleString('es-AR')}</div>
                   </td>
                   <td className="px-4 py-4 text-center">
                     <span className={`text-sm font-black ${(p.stock ?? 0) > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
@@ -207,7 +207,7 @@ const RepuestosTab = () => {
                   <td className="px-4 py-4 text-center" onClick={e => e.stopPropagation()}>
                     <div className="flex justify-center gap-1">
                       <button onClick={() => handleToggleFeatured(p.id, !!(p as any).is_featured)} className={`p-2 ${(p as any).is_featured ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}`}><Star size={18} fill={(p as any).is_featured ? 'currentColor' : 'none'}/></button>
-                      <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-orange-500"><Pencil size={18}/></button>
+                      <button onClick={() => handleEdit(p)} className="p-2 text-gray-400 hover:text-yellow-400"><Pencil size={18}/></button>
                       <button onClick={() => handleDuplicate(p)} className="p-2 text-gray-400 hover:text-zinc-900"><Copy size={18}/></button>
                       <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                     </div>

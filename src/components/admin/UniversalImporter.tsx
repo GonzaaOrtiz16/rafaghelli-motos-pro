@@ -756,7 +756,7 @@ const UniversalImporter = () => {
         {(['upload', 'map', 'preview', 'done'] as const).map((s, i) => (
           <React.Fragment key={s}>
             {i > 0 && <ArrowRight size={12} className="text-zinc-300" />}
-            <span className={`px-3 py-1.5 rounded-full transition-colors ${step === s ? 'bg-orange-500 text-white' : 'bg-zinc-100 text-zinc-400'}`}>
+            <span className={`px-3 py-1.5 rounded-full transition-colors ${step === s ? 'bg-yellow-400 text-white' : 'bg-zinc-100 text-zinc-400'}`}>
               {s === 'upload' ? 'Subir' : s === 'map' ? 'Mapear' : s === 'preview' ? 'Preview' : 'Listo'}
             </span>
           </React.Fragment>
@@ -770,9 +770,9 @@ const UniversalImporter = () => {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-[32px] p-12 md:p-16 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${dragOver ? 'border-orange-500 bg-orange-50' : 'border-zinc-300 bg-zinc-50 hover:border-orange-400 hover:bg-orange-50/50'}`}
+          className={`border-2 border-dashed rounded-[32px] p-12 md:p-16 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${dragOver ? 'border-yellow-400 bg-yellow-50' : 'border-zinc-300 bg-zinc-50 hover:border-yellow-400 hover:bg-yellow-50/50'}`}
         >
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-orange-500 text-white' : 'bg-zinc-200 text-zinc-500'}`}>
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${dragOver ? 'bg-yellow-400 text-white' : 'bg-zinc-200 text-zinc-500'}`}>
             <Upload size={28} />
           </div>
           <div className="text-center">
@@ -791,7 +791,7 @@ const UniversalImporter = () => {
         <>
           <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-6">
             <div className="flex items-center gap-3">
-              <FileSpreadsheet size={20} className="text-orange-500" />
+              <FileSpreadsheet size={20} className="text-yellow-400" />
               <div>
                 <h3 className="font-black uppercase tracking-tighter text-sm">Mapeo de Columnas</h3>
                 <p className="text-[10px] text-zinc-400 font-medium">{fileName} — {rows.length} filas detectadas</p>
@@ -807,7 +807,7 @@ const UniversalImporter = () => {
             </div>
 
             {/* Image import toggle */}
-            <div className={`rounded-2xl p-4 border-2 transition-all ${importImages ? 'bg-orange-50 border-orange-300' : 'bg-zinc-50 border-zinc-200'}`}>
+            <div className={`rounded-2xl p-4 border-2 transition-all ${importImages ? 'bg-yellow-50 border-yellow-300' : 'bg-zinc-50 border-zinc-200'}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-xs font-black uppercase text-zinc-900 mb-1">
@@ -822,7 +822,7 @@ const UniversalImporter = () => {
                 <button
                   type="button"
                   onClick={() => setImportImages(v => !v)}
-                  className={`relative w-14 h-7 rounded-full transition-colors flex-shrink-0 ${importImages ? 'bg-orange-500' : 'bg-zinc-300'}`}
+                  className={`relative w-14 h-7 rounded-full transition-colors flex-shrink-0 ${importImages ? 'bg-yellow-400' : 'bg-zinc-300'}`}
                 >
                   <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${importImages ? 'translate-x-7' : ''}`} />
                 </button>
@@ -833,7 +833,7 @@ const UniversalImporter = () => {
               {DB_FIELDS.map(field => (
                 <div key={field.key} className="flex items-center gap-3 bg-zinc-50 rounded-2xl p-3 border">
                   <div className="flex items-center gap-2 min-w-[180px]">
-                    <Database size={14} className="text-orange-500 flex-shrink-0" />
+                    <Database size={14} className="text-yellow-400 flex-shrink-0" />
                     <span className="text-xs font-black uppercase text-zinc-700">
                       {field.label}
                       {field.required && <span className="text-red-500 ml-0.5">*</span>}
@@ -843,7 +843,7 @@ const UniversalImporter = () => {
                   <select
                     value={mapping[field.key] ?? ''}
                     onChange={e => setMapping(prev => ({ ...prev, [field.key]: e.target.value === '' ? null : Number(e.target.value) }))}
-                    className="flex-1 bg-white border rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500/20"
+                    className="flex-1 bg-white border rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-yellow-400/20"
                   >
                     <option value="">— No mapear —</option>
                     {headers.map((h, i) => (
@@ -897,12 +897,12 @@ const UniversalImporter = () => {
             <div className="bg-white rounded-[32px] border p-6 md:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Eye size={20} className="text-orange-500" />
+                  <Eye size={20} className="text-yellow-400" />
                   <h3 className="font-black uppercase tracking-tighter text-sm">
                     Vista Previa ({Math.min(10, previewData.length)} de {previewData.length} productos)
                   </h3>
                 </div>
-                <button onClick={() => setStep('map')} className="text-[10px] font-black uppercase text-orange-500 hover:text-orange-600">
+                <button onClick={() => setStep('map')} className="text-[10px] font-black uppercase text-yellow-400 hover:text-yellow-500">
                   ← Volver a mapear
                 </button>
               </div>
@@ -946,7 +946,7 @@ const UniversalImporter = () => {
                                     <span className="text-blue-500 ml-1">🏍️ {v.moto_fit.length}</span>
                                   )}
                                   {(v.price || v.public_price) && (
-                                    <span className="text-orange-500 ml-1">${v.public_price || v.price}</span>
+                                    <span className="text-yellow-400 ml-1">${v.public_price || v.price}</span>
                                   )}
                                 </div>
                               ))}
@@ -978,7 +978,7 @@ const UniversalImporter = () => {
               <button
                 onClick={handleImport}
                 disabled={importing}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-300 text-white py-4 rounded-2xl font-black uppercase text-sm transition-all shadow-lg shadow-orange-500/20 disabled:shadow-none flex items-center justify-center gap-2"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-zinc-300 text-white py-4 rounded-2xl font-black uppercase text-sm transition-all shadow-lg shadow-yellow-400/20 disabled:shadow-none flex items-center justify-center gap-2"
               >
                 {importing ? (
                   <><Loader2 size={18} className="animate-spin" /> Importando...</>

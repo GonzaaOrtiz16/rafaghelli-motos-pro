@@ -79,10 +79,10 @@ const ImageUpload = ({ onImagesSelected, uploading = false }: ImageUploadProps) 
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-zinc-300 hover:border-orange-500 hover:bg-orange-50 transition-all bg-white"
+          className="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-zinc-300 hover:border-yellow-400 hover:bg-yellow-50 transition-all bg-white"
         >
           {uploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-yellow-400" />
           ) : (
             <>
               <ImagePlus className="h-8 w-8 text-zinc-400 mb-2" />
@@ -109,7 +109,7 @@ const ImageUpload = ({ onImagesSelected, uploading = false }: ImageUploadProps) 
       </div>
       
       {previews.length > 0 && (
-        <p className="text-[10px] font-bold text-orange-600 uppercase italic">
+        <p className="text-[10px] font-bold text-yellow-500 uppercase italic">
           * Revisá las fotos antes de guardar el producto
         </p>
       )}

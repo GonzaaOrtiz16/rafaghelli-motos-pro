@@ -27,6 +27,7 @@ const formatPrice = (n: number) =>
   }).format(n);
 
 const ProductCard = React.memo(({ product }: { product: Product }) => {
+  const priority = !!product.priority;
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasDiscount = product.is_on_sale && product.original_price && product.original_price > product.price;
   const discountPercentage = hasDiscount

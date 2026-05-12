@@ -120,7 +120,7 @@ const AppLayout = () => {
         </>
       )}
 
-      <main className="flex-1">
+      <main className={`flex-1 ${!isBackoffice ? 'pt-[160px]' : ''}`}>
         <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Home />} />

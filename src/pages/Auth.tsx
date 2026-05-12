@@ -78,6 +78,25 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error.message || "Error al iniciar sesión con Google");
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      navigate("/");
+    } catch (err: any) {
+      toast.error(err.message || "Error al iniciar sesión con Google");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-background px-4">
       <motion.div

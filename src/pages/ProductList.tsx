@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -72,6 +72,23 @@ const ProductList = () => {
       return true;
     });
   }, [products, activeCat, qParam, brandFilter, priceFilter]);
+
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [activeCat, qParam, brandFilter, priceFilter]);
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!sentinelRef.current || visibleCount >= filtered.length) return;
+    const el = sentinelRef.current;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length));
+      }
+    }, { rootMargin: "600px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [filtered.length, visibleCount]);
 
   const hasActiveFilters = !!(brandFilter || catFilter || catParam || priceFilter >= 0);
 
@@ -248,11 +265,18 @@ const ProductList = () => {
                   <Button variant="outline" className="rounded-full border-foreground uppercase font-black text-xs" onClick={clearFilters}>Limpiar filtros</Button>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  {filtered.map((p) => (
-                    <ProductCard key={p.id} product={p as any} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    {visible.map((p, i) => (
+                      <ProductCard key={p.id} product={{ ...(p as any), priority: i < 6 }} />
+                    ))}
+                  </div>
+                  {visibleCount < filtered.length && (
+                    <div ref={sentinelRef} className="flex justify-center py-10">
+                      <Loader2 className="text-primary animate-spin" size={28} />
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

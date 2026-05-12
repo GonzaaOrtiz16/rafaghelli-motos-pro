@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Truck, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
+import { optimizeImage } from "@/lib/imageUrl";
 
 interface Product {
   id: string;
@@ -15,6 +16,7 @@ interface Product {
   is_on_sale: boolean;
   slug: string;
   stock?: number | null;
+  priority?: boolean;
 }
 
 const formatPrice = (n: number) =>
@@ -25,6 +27,7 @@ const formatPrice = (n: number) =>
   }).format(n);
 
 const ProductCard = React.memo(({ product }: { product: Product }) => {
+  const priority = !!product.priority;
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasDiscount = product.is_on_sale && product.original_price && product.original_price > product.price;
   const discountPercentage = hasDiscount
@@ -65,12 +68,15 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
             <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
           <img
-            src={product.images?.[0] || "/placeholder.svg"}
+            src={optimizeImage(product.images?.[0], 500)}
             alt={product.title}
             className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            // @ts-ignore
+            fetchpriority={priority ? "high" : "auto"}
             decoding="async"
             onLoad={() => setImgLoaded(true)}
+            onError={() => setImgLoaded(true)}
           />
           <div className="absolute inset-0 bg-zinc-700/0 group-hover:bg-zinc-700/5 transition-colors duration-300" />
         </div>

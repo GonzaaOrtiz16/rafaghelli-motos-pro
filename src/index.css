@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Kanit:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Permanent+Marker&family=Caveat:wght@700&family=Rubik+Wet+Paint&family=Rubik+Distressed&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Kanit:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Permanent+Marker&family=Caveat:wght@700&family=Rubik+Wet+Paint&family=Rubik+Distressed&family=Bungee&family=Faster+One&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -66,14 +66,16 @@
     background: hsl(var(--success) / 0.15);
     color: hsl(var(--success));
   }
-  /* RAFAGHELLI: tipografía brush/distressed roja */
+  /* RAFAGHELLI: estilo motoquero, brush inclinado */
   .title-brand {
-    font-family: 'Rubik Distressed', 'Permanent Marker', cursive !important;
+    font-family: 'Faster One', 'Permanent Marker', cursive !important;
     font-style: normal !important;
     font-weight: 400 !important;
     color: #E60000;
-    letter-spacing: 0.02em;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    letter-spacing: 0.04em;
+    transform: skewX(-8deg);
+    display: inline-block;
+    text-shadow: 3px 3px 0 #000, 1px 1px 0 #000;
   }
   /* MOTOS: amarillo oscuro con borde negro */
   .title-motos {

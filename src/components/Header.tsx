@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, Menu, Wrench, Phone, User, LogOut } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/rafaghelli-logo.png";
@@ -13,7 +13,25 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categorias', 'repuestos', 'nav'],
@@ -35,7 +53,11 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-zinc-950 shadow-lg border-b border-zinc-800">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 bg-zinc-950 shadow-lg border-b border-zinc-800 transition-transform duration-300 ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
       {/* Top promo bar (amarillo) */}
       <div className="bg-yellow-400 text-zinc-900 text-xs font-bold">
         <div className="container flex items-center justify-between py-1.5">

@@ -68,12 +68,15 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
             <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
           <img
-            src={product.images?.[0] || "/placeholder.svg"}
+            src={optimizeImage(product.images?.[0], 500)}
             alt={product.title}
             className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            // @ts-ignore
+            fetchpriority={priority ? "high" : "auto"}
             decoding="async"
             onLoad={() => setImgLoaded(true)}
+            onError={() => setImgLoaded(true)}
           />
           <div className="absolute inset-0 bg-zinc-700/0 group-hover:bg-zinc-700/5 transition-colors duration-300" />
         </div>

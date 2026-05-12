@@ -13,20 +13,35 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
+  const [offset, setOffset] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
+    let currentOffset = 0;
+    let ticking = false;
+    const MAX_OFFSET = 220;
+
+    const update = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+
+      if (currentScrollY <= 0) {
+        currentOffset = 0;
+      } else {
+        currentOffset = Math.max(0, Math.min(MAX_OFFSET, currentOffset + delta));
+      }
+
+      setOffset(currentOffset);
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        setHidden(true);
-      } else {
-        setHidden(false);
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
       }
-      lastScrollY = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -52,11 +67,15 @@ const Header = () => {
     if (query.trim()) navigate(`/productos?q=${encodeURIComponent(query.trim())}`);
   };
 
+  const opacity = Math.max(0, 1 - offset / 220);
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 bg-zinc-950 shadow-lg border-b border-zinc-800 transition-transform duration-300 ${
-        hidden ? "-translate-y-full" : "translate-y-0"
-      }`}
+      style={{
+        transform: `translateY(-${offset}px)`,
+        opacity,
+      }}
+      className="fixed top-0 left-0 right-0 z-50 bg-zinc-950 shadow-lg border-b border-zinc-800 will-change-transform"
     >
       {/* Top promo bar (amarillo) */}
       <div className="bg-yellow-400 text-zinc-900 text-xs font-bold">

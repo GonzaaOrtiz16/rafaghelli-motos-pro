@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/rafaghelli-logo.png";
+import brandLogo from "@/assets/rafaghelli-motos-logo.png";
 
 const Header = () => {
   const { itemCount, openCart } = useCart();
@@ -56,12 +57,7 @@ const Header = () => {
 
         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
           <img src={logo} alt="Rafaghelli Motos" className="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover" />
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-2xl md:text-3xl font-display italic font-black tracking-tight title-brand">
-              RAFAGHELLI
-            </span>
-            <span className="font-script text-lg md:text-xl title-motos -mt-1 ml-1 -rotate-3">Motos</span>
-          </div>
+          <img src={brandLogo} alt="Rafaghelli Motos" className="hidden sm:block h-12 md:h-14 w-auto object-contain" />
         </Link>
 
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-4">

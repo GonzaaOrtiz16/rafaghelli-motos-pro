@@ -265,11 +265,18 @@ const ProductList = () => {
                   <Button variant="outline" className="rounded-full border-foreground uppercase font-black text-xs" onClick={clearFilters}>Limpiar filtros</Button>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  {filtered.map((p) => (
-                    <ProductCard key={p.id} product={p as any} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    {visible.map((p, i) => (
+                      <ProductCard key={p.id} product={{ ...(p as any), priority: i < 6 }} />
+                    ))}
+                  </div>
+                  {visibleCount < filtered.length && (
+                    <div ref={sentinelRef} className="flex justify-center py-10">
+                      <Loader2 className="text-primary animate-spin" size={28} />
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

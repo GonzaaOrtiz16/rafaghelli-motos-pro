@@ -73,6 +73,23 @@ const ProductList = () => {
     });
   }, [products, activeCat, qParam, brandFilter, priceFilter]);
 
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [activeCat, qParam, brandFilter, priceFilter]);
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!sentinelRef.current || visibleCount >= filtered.length) return;
+    const el = sentinelRef.current;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length));
+      }
+    }, { rootMargin: "600px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [filtered.length, visibleCount]);
+
   const hasActiveFilters = !!(brandFilter || catFilter || catParam || priceFilter >= 0);
 
   const clearFilters = () => {

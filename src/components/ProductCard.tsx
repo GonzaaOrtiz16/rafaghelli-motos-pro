@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Truck, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
+import { optimizeImage } from "@/lib/imageUrl";
 
 interface Product {
   id: string;
@@ -15,6 +16,7 @@ interface Product {
   is_on_sale: boolean;
   slug: string;
   stock?: number | null;
+  priority?: boolean;
 }
 
 const formatPrice = (n: number) =>

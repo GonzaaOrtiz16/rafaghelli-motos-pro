@@ -207,7 +207,8 @@ const ProductDetail = () => {
   const discountPercent = hasDiscount ? Math.round((1 - product.price / product.original_price) * 100) : 0;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container py-10 px-6 max-w-7xl mx-auto">
+    <>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="container py-10 px-6 max-w-7xl mx-auto">
       {/* Navegación Superior */}
       <div className="flex justify-between items-center mb-8">
         <Link to="/productos" className="inline-flex items-center gap-2 text-zinc-400 hover:text-yellow-400 font-black uppercase text-[10px] tracking-widest transition-all">

@@ -59,9 +59,8 @@ const ProductDetail = () => {
 
   // Scroll listener to show floating thumbnail on mobile when gallery scrolls out
   useEffect(() => {
-    if (!isMobile) return;
     const handleScroll = () => {
-      if (!galleryRef.current) return;
+      if (!galleryRef.current || !isMobile) return;
       const rect = galleryRef.current.getBoundingClientRect();
       // Show thumbnail when gallery is mostly scrolled out of view
       setShowFloatingThumb(rect.bottom < 0);
@@ -69,7 +68,7 @@ const ProductDetail = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
+  }, [isMobile, product]);
 
   // Parse variants
   const variants: VariantColor[] = useMemo(() => {

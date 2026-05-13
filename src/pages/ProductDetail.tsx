@@ -394,6 +394,78 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      {/* Floating thumbnail on mobile */}
+      <AnimatePresence>
+        {isMobile && showFloatingThumb && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            onClick={() => setLightboxOpen(true)}
+            className="fixed bottom-6 right-6 z-50 w-20 h-20 rounded-2xl overflow-hidden border-4 border-yellow-400 shadow-2xl bg-white"
+          >
+            <img
+              src={optimizeImage(variantImage || product.images[activeImage], 200)}
+              alt="Miniatura"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <ZoomIn size={20} className="text-white drop-shadow-md" />
+            </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox / Image Modal */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative w-full max-w-lg aspect-square bg-white rounded-[2rem] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="absolute top-4 right-4 z-10 bg-black/50 text-white p-2 rounded-full"
+              >
+                <X size={20} />
+              </button>
+              <img
+                src={variantImage || product.images[activeImage]}
+                alt={product.title}
+                className="w-full h-full object-contain p-6"
+              />
+              {product.images.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 px-4">
+                  {product.images.map((img: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImage(i)}
+                      className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                        i === activeImage ? 'border-yellow-400 scale-110' : 'border-white/30 opacity-70'
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Descripción Técnica */}
       <div className="mt-24">
         <div className="max-w-3xl">

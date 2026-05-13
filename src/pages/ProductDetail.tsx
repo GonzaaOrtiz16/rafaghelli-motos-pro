@@ -57,18 +57,19 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
-  // IntersectionObserver to show floating thumbnail on mobile when gallery scrolls out
+  // Scroll listener to show floating thumbnail on mobile when gallery scrolls out
   useEffect(() => {
-    if (!isMobile || !galleryRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowFloatingThumb(!entry.isIntersecting);
-      },
-      { threshold: 0.05, rootMargin: '0px' }
-    );
-    observer.observe(galleryRef.current);
-    return () => observer.disconnect();
-  }, [isMobile, galleryRef.current]);
+    if (!isMobile) return;
+    const handleScroll = () => {
+      if (!galleryRef.current) return;
+      const rect = galleryRef.current.getBoundingClientRect();
+      // Show thumbnail when gallery is mostly scrolled out of view
+      setShowFloatingThumb(rect.bottom < 0);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   // Parse variants
   const variants: VariantColor[] = useMemo(() => {

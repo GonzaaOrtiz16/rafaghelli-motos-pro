@@ -1,12 +1,14 @@
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Truck, Shield, ChevronRight, MessageCircle, Box, ArrowLeft, CheckCircle2, Instagram, Phone, ShoppingCart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Truck, Shield, ArrowLeft, MessageCircle, Box, Instagram, Phone, ShoppingCart, X, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { optimizeImage } from "@/lib/imageUrl";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 

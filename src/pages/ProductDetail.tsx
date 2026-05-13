@@ -26,6 +26,10 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [manualGallery, setManualGallery] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showFloatingThumb, setShowFloatingThumb] = useState(false);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   const { addItem } = useCart();
 
   useEffect(() => {

@@ -213,7 +213,7 @@ const ProductDetail = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Galería de Imágenes */}
-        <div className="sticky top-24">
+        <div ref={galleryRef} className="lg:sticky lg:top-24">
           <div className="aspect-square bg-white rounded-[3rem] overflow-hidden border border-zinc-100 shadow-2xl relative p-6">
             <img
               src={variantImage || product.images[activeImage]}

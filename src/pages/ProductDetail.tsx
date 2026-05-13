@@ -57,6 +57,19 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
+  // IntersectionObserver to show floating thumbnail on mobile when gallery scrolls out
+  useEffect(() => {
+    if (!isMobile || !galleryRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingThumb(!entry.isIntersecting);
+      },
+      { threshold: 0.05, rootMargin: '0px' }
+    );
+    observer.observe(galleryRef.current);
+    return () => observer.disconnect();
+  }, [isMobile, galleryRef.current]);
+
   // Parse variants
   const variants: VariantColor[] = useMemo(() => {
     if (!product) return [];

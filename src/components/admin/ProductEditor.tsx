@@ -421,8 +421,51 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
               {variants.length === 0 ? (
                 <div>
-                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
-                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles y stock por talle</label>
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 space-y-2">
+                    {Object.keys(sizeStock).length === 0 && (
+                      <p className="text-[10px] text-zinc-400 font-bold">Sin talles. Agregá uno abajo o dejá vacío para usar solo el Stock General.</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(sizeStock).map(([size, qty]) => (
+                        <div key={size} className="flex items-center bg-white border rounded-lg overflow-hidden">
+                          <span className="px-2.5 py-1.5 text-[10px] font-black uppercase bg-zinc-50 border-r">{size}</span>
+                          <input
+                            className="w-16 px-2 py-1.5 text-sm font-bold text-center outline-none"
+                            type="number"
+                            value={qty}
+                            onChange={e => setSizeStock(prev => ({ ...prev, [size]: Number(e.target.value) || 0 }))}
+                          />
+                          <button type="button" onClick={() => setSizeStock(prev => { const { [size]: _, ...rest } = prev; return rest; })} className="px-1.5 py-1.5 text-zinc-300 hover:text-red-500 transition-colors">
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-1">
+                        <input
+                          className="bg-white border rounded-lg px-2.5 py-1.5 text-sm font-bold w-24 outline-none focus:ring-2 focus:ring-yellow-400/20"
+                          placeholder="Talle..."
+                          value={newInfoSize}
+                          onChange={e => setNewInfoSize(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const s = newInfoSize.trim();
+                              if (s && !(s in sizeStock)) setSizeStock(prev => ({ ...prev, [s]: 0 }));
+                              setNewInfoSize('');
+                            }
+                          }}
+                        />
+                        <button type="button" onClick={() => {
+                          const s = newInfoSize.trim();
+                          if (s && !(s in sizeStock)) setSizeStock(prev => ({ ...prev, [s]: 0 }));
+                          setNewInfoSize('');
+                        }} className="bg-zinc-700 text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors">
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <p className="text-[9px] text-zinc-400 mt-1 ml-1">Si tu producto tiene colores con stock distinto, cargá <button type="button" onClick={() => setActiveSection('variants')} className="text-yellow-500 font-black underline">variantes</button> en su lugar.</p>
                 </div>
               ) : (

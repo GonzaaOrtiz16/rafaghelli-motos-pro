@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Download, Upload, Search, Package, FileSpreadsheet, Loader2, Boxes, Layers, Tag, AlertTriangle, XCircle, CheckCircle2, DollarSign, TrendingUp, QrCode, Edit3, X, Plus, Minus } from "lucide-react";
 import ProductQRModal from "@/components/ProductQRModal";
 import * as XLSX from 'xlsx';
+import { loadVariantsForProducts } from '@/lib/productVariants';
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
@@ -35,7 +36,9 @@ const StockControlTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from('products').select('*').order('title');
       if (error) throw error;
-      return data;
+      const ids = (data || []).map((p: any) => p.id);
+      const variantsMap = await loadVariantsForProducts(ids);
+      return (data || []).map((p: any) => ({ ...p, variants: variantsMap.get(p.id) || [] }));
     }
   });
 

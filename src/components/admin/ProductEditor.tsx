@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, ImagePlus } from "lucide-react";
 import { useCategorias } from './useCategorias';
+import { loadVariantsForProduct, saveProductVariants } from '@/lib/productVariants';
 
 interface Variant {
   color: string;
@@ -51,21 +52,24 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     moto_fit: (product?.moto_fit || []).join(', '),
   });
 
-  // Parse existing variants
-  const parseVariants = (): Variant[] => {
-    if (!product?.variants) return [];
-    const raw = Array.isArray(product.variants) ? product.variants : [];
-    return raw.map((v: any) => ({
-      color: v.color || '',
-      price: v.price ?? null,
-      stock: v.stock ?? null,
-      sizes: v.sizes || {},
-      moto_fit: v.moto_fit || [],
-      image: v.image || null,
-    }));
-  };
+  const [variants, setVariants] = useState<Variant[]>([]);
 
-  const [variants, setVariants] = useState<Variant[]>(parseVariants());
+  // Load variants from product_variants table when editing existing product
+  useEffect(() => {
+    if (!product?.id) return;
+    loadVariantsForProduct(product.id).then((rows) => {
+      setVariants(
+        rows.map((v) => ({
+          color: v.color || '',
+          price: v.price ?? null,
+          stock: v.stock ?? null,
+          sizes: v.sizes || {},
+          moto_fit: v.moto_fit || [],
+          image: v.image || null,
+        }))
+      );
+    });
+  }, [product?.id]);
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
   const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
 
@@ -199,23 +203,16 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     const slug = formData.title.toLowerCase().trim().replace(/[\s_-]+/g, '-').replace(/[^\w-]/g, '');
     
     // Calculate total stock from variants if they exist
-    let totalStock = parseInt(formData.stock) || 0;
-    if (variants.length > 0) {
-      totalStock = variants.reduce((sum, v) => {
-        const sizeStock = Object.values(v.sizes).reduce((s, q) => s + (Number(q) || 0), 0);
-        return sum + (sizeStock > 0 ? sizeStock : (Number(v.stock) || 0));
-      }, 0);
-    }
-
-    // Clean variants for storage
     const cleanVariants = variants.filter(v => v.color.trim()).map(v => ({
       color: v.color.trim(),
       price: v.price ? Number(v.price) : null,
-      stock: Object.values(v.sizes).reduce((s, q) => s + (Number(q) || 0), 0) || (Number(v.stock) || 0),
+      stock: Number(v.stock) || 0,
       sizes: v.sizes,
       moto_fit: v.moto_fit || [],
       image: v.image || null,
     }));
+
+    const manualStock = parseInt(formData.stock) || 0;
 
     const motoFitArr = formData.moto_fit.trim() ? formData.moto_fit.split(',').map(s => s.trim()).filter(Boolean) : [];
 
@@ -226,31 +223,40 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       category: formData.category,
       brand: formData.brand,
       description: formData.description,
-      stock: totalStock,
+      // Si no hay variantes, usar stock manual. Si hay, el trigger lo recalcula.
+      stock: cleanVariants.length > 0 ? 0 : manualStock,
       free_shipping: formData.free_shipping,
       is_on_sale: formData.is_on_sale,
       slug,
       images: tempImages,
       sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
       barcode: formData.barcode.trim() || `RM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
-      variants: cleanVariants,
       moto_fit: motoFitArr,
     };
 
-    let error;
-    if (product?.id) {
-      const { error: e } = await supabase.from('products').update(productData).eq('id', product.id);
+    let error: any = null;
+    let productId = product?.id as string | undefined;
+    if (productId) {
+      const { error: e } = await supabase.from('products').update(productData).eq('id', productId);
       error = e;
     } else {
-      const { error: e } = await supabase.from('products').insert([productData]);
+      const { data: inserted, error: e } = await supabase.from('products').insert([productData]).select('id').single();
       error = e;
+      productId = inserted?.id;
     }
+
+    if (!error && productId) {
+      // Replace variants in normalized table (trigger recalculates products.stock)
+      const { error: vErr } = await saveProductVariants(productId, cleanVariants);
+      if (vErr) error = vErr;
+    }
+
     setLoading(false);
     if (!error) {
       toast.success(product?.id ? "¡Actualizado!" : "¡Publicado!");
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       onClose();
-    } else toast.error("Error: " + error.message);
+    } else toast.error("Error: " + (error.message || 'desconocido'));
   };
 
   const sections = [

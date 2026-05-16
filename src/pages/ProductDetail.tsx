@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import ProductCard from "@/components/ProductCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { optimizeImage } from "@/lib/imageUrl";
+import { loadVariantsForProduct } from "@/lib/productVariants";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
@@ -42,7 +43,8 @@ const ProductDetail = () => {
         .single();
 
       if (data) {
-        setProduct(data);
+        const vts = await loadVariantsForProduct(data.id);
+        setProduct({ ...data, variants: vts });
         const { data: relData } = await supabase
           .from('products')
           .select('*')

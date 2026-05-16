@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { X, Upload, Loader2, ClipboardPaste, Plus, Trash2, Palette, ImagePlus } from "lucide-react";
 import { useCategorias } from './useCategorias';
+import { loadVariantsForProduct, saveProductVariants } from '@/lib/productVariants';
 
 interface Variant {
   color: string;
@@ -51,21 +52,24 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
     moto_fit: (product?.moto_fit || []).join(', '),
   });
 
-  // Parse existing variants
-  const parseVariants = (): Variant[] => {
-    if (!product?.variants) return [];
-    const raw = Array.isArray(product.variants) ? product.variants : [];
-    return raw.map((v: any) => ({
-      color: v.color || '',
-      price: v.price ?? null,
-      stock: v.stock ?? null,
-      sizes: v.sizes || {},
-      moto_fit: v.moto_fit || [],
-      image: v.image || null,
-    }));
-  };
+  const [variants, setVariants] = useState<Variant[]>([]);
 
-  const [variants, setVariants] = useState<Variant[]>(parseVariants());
+  // Load variants from product_variants table when editing existing product
+  useEffect(() => {
+    if (!product?.id) return;
+    loadVariantsForProduct(product.id).then((rows) => {
+      setVariants(
+        rows.map((v) => ({
+          color: v.color || '',
+          price: v.price ?? null,
+          stock: v.stock ?? null,
+          sizes: v.sizes || {},
+          moto_fit: v.moto_fit || [],
+          image: v.image || null,
+        }))
+      );
+    });
+  }, [product?.id]);
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
   const [pasteTargetVariant, setPasteTargetVariant] = useState<number | null>(null);
 

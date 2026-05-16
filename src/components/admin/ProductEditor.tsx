@@ -53,13 +53,23 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   });
 
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [sizeStock, setSizeStock] = useState<Record<string, number>>(() => {
+    // Initialize from product.sizes (no per-size stock in DB schema for this case → 0)
+    const init: Record<string, number> = {};
+    (product?.sizes || []).forEach((s: string) => { init[s] = 0; });
+    return init;
+  });
+  const [newInfoSize, setNewInfoSize] = useState('');
 
   // Load variants from product_variants table when editing existing product
   useEffect(() => {
     if (!product?.id) return;
     loadVariantsForProduct(product.id).then((rows) => {
+      // Separate color-less variants (size-only) from color variants
+      const colorVariants = rows.filter(v => (v.color || '').trim() !== '');
+      const sizeOnly = rows.filter(v => (v.color || '').trim() === '');
       setVariants(
-        rows.map((v) => ({
+        colorVariants.map((v) => ({
           color: v.color || '',
           price: v.price ?? null,
           stock: v.stock ?? null,
@@ -68,6 +78,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
           image: v.image || null,
         }))
       );
+      if (sizeOnly.length > 0) {
+        const merged: Record<string, number> = {};
+        sizeOnly.forEach(v => {
+          Object.entries(v.sizes || {}).forEach(([s, q]) => { merged[s] = Number(q) || 0; });
+        });
+        if (Object.keys(merged).length > 0) setSizeStock(merged);
+      }
     });
   }, [product?.id]);
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});
@@ -212,9 +229,28 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       image: v.image || null,
     }));
 
+    // If no color variants but per-size stock was entered, persist as a single color-less variant
+    const sizeStockEntries = Object.entries(sizeStock).filter(([s]) => s.trim());
+    if (cleanVariants.length === 0 && sizeStockEntries.length > 0) {
+      const sizesObj: Record<string, number> = {};
+      sizeStockEntries.forEach(([s, q]) => { sizesObj[s.trim()] = Number(q) || 0; });
+      cleanVariants.push({
+        color: '',
+        price: null,
+        stock: 0,
+        sizes: sizesObj,
+        moto_fit: [],
+        image: null,
+      });
+    }
+
     const manualStock = parseInt(formData.stock) || 0;
 
     const motoFitArr = formData.moto_fit.trim() ? formData.moto_fit.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    // Merge size labels from sizeStock into products.sizes for backward compat
+    const baseSizes = formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const finalSizes = Array.from(new Set([...baseSizes, ...Object.keys(sizeStock).filter(s => s.trim())]));
 
     const productData: any = {
       title: formData.title,
@@ -223,13 +259,12 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       category: formData.category,
       brand: formData.brand,
       description: formData.description,
-      // Si no hay variantes, usar stock manual. Si hay, el trigger lo recalcula.
       stock: cleanVariants.length > 0 ? 0 : manualStock,
       free_shipping: formData.free_shipping,
       is_on_sale: formData.is_on_sale,
       slug,
       images: tempImages,
-      sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
+      sizes: finalSizes,
       barcode: formData.barcode.trim() || `RM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       moto_fit: motoFitArr,
     };
@@ -348,6 +383,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                         </div>
                         <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Calculado desde {variants.length} variante{variants.length > 1 ? 's' : ''} — tocá para editar</div>
                       </button>
+                    ) : Object.keys(sizeStock).length > 0 ? (
+                      <div className="w-full bg-white/5 border border-dashed border-white/20 rounded-xl px-4 py-3">
+                        <div className="text-emerald-400 font-black text-xl leading-tight">
+                          {Object.values(sizeStock).reduce((s, q) => s + (Number(q) || 0), 0)}
+                        </div>
+                        <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Sumado desde {Object.keys(sizeStock).length} talle{Object.keys(sizeStock).length > 1 ? 's' : ''}</div>
+                      </div>
                     ) : (
                       <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                     )}
@@ -379,8 +421,51 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
 
               {variants.length === 0 ? (
                 <div>
-                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
-                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles y stock por talle</label>
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 space-y-2">
+                    {Object.keys(sizeStock).length === 0 && (
+                      <p className="text-[10px] text-zinc-400 font-bold">Sin talles. Agregá uno abajo o dejá vacío para usar solo el Stock General.</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(sizeStock).map(([size, qty]) => (
+                        <div key={size} className="flex items-center bg-white border rounded-lg overflow-hidden">
+                          <span className="px-2.5 py-1.5 text-[10px] font-black uppercase bg-zinc-50 border-r">{size}</span>
+                          <input
+                            className="w-16 px-2 py-1.5 text-sm font-bold text-center outline-none"
+                            type="number"
+                            value={qty}
+                            onChange={e => setSizeStock(prev => ({ ...prev, [size]: Number(e.target.value) || 0 }))}
+                          />
+                          <button type="button" onClick={() => setSizeStock(prev => { const { [size]: _, ...rest } = prev; return rest; })} className="px-1.5 py-1.5 text-zinc-300 hover:text-red-500 transition-colors">
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-1">
+                        <input
+                          className="bg-white border rounded-lg px-2.5 py-1.5 text-sm font-bold w-24 outline-none focus:ring-2 focus:ring-yellow-400/20"
+                          placeholder="Talle..."
+                          value={newInfoSize}
+                          onChange={e => setNewInfoSize(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const s = newInfoSize.trim();
+                              if (s && !(s in sizeStock)) setSizeStock(prev => ({ ...prev, [s]: 0 }));
+                              setNewInfoSize('');
+                            }
+                          }}
+                        />
+                        <button type="button" onClick={() => {
+                          const s = newInfoSize.trim();
+                          if (s && !(s in sizeStock)) setSizeStock(prev => ({ ...prev, [s]: 0 }));
+                          setNewInfoSize('');
+                        }} className="bg-zinc-700 text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors">
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <p className="text-[9px] text-zinc-400 mt-1 ml-1">Si tu producto tiene colores con stock distinto, cargá <button type="button" onClick={() => setActiveSection('variants')} className="text-yellow-500 font-black underline">variantes</button> en su lugar.</p>
                 </div>
               ) : (

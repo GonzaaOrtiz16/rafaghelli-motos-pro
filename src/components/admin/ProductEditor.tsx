@@ -229,9 +229,28 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       image: v.image || null,
     }));
 
+    // If no color variants but per-size stock was entered, persist as a single color-less variant
+    const sizeStockEntries = Object.entries(sizeStock).filter(([s]) => s.trim());
+    if (cleanVariants.length === 0 && sizeStockEntries.length > 0) {
+      const sizesObj: Record<string, number> = {};
+      sizeStockEntries.forEach(([s, q]) => { sizesObj[s.trim()] = Number(q) || 0; });
+      cleanVariants.push({
+        color: '',
+        price: null,
+        stock: 0,
+        sizes: sizesObj,
+        moto_fit: [],
+        image: null,
+      });
+    }
+
     const manualStock = parseInt(formData.stock) || 0;
 
     const motoFitArr = formData.moto_fit.trim() ? formData.moto_fit.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    // Merge size labels from sizeStock into products.sizes for backward compat
+    const baseSizes = formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const finalSizes = Array.from(new Set([...baseSizes, ...Object.keys(sizeStock).filter(s => s.trim())]));
 
     const productData: any = {
       title: formData.title,
@@ -240,13 +259,12 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
       category: formData.category,
       brand: formData.brand,
       description: formData.description,
-      // Si no hay variantes, usar stock manual. Si hay, el trigger lo recalcula.
       stock: cleanVariants.length > 0 ? 0 : manualStock,
       free_shipping: formData.free_shipping,
       is_on_sale: formData.is_on_sale,
       slug,
       images: tempImages,
-      sizes: formData.sizes.trim() ? formData.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
+      sizes: finalSizes,
       barcode: formData.barcode.trim() || `RM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       moto_fit: motoFitArr,
     };

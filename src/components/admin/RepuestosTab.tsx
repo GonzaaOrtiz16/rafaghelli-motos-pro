@@ -23,13 +23,83 @@ const RepuestosTab = () => {
     }
   });
 
+  // Normaliza: minúsculas, sin acentos, sin signos, espacios colapsados
+  const normalize = (s: any) =>
+    String(s ?? '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  // Distancia de Levenshtein acotada (para tolerar typos pequeños)
+  const lev = (a: string, b: string, max = 2) => {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    const dp = Array.from({ length: a.length + 1 }, (_, i) => i);
+    for (let j = 1; j <= b.length; j++) {
+      let prev = dp[0]; dp[0] = j; let best = dp[0];
+      for (let i = 1; i <= a.length; i++) {
+        const tmp = dp[i];
+        dp[i] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[i], dp[i - 1]);
+        prev = tmp; if (dp[i] < best) best = dp[i];
+      }
+      if (best > max) return max + 1;
+    }
+    return dp[a.length];
+  };
+
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-    return products.filter(p =>
-      p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const q = normalize(searchTerm);
+    if (!q) return products;
+    const tokens = q.split(' ').filter(Boolean);
+
+    const scored = products.map((p: any) => {
+      const title = normalize(p.title);
+      const brand = normalize(p.brand);
+      const category = normalize(p.category);
+      const barcode = normalize(p.barcode);
+      const variants = Array.isArray(p.variants) ? p.variants : [];
+      const colors = normalize(variants.map((v: any) => v.color).filter(Boolean).join(' '));
+      const motofit = normalize((p.moto_fit || []).join(' '));
+      const hay = `${title} ${brand} ${category} ${barcode} ${colors} ${motofit}`;
+      const titleWords = title.split(' ');
+
+      let score = 0;
+      let allMatch = true;
+
+      // bonus de frase completa
+      if (title.includes(q)) score += 200;
+      if (title.startsWith(q)) score += 150;
+
+      for (const t of tokens) {
+        let tokenScore = 0;
+        if (title.startsWith(t)) tokenScore = 100;
+        else if (titleWords.some(w => w.startsWith(t))) tokenScore = 80;
+        else if (title.includes(t)) tokenScore = 60;
+        else if (brand.includes(t)) tokenScore = 50;
+        else if (category.includes(t)) tokenScore = 40;
+        else if (barcode.includes(t)) tokenScore = 90;
+        else if (colors.includes(t) || motofit.includes(t)) tokenScore = 30;
+        else if (hay.includes(t)) tokenScore = 20;
+        else if (t.length >= 4) {
+          // tolera 1 typo en tokens de 4-6, 2 en >=7
+          const maxD = t.length >= 7 ? 2 : 1;
+          const hit = titleWords.find(w => w.length >= 3 && lev(w, t, maxD) <= maxD);
+          if (hit) tokenScore = 25;
+        }
+
+        if (tokenScore === 0) { allMatch = false; break; }
+        score += tokenScore;
+      }
+
+      // Pequeño desempate por stock
+      if (allMatch && (p.stock ?? 0) > 0) score += 1;
+      return allMatch ? { p, score } : null;
+    }).filter(Boolean) as { p: any; score: number }[];
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map(s => s.p);
   }, [products, searchTerm]);
 
   const handleEdit = (product: any) => {

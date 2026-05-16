@@ -377,10 +377,23 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
-                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
-              </div>
+              {variants.length === 0 ? (
+                <div>
+                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
+                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+                  <p className="text-[9px] text-zinc-400 mt-1 ml-1">Si tu producto tiene colores con stock distinto, cargá <button type="button" onClick={() => setActiveSection('variants')} className="text-yellow-500 font-black underline">variantes</button> en su lugar.</p>
+                </div>
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase text-yellow-700">Talles y stock manejados por variantes</p>
+                    <p className="text-[10px] text-yellow-600/80 mt-0.5">Cada variante tiene sus propios talles. Editá desde la pestaña Variantes.</p>
+                  </div>
+                  <button type="button" onClick={() => setActiveSection('variants')} className="bg-yellow-400 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase whitespace-nowrap hover:bg-yellow-500 transition-colors">
+                    Ir a Variantes
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

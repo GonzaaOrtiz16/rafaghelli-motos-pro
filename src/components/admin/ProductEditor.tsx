@@ -334,9 +334,22 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                   </div>
                   <div>
                     <label className="text-[10px] text-zinc-500 font-black uppercase ml-1 block mb-1">Stock General</label>
-                    <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
-                    {variants.length > 0 && (
-                      <p className="text-[9px] text-zinc-500 mt-1 ml-1">Se calcula automático desde variantes</p>
+                    {variants.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveSection('variants')}
+                        className="w-full bg-white/5 border border-dashed border-white/20 rounded-xl px-4 py-3 text-left hover:bg-white/10 transition-colors"
+                      >
+                        <div className="text-emerald-400 font-black text-xl leading-tight">
+                          {variants.reduce((sum, v) => {
+                            const sizeSum = Object.values(v.sizes || {}).reduce((s, q) => s + (Number(q) || 0), 0);
+                            return sum + (sizeSum > 0 ? sizeSum : (Number(v.stock) || 0));
+                          }, 0)}
+                        </div>
+                        <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Calculado desde {variants.length} variante{variants.length > 1 ? 's' : ''} — tocá para editar</div>
+                      </button>
+                    ) : (
+                      <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                     )}
                   </div>
                 </div>
@@ -364,10 +377,23 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
-                <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
-              </div>
+              {variants.length === 0 ? (
+                <div>
+                  <label className="text-[10px] text-zinc-400 font-black uppercase ml-1 block mb-1">Talles generales (separados por coma)</label>
+                  <input className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-yellow-400/20 transition-all" placeholder="S, M, L, XL" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} />
+                  <p className="text-[9px] text-zinc-400 mt-1 ml-1">Si tu producto tiene colores con stock distinto, cargá <button type="button" onClick={() => setActiveSection('variants')} className="text-yellow-500 font-black underline">variantes</button> en su lugar.</p>
+                </div>
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase text-yellow-700">Talles y stock manejados por variantes</p>
+                    <p className="text-[10px] text-yellow-600/80 mt-0.5">Cada variante tiene sus propios talles. Editá desde la pestaña Variantes.</p>
+                  </div>
+                  <button type="button" onClick={() => setActiveSection('variants')} className="bg-yellow-400 text-white px-3 py-2 rounded-lg text-[10px] font-black uppercase whitespace-nowrap hover:bg-yellow-500 transition-colors">
+                    Ir a Variantes
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

@@ -334,9 +334,22 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                   </div>
                   <div>
                     <label className="text-[10px] text-zinc-500 font-black uppercase ml-1 block mb-1">Stock General</label>
-                    <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
-                    {variants.length > 0 && (
-                      <p className="text-[9px] text-zinc-500 mt-1 ml-1">Se calcula automático desde variantes</p>
+                    {variants.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveSection('variants')}
+                        className="w-full bg-white/5 border border-dashed border-white/20 rounded-xl px-4 py-3 text-left hover:bg-white/10 transition-colors"
+                      >
+                        <div className="text-emerald-400 font-black text-xl leading-tight">
+                          {variants.reduce((sum, v) => {
+                            const sizeSum = Object.values(v.sizes || {}).reduce((s, q) => s + (Number(q) || 0), 0);
+                            return sum + (sizeSum > 0 ? sizeSum : (Number(v.stock) || 0));
+                          }, 0)}
+                        </div>
+                        <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Calculado desde {variants.length} variante{variants.length > 1 ? 's' : ''} — tocá para editar</div>
+                      </button>
+                    ) : (
+                      <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                     )}
                   </div>
                 </div>

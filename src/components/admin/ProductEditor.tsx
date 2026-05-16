@@ -53,6 +53,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   });
 
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [sizeStock, setSizeStock] = useState<Record<string, number>>(() => {
+    // Initialize from product.sizes (no per-size stock in DB schema for this case → 0)
+    const init: Record<string, number> = {};
+    (product?.sizes || []).forEach((s: string) => { init[s] = 0; });
+    return init;
+  });
+  const [newInfoSize, setNewInfoSize] = useState('');
 
   // Load variants from product_variants table when editing existing product
   useEffect(() => {

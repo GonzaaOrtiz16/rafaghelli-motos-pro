@@ -144,15 +144,23 @@ const RepuestosTab = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
         <div className="w-full md:w-auto">
           <h1 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter leading-none">Repuestos</h1>
-          <div className="mt-4 relative w-full md:w-80">
+          <div className="mt-4 relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
             <input
               type="text"
-              placeholder="Buscar por nombre, marca o categoría..."
-              className="w-full bg-white border rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all shadow-sm"
+              placeholder="Buscar: 'casco mac negro', 'arkad xl', código de barras..."
+              className="w-full bg-white border rounded-2xl pl-12 pr-20 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-yellow-400/20 transition-all shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400 hover:text-zinc-700 bg-zinc-100 px-2 py-1 rounded-md"
+              >
+                {filteredProducts.length} ✕
+              </button>
+            )}
           </div>
         </div>
         <button onClick={handleNew} className="w-full md:w-auto bg-yellow-400 text-white p-4 md:px-8 md:py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-yellow-500 transition-all font-black uppercase shadow-lg shadow-yellow-400/20">

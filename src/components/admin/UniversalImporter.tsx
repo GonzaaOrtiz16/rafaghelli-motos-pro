@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Upload, FileSpreadsheet, Eye, Database, ArrowRight, CheckCircle2, XCircle, Loader2, Trash2 } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { loadVariantsForProducts, saveProductVariants, LegacyVariant } from '@/lib/productVariants';
 
 // --- Data Sanitization ---
 
@@ -587,14 +588,18 @@ const UniversalImporter = () => {
     let inserted = 0, errors = 0, skipped = 0, grouped = 0;
 
     // Fetch existing products to avoid overwriting images and to merge variants
-    const { data: existingProducts } = await supabase.from('products').select('id, title, images, variants, stock');
+    const { data: existingProducts } = await supabase.from('products').select('id, title, images, stock');
+    const existingIds = (existingProducts || []).map((p: any) => p.id);
+    const existingVariantsMap = await loadVariantsForProducts(existingIds);
     const existingMap = new Map<string, any>();
     (existingProducts || []).forEach((p: any) => {
-      existingMap.set(p.title?.toLowerCase().trim(), p);
+      existingMap.set(p.title?.toLowerCase().trim(), { ...p, variants: existingVariantsMap.get(p.id) || [] });
     });
 
     const batch: any[] = [];
-    const updateBatch: { id: string; data: Record<string, any> }[] = [];
+    // We need to save variants after insert, so keep them aside indexed by title
+    const newVariantsByTitle = new Map<string, LegacyVariant[]>();
+    const updateBatch: { id: string; data: Record<string, any>; variants?: LegacyVariant[] }[] = [];
     const seenInFile = new Set<string>();
     let updatedExisting = 0;
 
@@ -609,66 +614,49 @@ const UniversalImporter = () => {
 
       const existing = existingMap.get(normalizedName);
       if (existing) {
-        // PROTECCIÓN DE FOTOS: solo actualizar precio/stock/category, NUNCA tocar images existentes
         const updateData: Record<string, any> = {};
         const newPrice = item.public_price ?? item.price;
         if (newPrice && newPrice !== existing.price) updateData.price = newPrice;
         if (item.price && item.price !== existing.original_price) updateData.original_price = item.price;
         if (item.category && item.category !== 'Sin categoría') updateData.category = item.category;
 
-        // === MERGE DE VARIANTES ===
-        // Si el item importado trae variantes nuevas que el producto existente no tiene,
-        // las agregamos sin pisar las que ya están.
-        const incomingVariants: any[] = Array.isArray(item.variants) ? item.variants : [];
-        const currentVariants: any[] = Array.isArray(existing.variants) ? existing.variants : [];
+        // === MERGE DE VARIANTES (desde product_variants) ===
+        const incomingVariants: LegacyVariant[] = Array.isArray(item.variants) ? item.variants : [];
+        const currentVariants: LegacyVariant[] = existing.variants || [];
         const existingColors = new Set(
-          currentVariants.map((v: any) => String(v.color || '').toLowerCase().trim())
+          currentVariants.map((v) => String(v.color || '').toLowerCase().trim())
         );
         const brandNewVariants = incomingVariants.filter(
-          (v: any) => !existingColors.has(String(v.color || '').toLowerCase().trim())
+          (v) => !existingColors.has(String(v.color || '').toLowerCase().trim())
         );
 
-        let mergedVariants = currentVariants;
+        let mergedVariants: LegacyVariant[] | null = null;
         let addedVariantImages: string[] = [];
         if (brandNewVariants.length > 0) {
           mergedVariants = [...currentVariants, ...brandNewVariants];
-          updateData.variants = mergedVariants;
-          // Sumar stock de las nuevas variantes al stock total
-          const addedStock = brandNewVariants.reduce((acc: number, v: any) => {
-            if (typeof v.stock === 'number') return acc + v.stock;
-            const sizesSum = Object.values(v.sizes || {}).reduce<number>((s, n: any) => s + (Number(n) || 0), 0);
-            return acc + sizesSum;
-          }, 0);
-          if (addedStock > 0) {
-            updateData.stock = (existing.stock || 0) + addedStock;
-          }
-          // Imágenes de variantes nuevas (sólo si está habilitado importar imágenes)
           if (importImages) {
             addedVariantImages = brandNewVariants
-              .map((v: any) => v.image)
-              .filter((img: any) => typeof img === 'string' && /^https?:\/\//i.test(img));
+              .map((v) => v.image)
+              .filter((img): img is string => typeof img === 'string' && /^https?:\/\//i.test(img));
           }
         } else if (item.stock != null && currentVariants.length === 0) {
-          // Sin variantes: actualizar stock simple sólo si no hay variantes
           if (item.stock !== existing.stock) updateData.stock = item.stock;
         }
 
-        // Imagen: agregar fotos nuevas (de variantes nuevas) sin pisar las existentes
+        // Imagen: agregar fotos nuevas sin pisar
         const currentImages = Array.isArray(existing.images) ? existing.images : [];
         if (importImages) {
           if (currentImages.length === 0) {
-            // Producto sin fotos: cargar todas las agregadas
             const newImages: string[] = Array.isArray(item._aggregatedImages) ? item._aggregatedImages : [];
             if (newImages.length > 0) updateData.images = newImages;
           } else if (addedVariantImages.length > 0) {
-            // Producto con fotos: sólo agregar las de las variantes recién creadas
             const merged = Array.from(new Set([...currentImages, ...addedVariantImages]));
             if (merged.length !== currentImages.length) updateData.images = merged;
           }
         }
 
-        if (Object.keys(updateData).length > 0) {
-          updateBatch.push({ id: existing.id, data: updateData });
+        if (Object.keys(updateData).length > 0 || mergedVariants) {
+          updateBatch.push({ id: existing.id, data: updateData, variants: mergedVariants || undefined });
         } else {
           skipped++;
         }
@@ -683,6 +671,10 @@ const UniversalImporter = () => {
 
       if (hasVariants && item._variantCount > 1) grouped++;
 
+      if (hasVariants) {
+        newVariantsByTitle.set(normalizedName, item.variants);
+      }
+
       batch.push({
         title: item.name,
         slug: `${slug}-${barcode.slice(-5).toLowerCase()}`,
@@ -691,30 +683,45 @@ const UniversalImporter = () => {
         original_price: item.price ?? 0,
         category: item.category,
         brand: 'Importado',
-        stock: item.stock,
+        // Si hay variantes, el stock total lo recalcula el trigger
+        stock: hasVariants ? 0 : (item.stock ?? 0),
         description: null,
         images: importImages && Array.isArray(item._aggregatedImages) ? item._aggregatedImages : [],
         sizes: item.sizes || [],
         moto_fit: item.motoFit || [],
-        variants: hasVariants ? item.variants : [],
       });
     });
 
-    // Update existing products (preserving images)
-    for (const { id, data } of updateBatch) {
-      const { error } = await supabase.from('products').update(data).eq('id', id);
-      if (error) { errors++; } else { updatedExisting++; }
+    // Update existing products (preserving images) + replace variants when merged
+    for (const { id, data, variants } of updateBatch) {
+      if (Object.keys(data).length > 0) {
+        const { error } = await supabase.from('products').update(data).eq('id', id);
+        if (error) { errors++; continue; }
+      }
+      if (variants) {
+        const { error: vErr } = await saveProductVariants(id, variants);
+        if (vErr) { errors++; continue; }
+      }
+      updatedExisting++;
     }
 
-    // Insert new products
+    // Insert new products and save their variants
     for (let i = 0; i < batch.length; i += 50) {
       const chunk = batch.slice(i, i + 50);
-      const { error } = await supabase.from('products').insert(chunk);
+      const { data: insertedRows, error } = await supabase.from('products').insert(chunk).select('id, title');
       if (error) {
         console.error('Chunk error:', error);
         errors += chunk.length;
-      } else {
-        inserted += chunk.length;
+        continue;
+      }
+      inserted += chunk.length;
+      // Save variants per inserted product
+      for (const row of (insertedRows || [])) {
+        const key = (row.title || '').toLowerCase().trim();
+        const vts = newVariantsByTitle.get(key);
+        if (vts && vts.length > 0) {
+          await saveProductVariants(row.id, vts);
+        }
       }
     }
 

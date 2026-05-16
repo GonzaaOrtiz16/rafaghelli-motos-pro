@@ -65,8 +65,11 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
   useEffect(() => {
     if (!product?.id) return;
     loadVariantsForProduct(product.id).then((rows) => {
+      // Separate color-less variants (size-only) from color variants
+      const colorVariants = rows.filter(v => (v.color || '').trim() !== '');
+      const sizeOnly = rows.filter(v => (v.color || '').trim() === '');
       setVariants(
-        rows.map((v) => ({
+        colorVariants.map((v) => ({
           color: v.color || '',
           price: v.price ?? null,
           stock: v.stock ?? null,
@@ -75,6 +78,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
           image: v.image || null,
         }))
       );
+      if (sizeOnly.length > 0) {
+        const merged: Record<string, number> = {};
+        sizeOnly.forEach(v => {
+          Object.entries(v.sizes || {}).forEach(([s, q]) => { merged[s] = Number(q) || 0; });
+        });
+        if (Object.keys(merged).length > 0) setSizeStock(merged);
+      }
     });
   }, [product?.id]);
   const [newSizeInput, setNewSizeInput] = useState<Record<number, string>>({});

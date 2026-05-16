@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Copy, Search, Tag, Truck, Palette, Bike, Star } from "lucide-react";
 import ProductEditor from './ProductEditor';
+import { loadVariantsForProducts } from '@/lib/productVariants';
 
 const RepuestosTab = () => {
   const queryClient = useQueryClient();
@@ -16,7 +17,9 @@ const RepuestosTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-      return data;
+      const ids = (data || []).map((p: any) => p.id);
+      const variantsMap = await loadVariantsForProducts(ids);
+      return (data || []).map((p: any) => ({ ...p, variants: variantsMap.get(p.id) || [] }));
     }
   });
 

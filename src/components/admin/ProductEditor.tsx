@@ -383,6 +383,13 @@ const ProductEditor: React.FC<ProductEditorProps> = ({ product, onClose }) => {
                         </div>
                         <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Calculado desde {variants.length} variante{variants.length > 1 ? 's' : ''} — tocá para editar</div>
                       </button>
+                    ) : Object.keys(sizeStock).length > 0 ? (
+                      <div className="w-full bg-white/5 border border-dashed border-white/20 rounded-xl px-4 py-3">
+                        <div className="text-emerald-400 font-black text-xl leading-tight">
+                          {Object.values(sizeStock).reduce((s, q) => s + (Number(q) || 0), 0)}
+                        </div>
+                        <div className="text-[9px] text-zinc-400 font-bold mt-0.5">Sumado desde {Object.keys(sizeStock).length} talle{Object.keys(sizeStock).length > 1 ? 's' : ''}</div>
+                      </div>
                     ) : (
                       <input className="w-full bg-white/10 rounded-xl px-4 py-3 text-white font-black text-xl outline-none focus:ring-2 focus:ring-white/10" type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                     )}

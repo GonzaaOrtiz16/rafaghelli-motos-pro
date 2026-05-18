@@ -489,8 +489,6 @@ const Home = () => {
           </button>
         </div>
       </motion.section>
-        </div>
-      </motion.section>
 
       {/* VIDEO FINAL */}
       {siteSettings?.home_media_url && (

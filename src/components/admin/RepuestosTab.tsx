@@ -12,6 +12,15 @@ const RepuestosTab = () => {
   const [editorProduct, setEditorProduct] = useState<any | null>(null);
   const [showEditor, setShowEditor] = useState(false);
 
+  // Filtros
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterBrand, setFilterBrand] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"" | "stock" | "nostock" | "featured" | "sale" | "freeship">("");
+
+  // Ordenamiento
+  const [sortBy, setSortBy] = useState<"newest" | "price-asc" | "price-desc" | "stock-asc" | "stock-desc" | "name-asc" | "name-desc">("newest");
+  const [showFilters, setShowFilters] = useState(false);
+
   const { data: products } = useQuery({
     queryKey: ['admin-products'],
     queryFn: async () => {

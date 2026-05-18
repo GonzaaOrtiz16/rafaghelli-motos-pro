@@ -341,7 +341,7 @@ const Home = () => {
             </div>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="relative group">
+          <div className="relative group/carousel">
             <div
               id="featured-scroll"
               className="overflow-x-auto scrollbar-hide scroll-smooth"

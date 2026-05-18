@@ -118,12 +118,16 @@ const Home = () => {
       else if ((p.stock || 0) > 0) inStockNonOffers.push(p);
       if (p.free_shipping === true && freeShipping.length < 4) freeShipping.push(p);
     }
-    // Rellenar ofertas con productos en stock (sin descuento real: precio = precio original)
+    // Rellenar ofertas con productos en stock simulando descuento (10-25%)
     const featured: any[] = [...realOffers];
     let i = 0;
     while (featured.length < MIN_OFERTAS && i < inStockNonOffers.length) {
       const p = inStockNonOffers[i++];
-      featured.push({ ...p, original_price: p.price, is_on_sale: false });
+      // descuento pseudo-aleatorio pero estable por producto
+      const seed = (p.id || '').split('').reduce((a: number, c: string) => a + c.charCodeAt(0), 0);
+      const discount = 10 + (seed % 16); // 10% a 25%
+      const fakeOriginal = Math.round(p.price / (1 - discount / 100) / 100) * 100;
+      featured.push({ ...p, original_price: fakeOriginal, is_on_sale: true });
     }
     return { featuredProducts, featured, freeShipping, recent: products.slice(0, 8) };
   }, [products]);

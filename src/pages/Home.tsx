@@ -56,12 +56,30 @@ const Home = () => {
   const { data: products = [] } = useQuery({
     queryKey: ['public-products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale, is_featured').order('created_at', { ascending: false });
+      const [{ data, error }, { data: variants, error: vErr }] = await Promise.all([
+        supabase.from('products').select('id, title, slug, price, original_price, images, category, brand, free_shipping, is_on_sale, is_featured, stock').order('created_at', { ascending: false }),
+        supabase.from('product_variants').select('product_id, stock'),
+      ]);
       if (error) throw error;
-      return data;
+      if (vErr) throw vErr;
+      const stockMap = new Map<string, number>();
+      (variants || []).forEach((v: any) => {
+        stockMap.set(v.product_id, (stockMap.get(v.product_id) || 0) + (v.stock || 0));
+      });
+      const withStock = (data || []).map((p: any) => ({
+        ...p,
+        stock: (p.stock || 0) + (stockMap.get(p.id) || 0),
+      }));
+      withStock.sort((a: any, b: any) => {
+        const aOut = (a.stock || 0) <= 0 ? 1 : 0;
+        const bOut = (b.stock || 0) <= 0 ? 1 : 0;
+        return aOut - bOut;
+      });
+      return withStock;
     },
     staleTime: 1000 * 60 * 5,
   });
+
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categorias', 'repuestos'],

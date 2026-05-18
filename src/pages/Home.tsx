@@ -129,7 +129,7 @@ const Home = () => {
       const fakeOriginal = Math.round(p.price / (1 - discount / 100) / 100) * 100;
       featured.push({ ...p, original_price: fakeOriginal, is_on_sale: true });
     }
-    return { featuredProducts, featured, freeShipping, recent: products.slice(0, 8) };
+    return { featuredProducts, featured, freeShipping, recent: products.slice(0, 16) };
   }, [products]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -137,10 +137,11 @@ const Home = () => {
     if (q.trim()) navigate(`/productos?q=${encodeURIComponent(q)}`);
   };
 
-  const scrollFeatured = useCallback((dir: 'left' | 'right') => {
-    const el = document.getElementById('featured-scroll');
+  const scrollCarousel = useCallback((id: string, dir: 'left' | 'right') => {
+    const el = document.getElementById(id);
     if (el) el.scrollBy({ left: dir === 'left' ? -320 : 320, behavior: 'smooth' });
   }, []);
+  const scrollFeatured = useCallback((dir: 'left' | 'right') => scrollCarousel('featured-scroll', dir), [scrollCarousel]);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">

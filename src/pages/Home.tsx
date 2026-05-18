@@ -387,42 +387,74 @@ const Home = () => {
       )}
 
       {/* SUPER OFERTAS */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-24 px-4 md:px-6 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">
-        <div className="container max-w-[1300px]">
-          <div className="flex items-center justify-between mb-12 px-2">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="bg-foreground py-16 md:py-20 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-10 my-10">
+        <div className="container max-w-[1300px] px-4 md:px-6">
+          <div className="flex items-center justify-between mb-10 px-2">
             <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic text-background">
               <span className="text-primary">Super</span> Ofertas
             </h3>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-10">
-            {featured.map((p) => (
-              <div key={p.id} className="w-full">
-                <ProductCard product={p as any} />
-              </div>
-            ))}
+        </div>
+        <div className="relative group/carousel">
+          <div id="ofertas-scroll" className="overflow-x-auto scrollbar-hide scroll-smooth">
+            <div className="flex gap-4 md:gap-8 px-4 md:px-12 w-max">
+              {featured.map((p) => (
+                <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+                  <ProductCard product={p as any} />
+                </div>
+              ))}
+            </div>
           </div>
+          <button
+            onClick={() => scrollCarousel('ofertas-scroll', 'left')}
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={() => scrollCarousel('ofertas-scroll', 'right')}
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
       </motion.section>
 
       {/* ENVÍO GRATIS */}
-      <section className="container py-24 px-4 md:px-6">
-        <div className="flex items-center gap-4 mb-12">
+      <section className="py-16 md:py-20">
+        <div className="container px-4 md:px-6 flex items-center gap-4 mb-10">
           <Truck className="h-8 w-8 text-yellow-400" />
           <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic">Envío sin cargo</h3>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 mb-20">
-          {freeShipping.map((p) => (
-            <div key={p.id} className="w-full">
-              <ProductCard product={p as any} />
+        <div className="relative group/carousel">
+          <div id="envio-scroll" className="overflow-x-auto scrollbar-hide scroll-smooth">
+            <div className="flex gap-4 md:gap-8 px-4 md:px-6 w-max">
+              {freeShipping.map((p) => (
+                <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+                  <ProductCard product={p as any} />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          <button
+            onClick={() => scrollCarousel('envio-scroll', 'left')}
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={() => scrollCarousel('envio-scroll', 'right')}
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
       </section>
 
       {/* PRODUCTOS RECIENTES */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="container py-24 px-4 md:px-6">
-        <div className="flex items-center justify-between mb-12 px-2">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={stagger} className="py-16 md:py-20">
+        <div className="container px-4 md:px-6 flex items-center justify-between mb-10 px-2">
           <div>
             <span className="text-primary font-black uppercase text-xs tracking-[0.2em]">Catálogo</span>
             <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">
@@ -433,12 +465,30 @@ const Home = () => {
             Ver todos <ChevronRight size={20} />
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-          {recent.map((p) => (
-            <div key={p.id} className="w-full">
-              <ProductCard product={p as any} />
+        <div className="relative group/carousel">
+          <div id="recent-scroll" className="overflow-x-auto scrollbar-hide scroll-smooth">
+            <div className="flex gap-4 md:gap-8 px-4 md:px-6 w-max">
+              {recent.map((p) => (
+                <div key={p.id} className="w-[45vw] md:w-[280px] lg:w-[300px] shrink-0">
+                  <ProductCard product={p as any} />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          <button
+            onClick={() => scrollCarousel('recent-scroll', 'left')}
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={() => scrollCarousel('recent-scroll', 'right')}
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </div>
+      </motion.section>
         </div>
       </motion.section>
 

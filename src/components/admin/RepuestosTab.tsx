@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Copy, Search, Tag, Truck, Palette, Bike, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Copy, Search, Tag, Truck, Palette, Bike, Star, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 import ProductEditor from './ProductEditor';
 import { loadVariantsForProducts } from '@/lib/productVariants';
 

@@ -106,14 +106,24 @@ const Home = () => {
   });
 
   // Una sola pasada por el array en lugar de 3 .filter()
+  const MIN_OFERTAS = 6;
   const { featuredProducts, featured, freeShipping, recent } = useMemo(() => {
     const featuredProducts: any[] = [];
-    const featured: any[] = [];
+    const realOffers: any[] = [];
     const freeShipping: any[] = [];
+    const inStockNonOffers: any[] = [];
     for (const p of products) {
       if ((p as any).is_featured === true) featuredProducts.push(p);
-      if (p.is_on_sale === true && featured.length < 4) featured.push(p);
+      if (p.is_on_sale === true && realOffers.length < MIN_OFERTAS) realOffers.push(p);
+      else if ((p.stock || 0) > 0) inStockNonOffers.push(p);
       if (p.free_shipping === true && freeShipping.length < 4) freeShipping.push(p);
+    }
+    // Rellenar ofertas con productos en stock (sin descuento real: precio = precio original)
+    const featured: any[] = [...realOffers];
+    let i = 0;
+    while (featured.length < MIN_OFERTAS && i < inStockNonOffers.length) {
+      const p = inStockNonOffers[i++];
+      featured.push({ ...p, original_price: p.price, is_on_sale: false });
     }
     return { featuredProducts, featured, freeShipping, recent: products.slice(0, 8) };
   }, [products]);

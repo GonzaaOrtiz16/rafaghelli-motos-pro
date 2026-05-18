@@ -57,59 +57,108 @@ const RepuestosTab = () => {
     return dp[a.length];
   };
 
+  // Extraer categorías y marcas únicas de los productos para los selectores
+  const categories = useMemo(() => {
+    if (!products) return [];
+    const cats = [...new Set(products.map((p: any) => p.category).filter(Boolean))];
+    return cats.sort();
+  }, [products]);
+
+  const brands = useMemo(() => {
+    if (!products) return [];
+    const brs = [...new Set(products.map((p: any) => p.brand).filter(Boolean))];
+    return brs.sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     if (!products) return [];
+    let result = [...products];
+
+    // --- BÚSQUEDA INTELIGENTE ---
     const q = normalize(searchTerm);
-    if (!q) return products;
-    const tokens = q.split(' ').filter(Boolean);
+    if (q) {
+      const tokens = q.split(' ').filter(Boolean);
+      const scored = result.map((p: any) => {
+        const title = normalize(p.title);
+        const brand = normalize(p.brand);
+        const category = normalize(p.category);
+        const barcode = normalize(p.barcode);
+        const variants = Array.isArray(p.variants) ? p.variants : [];
+        const colors = normalize(variants.map((v: any) => v.color).filter(Boolean).join(' '));
+        const motofit = normalize((p.moto_fit || []).join(' '));
+        const hay = `${title} ${brand} ${category} ${barcode} ${colors} ${motofit}`;
+        const titleWords = title.split(' ');
 
-    const scored = products.map((p: any) => {
-      const title = normalize(p.title);
-      const brand = normalize(p.brand);
-      const category = normalize(p.category);
-      const barcode = normalize(p.barcode);
-      const variants = Array.isArray(p.variants) ? p.variants : [];
-      const colors = normalize(variants.map((v: any) => v.color).filter(Boolean).join(' '));
-      const motofit = normalize((p.moto_fit || []).join(' '));
-      const hay = `${title} ${brand} ${category} ${barcode} ${colors} ${motofit}`;
-      const titleWords = title.split(' ');
+        let score = 0;
+        let allMatch = true;
 
-      let score = 0;
-      let allMatch = true;
+        if (title.includes(q)) score += 200;
+        if (title.startsWith(q)) score += 150;
 
-      // bonus de frase completa
-      if (title.includes(q)) score += 200;
-      if (title.startsWith(q)) score += 150;
+        for (const t of tokens) {
+          let tokenScore = 0;
+          if (title.startsWith(t)) tokenScore = 100;
+          else if (titleWords.some(w => w.startsWith(t))) tokenScore = 80;
+          else if (title.includes(t)) tokenScore = 60;
+          else if (brand.includes(t)) tokenScore = 50;
+          else if (category.includes(t)) tokenScore = 40;
+          else if (barcode.includes(t)) tokenScore = 90;
+          else if (colors.includes(t) || motofit.includes(t)) tokenScore = 30;
+          else if (hay.includes(t)) tokenScore = 20;
+          else if (t.length >= 4) {
+            const maxD = t.length >= 7 ? 2 : 1;
+            const hit = titleWords.find(w => w.length >= 3 && lev(w, t, maxD) <= maxD);
+            if (hit) tokenScore = 25;
+          }
 
-      for (const t of tokens) {
-        let tokenScore = 0;
-        if (title.startsWith(t)) tokenScore = 100;
-        else if (titleWords.some(w => w.startsWith(t))) tokenScore = 80;
-        else if (title.includes(t)) tokenScore = 60;
-        else if (brand.includes(t)) tokenScore = 50;
-        else if (category.includes(t)) tokenScore = 40;
-        else if (barcode.includes(t)) tokenScore = 90;
-        else if (colors.includes(t) || motofit.includes(t)) tokenScore = 30;
-        else if (hay.includes(t)) tokenScore = 20;
-        else if (t.length >= 4) {
-          // tolera 1 typo en tokens de 4-6, 2 en >=7
-          const maxD = t.length >= 7 ? 2 : 1;
-          const hit = titleWords.find(w => w.length >= 3 && lev(w, t, maxD) <= maxD);
-          if (hit) tokenScore = 25;
+          if (tokenScore === 0) { allMatch = false; break; }
+          score += tokenScore;
         }
 
-        if (tokenScore === 0) { allMatch = false; break; }
-        score += tokenScore;
+        if (allMatch && (p.stock ?? 0) > 0) score += 1;
+        return allMatch ? { p, score } : null;
+      }).filter(Boolean) as { p: any; score: number }[];
+
+      scored.sort((a, b) => b.score - a.score);
+      result = scored.map(s => s.p);
+    }
+
+    // --- FILTROS ---
+    if (filterCategory) {
+      result = result.filter((p: any) => normalize(p.category) === normalize(filterCategory));
+    }
+    if (filterBrand) {
+      result = result.filter((p: any) => normalize(p.brand) === normalize(filterBrand));
+    }
+    if (filterStatus) {
+      result = result.filter((p: any) => {
+        switch (filterStatus) {
+          case "stock": return (p.stock ?? 0) > 0;
+          case "nostock": return (p.stock ?? 0) === 0;
+          case "featured": return !!(p as any).is_featured;
+          case "sale": return p.is_on_sale;
+          case "freeship": return p.free_shipping;
+          default: return true;
+        }
+      });
+    }
+
+    // --- ORDENAMIENTO ---
+    result.sort((a: any, b: any) => {
+      switch (sortBy) {
+        case "newest": return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        case "price-asc": return (a.price ?? 0) - (b.price ?? 0);
+        case "price-desc": return (b.price ?? 0) - (a.price ?? 0);
+        case "stock-asc": return (a.stock ?? 0) - (b.stock ?? 0);
+        case "stock-desc": return (b.stock ?? 0) - (a.stock ?? 0);
+        case "name-asc": return normalize(a.title).localeCompare(normalize(b.title));
+        case "name-desc": return normalize(b.title).localeCompare(normalize(a.title));
+        default: return 0;
       }
+    });
 
-      // Pequeño desempate por stock
-      if (allMatch && (p.stock ?? 0) > 0) score += 1;
-      return allMatch ? { p, score } : null;
-    }).filter(Boolean) as { p: any; score: number }[];
-
-    scored.sort((a, b) => b.score - a.score);
-    return scored.map(s => s.p);
-  }, [products, searchTerm]);
+    return result;
+  }, [products, searchTerm, filterCategory, filterBrand, filterStatus, sortBy]);
 
   const handleEdit = (product: any) => {
     setEditorProduct(product);

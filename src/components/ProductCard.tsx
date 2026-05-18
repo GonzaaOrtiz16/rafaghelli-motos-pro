@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Truck, Tag } from "lucide-react";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React from "react";
 import { optimizeImage } from "@/lib/imageUrl";
 
 interface Product {

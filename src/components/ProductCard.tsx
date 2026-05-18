@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Truck, Tag } from "lucide-react";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React from "react";
 import { optimizeImage } from "@/lib/imageUrl";
 
 interface Product {
@@ -28,7 +28,6 @@ const formatPrice = (n: number) =>
 
 const ProductCard = React.memo(({ product }: { product: Product }) => {
   const priority = !!product.priority;
-  const [imgLoaded, setImgLoaded] = useState(false);
   const hasDiscount = product.is_on_sale && product.original_price && product.original_price > product.price;
   const discountPercentage = hasDiscount
     ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100)
@@ -63,20 +62,14 @@ const ProductCard = React.memo(({ product }: { product: Product }) => {
 
         {/* CONTENEDOR DE IMAGEN */}
         <div className="relative w-full aspect-square overflow-hidden bg-muted flex items-center justify-center">
-          {/* Skeleton placeholder */}
-          {!imgLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
-          )}
           <img
             src={optimizeImage(product.images?.[0], 500)}
             alt={product.title}
-            className={`absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             loading={priority ? "eager" : "lazy"}
             // @ts-ignore
             fetchpriority={priority ? "high" : "auto"}
             decoding="async"
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgLoaded(true)}
           />
           <div className="absolute inset-0 bg-zinc-700/0 group-hover:bg-zinc-700/5 transition-colors duration-300" />
         </div>

@@ -390,7 +390,7 @@ const Home = () => {
             </h3>
             <Link to="/productos" className="text-primary"><ChevronRight size={32} /></Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-10">
             {featured.map((p) => (
               <div key={p.id} className="w-full">
                 <ProductCard product={p as any} />
